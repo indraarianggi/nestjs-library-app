@@ -1,0 +1,3003 @@
+openapi: 3.1.0
+info:
+  title: Library Management System API
+  description: |
+    Comprehensive API specification for the Library Management System (LMS).
+    
+    ## Overview
+    This API provides endpoints for managing a library catalog, memberships, and book borrowing operations.
+    Built with NestJS backend, PostgreSQL database, and Better Auth for authentication.
+    
+    ## Authentication
+    The API uses session-based authentication via Better Auth with secure HTTPOnly cookies.
+    Protected endpoints require a valid session cookie obtained through login.
+    
+    ## Roles
+    - **Admin**: Full access to all resources including catalog management, memberships, and system settings
+    - **Member**: Access to public catalog, personal loans, profile, and borrowing operations
+    
+    ## Key Features
+    - Books catalog management with authors, categories, and copies
+    - Membership lifecycle management (evergreen, no expiry)
+    - Borrowing system with 14-day loans, single renewal per loan (+7 days)
+    - Overdue fee calculation in IDR
+    - Email notifications for loan events and due dates
+    
+    ## Base URL
+    All endpoints are prefixed with `/api`
+    
+  version: 1.0.0
+  contact:
+    name: Library Management System
+    email: admin-library@mail.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+  - url: https://api.library.example.com/api
+    description: Production server
+
+tags:
+  - name: Auth
+    description: Authentication and session management endpoints
+  - name: Books
+    description: Book catalog operations (CRUD, search, filtering)
+  - name: Authors
+    description: Author management endpoints
+  - name: Categories
+    description: Category/genre management endpoints
+  - name: Copies
+    description: Book copy/inventory management endpoints
+  - name: Memberships
+    description: Member profile and status management endpoints
+  - name: Loans
+    description: Borrowing, returns, renewals, and loan lifecycle management
+  - name: Settings
+    description: System configuration and borrowing policy settings
+  - name: AuditLogs
+    description: Audit trail and system activity logs
+
+security:
+  - sessionAuth: []
+
+paths:
+  # =========================
+  # AUTH ENDPOINTS
+  # =========================
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new member account
+      description: |
+        Creates a new member user account with associated member profile.
+        Registration is public and does not require authentication.
+        By default, new members are created with ACTIVE status and can borrow immediately.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstName
+                - lastName
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Unique email address for the user account (case-insensitive)
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: Password with minimum 8 characters
+                  example: SecureP@ssw0rd
+                firstName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Member's first name
+                  example: John
+                lastName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Member's last name
+                  example: Doe
+                phone:
+                  type: string
+                  nullable: true
+                  description: Optional phone number
+                  example: '+62812345678'
+                address:
+                  type: string
+                  nullable: true
+                  description: Optional residential address
+                  example: 'Jl. Merdeka No. 123, Jakarta'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  memberProfile:
+                    $ref: '#/components/schemas/MemberProfile'
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Email already registered
+                error: Conflict
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate and create session
+      description: |
+        Authenticates a user with email and password, creating a secure session cookie.
+        Returns user information and session details.
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: admin@example.com
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: SecureP@ssw0rd
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: session=abc123; HttpOnly; Secure; SameSite=Strict
+              description: Session cookie for authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  memberProfile:
+                    $ref: '#/components/schemas/MemberProfile'
+                    nullable: true
+                    description: Only present for MEMBER role users
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 401
+                message: Invalid email or password
+                error: Unauthorized
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: End current session
+      description: |
+        Invalidates the current user session and clears the session cookie.
+        Requires authentication.
+      operationId: logoutUser
+      responses:
+        '204':
+          description: Logout successful (no content)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # =========================
+  # BOOKS ENDPOINTS
+  # =========================
+  /books:
+    get:
+      tags:
+        - Books
+      summary: List and search books in catalog
+      description: |
+        Retrieves a paginated list of books with support for search, filtering, and sorting.
+        Public endpoint accessible without authentication.
+        Returns books with their available copy count for display in catalog.
+      operationId: listBooks
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query for title or author name (case-insensitive partial match)
+          schema:
+            type: string
+            example: 'Harry Potter'
+        - name: categoryId
+          in: query
+          description: Filter by category UUID
+          schema:
+            type: string
+            format: uuid
+        - name: authorId
+          in: query
+          description: Filter by author UUID
+          schema:
+            type: string
+            format: uuid
+        - name: availability
+          in: query
+          description: Filter by availability status (true = available copies > 0)
+          schema:
+            type: boolean
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [relevance, title, createdAt]
+            default: relevance
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of books retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BookListItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      tags:
+        - Books
+      summary: Create a new book
+      description: |
+        Creates a new book in the catalog with metadata, authors, and categories.
+        Admin only. ISBN must be unique.
+      operationId: createBook
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookRequest'
+      responses:
+        '201':
+          description: Book created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  book:
+                    $ref: '#/components/schemas/BookDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: ISBN already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Book with this ISBN already exists
+                error: Conflict
+
+  /books/{id}:
+    get:
+      tags:
+        - Books
+      summary: Get book details
+      description: |
+        Retrieves detailed information about a specific book including authors, categories,
+        and available copies count. Public endpoint.
+      operationId: getBookById
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '200':
+          description: Book details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Books
+      summary: Update book information
+      description: |
+        Updates an existing book's metadata, authors, or categories.
+        Admin only. ISBN uniqueness is validated if changed.
+      operationId: updateBook
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookRequest'
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  book:
+                    $ref: '#/components/schemas/BookDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: ISBN already exists (if changed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Books
+      summary: Delete or archive a book
+      description: |
+        Deletes a book if it has no associated loans. If the book has historical loans,
+        it must be archived instead (set status to ARCHIVED). Admin only.
+      operationId: deleteBook
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      responses:
+        '204':
+          description: Book deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete book with active or historical loans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Cannot delete book with existing loans. Archive the book instead.
+                error: Conflict
+
+  # =========================
+  # AUTHORS ENDPOINTS
+  # =========================
+  /authors:
+    get:
+      tags:
+        - Authors
+      summary: List all authors
+      description: |
+        Retrieves a paginated list of authors with optional search.
+        Public endpoint.
+      operationId: listAuthors
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query for author name (case-insensitive partial match)
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [name, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of authors retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      tags:
+        - Authors
+      summary: Create a new author
+      description: |
+        Creates a new author. Name must be unique. Admin only.
+      operationId: createAuthor
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  description: Author's full name (unique)
+                  example: 'J.K. Rowling'
+                bio:
+                  type: string
+                  nullable: true
+                  description: Author's biography
+                  example: 'British author, best known for the Harry Potter series'
+      responses:
+        '201':
+          description: Author created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Author name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /authors/{id}:
+    patch:
+      tags:
+        - Authors
+      summary: Update author information
+      description: |
+        Updates an existing author's information. Admin only.
+      operationId: updateAuthor
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Author UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  description: Author's full name (unique)
+                bio:
+                  type: string
+                  nullable: true
+                  description: Author's biography
+      responses:
+        '200':
+          description: Author updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  author:
+                    $ref: '#/components/schemas/Author'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Author name already exists (if changed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Authors
+      summary: Delete an author
+      description: |
+        Deletes an author if not referenced by any books. Admin only.
+      operationId: deleteAuthor
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Author UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Author deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete author referenced by books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Cannot delete author referenced by existing books
+                error: Conflict
+
+  # =========================
+  # CATEGORIES ENDPOINTS
+  # =========================
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: List all categories
+      description: |
+        Retrieves a paginated list of categories/genres with optional search.
+        Public endpoint.
+      operationId: listCategories
+      security: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query for category name (case-insensitive partial match)
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [name, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    post:
+      tags:
+        - Categories
+      summary: Create a new category
+      description: |
+        Creates a new category/genre. Name must be unique. Admin only.
+      operationId: createCategory
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Category name (unique)
+                  example: 'Science Fiction'
+                description:
+                  type: string
+                  nullable: true
+                  description: Category description
+                  example: 'Books featuring futuristic science and technology'
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Category name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /categories/{id}:
+    patch:
+      tags:
+        - Categories
+      summary: Update category information
+      description: |
+        Updates an existing category's information. Admin only.
+      operationId: updateCategory
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Category UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Category name (unique)
+                description:
+                  type: string
+                  nullable: true
+                  description: Category description
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Category name already exists (if changed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Categories
+      summary: Delete a category
+      description: |
+        Deletes a category if not referenced by any books. Admin only.
+      operationId: deleteCategory
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Category UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Category deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete category referenced by books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Cannot delete category referenced by existing books
+                error: Conflict
+
+  # =========================
+  # COPIES ENDPOINTS
+  # =========================
+  /books/{id}/copies:
+    get:
+      tags:
+        - Copies
+      summary: List copies for a specific book
+      description: |
+        Retrieves all copies (inventory items) for a specific book with their status and location.
+        Admin only.
+      operationId: listBookCopies
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+        - name: status
+          in: query
+          description: Filter by copy status
+          schema:
+            $ref: '#/components/schemas/CopyStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of copies retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BookCopy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - Copies
+      summary: Add copies to a book
+      description: |
+        Adds N new copies to a book's inventory. Generates unique codes for each copy.
+        Admin only.
+      operationId: addBookCopies
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - count
+              properties:
+                count:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  description: Number of copies to add
+                  example: 5
+                locationCode:
+                  type: string
+                  nullable: true
+                  maxLength: 50
+                  description: Optional location code for all new copies
+                  example: 'SHELF-A3'
+      responses:
+        '201':
+          description: Copies added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  copies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BookCopy'
+                  message:
+                    type: string
+                    example: '5 copies added successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /copies/{copyId}:
+    patch:
+      tags:
+        - Copies
+      summary: Update copy status or location
+      description: |
+        Updates a copy's status (AVAILABLE, ON_LOAN, LOST, DAMAGED) or location code.
+        Admin only. Cannot change status to AVAILABLE if copy has an active loan.
+      operationId: updateBookCopy
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: copyId
+          in: path
+          required: true
+          description: Copy UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/CopyStatus'
+                locationCode:
+                  type: string
+                  nullable: true
+                  maxLength: 50
+                  description: Location code for the copy
+      responses:
+        '200':
+          description: Copy updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  copy:
+                    $ref: '#/components/schemas/BookCopy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot update copy due to business rule conflict (e.g., active loan)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Copies
+      summary: Delete a book copy
+      description: |
+        Deletes a copy from inventory. Cannot delete if copy is currently on loan.
+        Admin only.
+      operationId: deleteBookCopy
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: copyId
+          in: path
+          required: true
+          description: Copy UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Copy deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete copy currently on loan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Cannot delete copy that is currently on loan
+                error: Conflict
+
+  # =========================
+  # MEMBERSHIPS ENDPOINTS
+  # =========================
+  /members:
+    get:
+      tags:
+        - Memberships
+      summary: List all members
+      description: |
+        Retrieves a paginated list of members with optional filtering by status and search.
+        Admin only.
+      operationId: listMembers
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by membership status
+          schema:
+            $ref: '#/components/schemas/MembershipStatus'
+        - name: q
+          in: query
+          description: Search query for member name or email (case-insensitive partial match)
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [firstName, lastName, email, createdAt]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of members retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MemberListItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /members/{id}:
+    get:
+      tags:
+        - Memberships
+      summary: Get member details
+      description: |
+        Retrieves detailed information about a specific member including profile and status.
+        Admin only.
+      operationId: getMemberById
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Member profile UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Member details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Memberships
+      summary: Update member profile or status
+      description: |
+        Updates a member's profile information or membership status.
+        Admin only. Use dedicated activate/suspend endpoints for status changes.
+      operationId: updateMember
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Member profile UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                lastName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                phone:
+                  type: string
+                  nullable: true
+                address:
+                  type: string
+                  nullable: true
+                notes:
+                  type: string
+                  nullable: true
+                  description: Admin-only notes about the member
+      responses:
+        '200':
+          description: Member updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  member:
+                    $ref: '#/components/schemas/MemberDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /members/{id}/activate:
+    post:
+      tags:
+        - Memberships
+      summary: Activate a member
+      description: |
+        Activates a pending member, allowing them to borrow books immediately.
+        Admin only. Sends activation notification email to member.
+      operationId: activateMember
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Member profile UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Member activated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  member:
+                    $ref: '#/components/schemas/MemberDetail'
+                  message:
+                    type: string
+                    example: 'Member activated successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Member already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /members/{id}/suspend:
+    post:
+      tags:
+        - Memberships
+      summary: Suspend a member
+      description: |
+        Suspends an active member, preventing new borrows and renewals.
+        Active loans remain but cannot be renewed. Admin only.
+      operationId: suspendMember
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Member profile UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  nullable: true
+                  description: Optional reason for suspension (stored in notes)
+      responses:
+        '200':
+          description: Member suspended successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  member:
+                    $ref: '#/components/schemas/MemberDetail'
+                  message:
+                    type: string
+                    example: 'Member suspended successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Member already suspended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # =========================
+  # LOANS ENDPOINTS
+  # =========================
+  /loans:
+    get:
+      tags:
+        - Loans
+      summary: List all loans (admin view)
+      description: |
+        Retrieves a paginated list of all loans with advanced filtering options.
+        Admin only. Supports filtering by status, member, book, and due date ranges.
+      operationId: listAllLoans
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by loan status
+          schema:
+            $ref: '#/components/schemas/LoanStatus'
+        - name: memberId
+          in: query
+          description: Filter by member user UUID
+          schema:
+            type: string
+            format: uuid
+        - name: bookId
+          in: query
+          description: Filter by book UUID
+          schema:
+            type: string
+            format: uuid
+        - name: dueBefore
+          in: query
+          description: Filter loans due before this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: dueAfter
+          in: query
+          description: Filter loans due after this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [dueDate, borrowedAt, createdAt, status]
+            default: dueDate
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of loans retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LoanListItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /my/loans:
+    get:
+      tags:
+        - Loans
+      summary: List current user's loans (member view)
+      description: |
+        Retrieves a paginated list of loans for the authenticated member.
+        Shows active loans, history, due dates, and renewal status.
+        Member only.
+      operationId: listMyLoans
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by loan status
+          schema:
+            $ref: '#/components/schemas/LoanStatus'
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [dueDate, borrowedAt, createdAt]
+            default: dueDate
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of loans retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LoanDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /loans:
+    post:
+      tags:
+        - Loans
+      summary: Create a new loan (borrow a book)
+      description: |
+        Creates a new loan for the authenticated member. Validates:
+        - Member is active (not suspended or pending)
+        - Book has available copies
+        - Member has not exceeded concurrent loan limit (default 5)
+        
+        If approvals are required (system setting), loan is created in REQUESTED status
+        and requires admin approval. Otherwise, loan is auto-approved to ACTIVE status.
+        
+        Automatically assigns an available copy and sets due date based on loan policy (default 14 days).
+        Sends loan created/approved notification email.
+        
+        Member only.
+      operationId: createLoan
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookId
+              properties:
+                bookId:
+                  type: string
+                  format: uuid
+                  description: UUID of the book to borrow
+      responses:
+        '201':
+          description: Loan created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanDetail'
+                  message:
+                    type: string
+                    example: 'Loan created and approved. Due date: 2024-02-15'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Member not eligible to borrow (suspended or pending)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 403
+                message: Your membership is suspended. Please contact admin.
+                error: Forbidden
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - no copies available or concurrent loan limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                noCopies:
+                  value:
+                    statusCode: 409
+                    message: No available copies for this book
+                    error: Conflict
+                limitExceeded:
+                  value:
+                    statusCode: 409
+                    message: You have reached the maximum concurrent loans limit (5)
+                    error: Conflict
+
+  /loans/{id}/approve:
+    post:
+      tags:
+        - Loans
+      summary: Approve a loan request
+      description: |
+        Approves a loan in REQUESTED status, changing it to ACTIVE.
+        Only applicable when approvals are required (system setting).
+        Sets borrowed date and due date. Sends approval notification email.
+        Admin only.
+      operationId: approveLoan
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Loan UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Loan approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanDetail'
+                  message:
+                    type: string
+                    example: 'Loan approved successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Loan not in REQUESTED status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Loan is not in REQUESTED status
+                error: Conflict
+
+  /loans/{id}/reject:
+    post:
+      tags:
+        - Loans
+      summary: Reject a loan request
+      description: |
+        Rejects a loan in REQUESTED status, changing it to REJECTED.
+        Releases the assigned copy back to available. Sends rejection notification email.
+        Admin only.
+      operationId: rejectLoan
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Loan UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  nullable: true
+                  description: Optional reason for rejection (included in notification)
+      responses:
+        '200':
+          description: Loan rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanDetail'
+                  message:
+                    type: string
+                    example: 'Loan rejected successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Loan not in REQUESTED status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /loans/{id}/renew:
+    post:
+      tags:
+        - Loans
+      summary: Renew a loan
+      description: |
+        Renews an active loan, extending the due date by renewal period (default 7 days).
+        
+        Renewal is allowed only if:
+        - Loan status is ACTIVE (not overdue, returned, or rejected)
+        - Member is not suspended
+        - Renewal count < max renewals (default 1)
+        - Request made at least 1 day before due date (configurable)
+        
+        Updates renewal count and extends due date. Member only (can renew their own loans).
+      operationId: renewLoan
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Loan UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Loan renewed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanDetail'
+                  message:
+                    type: string
+                    example: 'Loan renewed successfully. New due date: 2024-02-22'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not authorized to renew this loan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Renewal not allowed due to business rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                maxRenewals:
+                  value:
+                    statusCode: 409
+                    message: Maximum renewals (1) reached for this loan
+                    error: Conflict
+                overdue:
+                  value:
+                    statusCode: 409
+                    message: Cannot renew overdue loan
+                    error: Conflict
+                suspended:
+                  value:
+                    statusCode: 409
+                    message: Cannot renew loan while membership is suspended
+                    error: Conflict
+                tooLate:
+                  value:
+                    statusCode: 409
+                    message: Renewal must be requested at least 1 day before due date
+                    error: Conflict
+
+  /loans/{id}/return:
+    post:
+      tags:
+        - Loans
+      summary: Return a borrowed book
+      description: |
+        Marks a loan as returned, setting return date and updating copy status to AVAILABLE.
+        Calculates overdue days and penalty if returned late.
+        
+        Penalty calculation:
+        - overdueDays = max(0, today - dueDate)
+        - penaltyAmount = overdueDays * overdueFeePerDay (from settings)
+        - capped at overdueFeeCapPerLoan (from settings)
+        
+        Sends return confirmation email with penalty amount if applicable.
+        
+        Can be performed by the member (self-return) or admin (assisted return).
+      operationId: returnLoan
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Loan UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Loan returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  loan:
+                    $ref: '#/components/schemas/LoanDetail'
+                  message:
+                    type: string
+                    example: 'Book returned successfully. Overdue penalty: IDR 3000'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not authorized to return this loan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Loan already returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 409
+                message: Loan already returned
+                error: Conflict
+
+  # =========================
+  # SETTINGS ENDPOINTS
+  # =========================
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get system settings
+      description: |
+        Retrieves current system configuration including borrowing policy,
+        notification settings, and operational parameters.
+        Admin only.
+      operationId: getSettings
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags:
+        - Settings
+      summary: Update system settings
+      description: |
+        Updates system configuration including borrowing policy parameters,
+        overdue fees, notification settings, and SMTP configuration.
+        
+        All changes are logged in audit logs.
+        Changes to notification settings take effect immediately.
+        Changes to borrowing policy apply to new loans only (existing loans retain original terms).
+        
+        Admin only.
+      operationId: updateSettings
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    $ref: '#/components/schemas/SystemSettings'
+                  message:
+                    type: string
+                    example: 'Settings updated successfully'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          description: Invalid settings values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 422
+                message: loanDays must be between 1 and 90
+                error: Unprocessable Entity
+
+  # =========================
+  # AUDIT LOGS ENDPOINTS
+  # =========================
+  /audit-logs:
+    get:
+      tags:
+        - AuditLogs
+      summary: List audit logs
+      description: |
+        Retrieves a paginated list of audit log entries with advanced filtering.
+        Tracks all significant actions in the system including auth events, CRUD operations,
+        and status changes. Admin only.
+      operationId: listAuditLogs
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: userId
+          in: query
+          description: Filter by user UUID (actor)
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          description: Filter by action type
+          schema:
+            type: string
+            example: 'book.created'
+        - name: entityType
+          in: query
+          description: Filter by entity type
+          schema:
+            type: string
+            example: 'book'
+        - name: entityId
+          in: query
+          description: Filter by entity UUID
+          schema:
+            type: string
+            format: uuid
+        - name: dateFrom
+          in: query
+          description: Filter logs from this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          description: Filter logs until this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: sortOrder
+          in: query
+          description: Sort direction (by createdAt)
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of audit logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AuditLog'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: |
+        Session-based authentication using Better Auth.
+        Session cookie is automatically set on successful login and validated on each request.
+        HTTPOnly and Secure flags prevent XSS attacks.
+
+  parameters:
+    BookId:
+      name: id
+      in: path
+      required: true
+      description: Book UUID
+      schema:
+        type: string
+        format: uuid
+
+    Page:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSize:
+      name: pageSize
+      in: query
+      description: Number of items per page (max 100)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    # =========================
+    # ENUM TYPES
+    # =========================
+    Role:
+      type: string
+      enum: [ADMIN, MEMBER]
+      description: User role
+
+    MembershipStatus:
+      type: string
+      enum: [PENDING, ACTIVE, SUSPENDED]
+      description: |
+        Membership status:
+        - PENDING: New registration awaiting activation
+        - ACTIVE: Can borrow and renew books
+        - SUSPENDED: Cannot borrow or renew (active loans remain)
+
+    BookStatus:
+      type: string
+      enum: [ACTIVE, ARCHIVED]
+      description: |
+        Book status:
+        - ACTIVE: Available in catalog
+        - ARCHIVED: Hidden from catalog but preserved for historical records
+
+    CopyStatus:
+      type: string
+      enum: [AVAILABLE, ON_LOAN, LOST, DAMAGED]
+      description: |
+        Copy status:
+        - AVAILABLE: Ready to be borrowed
+        - ON_LOAN: Currently borrowed
+        - LOST: Missing from inventory
+        - DAMAGED: Unusable condition
+
+    LoanStatus:
+      type: string
+      enum: [REQUESTED, APPROVED, ACTIVE, RETURNED, OVERDUE, REJECTED, CANCELLED]
+      description: |
+        Loan status:
+        - REQUESTED: Awaiting admin approval (if required)
+        - APPROVED: Approved and ready for pickup
+        - ACTIVE: Currently borrowed, not overdue
+        - OVERDUE: Past due date, not yet returned
+        - RETURNED: Completed loan
+        - REJECTED: Admin denied the request
+        - CANCELLED: Cancelled by member or admin
+
+    Currency:
+      type: string
+      enum: [IDR]
+      description: Currency for fees (Indonesian Rupiah)
+
+    SmtpProvider:
+      type: string
+      enum: [MAILTRAP]
+      description: SMTP email provider
+
+    # =========================
+    # CORE ENTITIES
+    # =========================
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - role
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User UUID
+        email:
+          type: string
+          format: email
+          description: User's email (unique, case-insensitive)
+        role:
+          $ref: '#/components/schemas/Role'
+        isActive:
+          type: boolean
+          description: Account active status
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last successful login timestamp
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    MemberProfile:
+      type: object
+      required:
+        - id
+        - userId
+        - firstName
+        - lastName
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Member profile UUID
+        userId:
+          type: string
+          format: uuid
+          description: Associated user UUID
+        firstName:
+          type: string
+          description: Member's first name
+        lastName:
+          type: string
+          description: Member's last name
+        phone:
+          type: string
+          nullable: true
+          description: Contact phone number
+        address:
+          type: string
+          nullable: true
+          description: Residential address
+        status:
+          $ref: '#/components/schemas/MembershipStatus'
+        notes:
+          type: string
+          nullable: true
+          description: Admin-only notes
+        createdAt:
+          type: string
+          format: date-time
+          description: Profile creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Author:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Author UUID
+        name:
+          type: string
+          description: Author's full name (unique)
+        bio:
+          type: string
+          nullable: true
+          description: Author biography
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Category:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Category UUID
+        name:
+          type: string
+          description: Category name (unique)
+        description:
+          type: string
+          nullable: true
+          description: Category description
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Book:
+      type: object
+      required:
+        - id
+        - title
+        - isbn
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Book UUID
+        title:
+          type: string
+          description: Book title
+        subtitle:
+          type: string
+          nullable: true
+          description: Book subtitle
+        description:
+          type: string
+          nullable: true
+          description: Book description/synopsis
+        isbn:
+          type: string
+          description: International Standard Book Number (unique)
+        publicationYear:
+          type: integer
+          nullable: true
+          description: Year of publication
+          example: 2020
+        language:
+          type: string
+          nullable: true
+          description: Primary language of the book
+          example: 'English'
+        coverImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to cover image
+        status:
+          $ref: '#/components/schemas/BookStatus'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    BookCopy:
+      type: object
+      required:
+        - id
+        - bookId
+        - code
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Copy UUID
+        bookId:
+          type: string
+          format: uuid
+          description: Parent book UUID
+        code:
+          type: string
+          description: Unique inventory code/barcode
+        status:
+          $ref: '#/components/schemas/CopyStatus'
+        locationCode:
+          type: string
+          nullable: true
+          description: Physical location code
+          example: 'SHELF-A3'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    Loan:
+      type: object
+      required:
+        - id
+        - userId
+        - bookId
+        - copyId
+        - status
+        - renewalCount
+        - penaltyAccrued
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Loan UUID
+        userId:
+          type: string
+          format: uuid
+          description: Borrowing member's user UUID
+        bookId:
+          type: string
+          format: uuid
+          description: Borrowed book UUID
+        copyId:
+          type: string
+          format: uuid
+          description: Specific copy UUID
+        status:
+          $ref: '#/components/schemas/LoanStatus'
+        borrowedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date when loan became active
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Due date for return
+        returnedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Actual return date
+        renewalCount:
+          type: integer
+          description: Number of times renewed
+          default: 0
+        penaltyAccrued:
+          type: number
+          format: decimal
+          description: Overdue penalty amount in configured currency
+          example: 3000.00
+        createdAt:
+          type: string
+          format: date-time
+          description: Loan request timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    SystemSettings:
+      type: object
+      required:
+        - id
+        - approvalsRequired
+        - loanDays
+        - renewalDays
+        - renewalMinDaysBeforeDue
+        - maxRenewals
+        - overdueFeePerDay
+        - overdueFeeCapPerLoan
+        - currency
+        - maxConcurrentLoans
+        - notificationsEnabled
+        - dueSoonDays
+        - dueDateNotificationsEnabled
+        - fromEmail
+        - smtpProvider
+        - sendHourUTC
+        - timeZone
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Settings UUID
+        approvalsRequired:
+          type: boolean
+          description: Whether loans require admin approval
+          default: true
+        loanDays:
+          type: integer
+          description: Default loan period in days
+          default: 14
+          minimum: 1
+          maximum: 90
+        renewalDays:
+          type: integer
+          description: Extension period for renewals in days
+          default: 7
+          minimum: 1
+          maximum: 90
+        renewalMinDaysBeforeDue:
+          type: integer
+          description: Minimum days before due date to request renewal
+          default: 1
+          minimum: 0
+          maximum: 30
+        maxRenewals:
+          type: integer
+          description: Maximum renewals allowed per loan
+          default: 1
+          minimum: 0
+          maximum: 10
+        overdueFeePerDay:
+          type: number
+          format: decimal
+          description: Daily overdue fee amount
+          default: 1000.00
+          minimum: 0
+        overdueFeeCapPerLoan:
+          type: number
+          format: decimal
+          description: Maximum overdue fee per loan
+          default: 1000000.00
+          minimum: 0
+        currency:
+          $ref: '#/components/schemas/Currency'
+        maxConcurrentLoans:
+          type: integer
+          description: Maximum active loans per member
+          default: 5
+          minimum: 1
+          maximum: 50
+        notificationsEnabled:
+          type: boolean
+          description: Global notifications toggle
+          default: true
+        dueSoonDays:
+          type: integer
+          description: Days before due date to send reminder
+          default: 3
+          minimum: 1
+          maximum: 14
+        dueDateNotificationsEnabled:
+          type: boolean
+          description: Send notifications on due date
+          default: true
+        fromEmail:
+          type: string
+          format: email
+          description: From email address for notifications
+          default: 'admin-library@mail.com'
+        smtpProvider:
+          $ref: '#/components/schemas/SmtpProvider'
+        sendHourUTC:
+          type: integer
+          description: Hour in UTC to send scheduled notifications
+          default: 8
+          minimum: 0
+          maximum: 23
+        timeZone:
+          type: string
+          description: Time zone for scheduling
+          default: 'UTC'
+          example: 'Asia/Jakarta'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    AuditLog:
+      type: object
+      required:
+        - id
+        - action
+        - entityType
+        - entityId
+        - metadata
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Audit log UUID
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Actor user UUID (null for system actions)
+        action:
+          type: string
+          description: Action performed
+          example: 'book.created'
+        entityType:
+          type: string
+          description: Type of entity affected
+          example: 'book'
+        entityId:
+          type: string
+          format: uuid
+          description: UUID of affected entity
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional context (old/new values, etc.)
+        createdAt:
+          type: string
+          format: date-time
+          description: Action timestamp
+
+    Session:
+      type: object
+      required:
+        - id
+        - expiresAt
+      properties:
+        id:
+          type: string
+          description: Session identifier
+        expiresAt:
+          type: string
+          format: date-time
+          description: Session expiration timestamp
+
+    # =========================
+    # COMPOSITE/LIST SCHEMAS
+    # =========================
+    BookListItem:
+      allOf:
+        - $ref: '#/components/schemas/Book'
+        - type: object
+          required:
+            - authors
+            - categories
+            - availableCopies
+            - totalCopies
+          properties:
+            authors:
+              type: array
+              items:
+                $ref: '#/components/schemas/Author'
+              description: Book authors
+            categories:
+              type: array
+              items:
+                $ref: '#/components/schemas/Category'
+              description: Book categories/genres
+            availableCopies:
+              type: integer
+              description: Number of available copies for borrowing
+              example: 3
+            totalCopies:
+              type: integer
+              description: Total number of copies in inventory
+              example: 5
+
+    BookDetail:
+      allOf:
+        - $ref: '#/components/schemas/Book'
+        - type: object
+          required:
+            - authors
+            - categories
+            - availableCopies
+            - totalCopies
+          properties:
+            authors:
+              type: array
+              items:
+                $ref: '#/components/schemas/Author'
+            categories:
+              type: array
+              items:
+                $ref: '#/components/schemas/Category'
+            availableCopies:
+              type: integer
+              description: Number of available copies
+            totalCopies:
+              type: integer
+              description: Total copies in inventory
+
+    MemberListItem:
+      type: object
+      required:
+        - id
+        - userId
+        - firstName
+        - lastName
+        - email
+        - status
+        - activeLoanCount
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Member profile UUID
+        userId:
+          type: string
+          format: uuid
+          description: User UUID
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/MembershipStatus'
+        activeLoanCount:
+          type: integer
+          description: Number of active/overdue loans
+        createdAt:
+          type: string
+          format: date-time
+
+    MemberDetail:
+      allOf:
+        - $ref: '#/components/schemas/MemberProfile'
+        - type: object
+          required:
+            - user
+            - activeLoanCount
+            - totalLoanCount
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            activeLoanCount:
+              type: integer
+              description: Number of active/overdue loans
+            totalLoanCount:
+              type: integer
+              description: Total loans (all time)
+
+    LoanListItem:
+      allOf:
+        - $ref: '#/components/schemas/Loan'
+        - type: object
+          required:
+            - book
+            - member
+            - copy
+          properties:
+            book:
+              type: object
+              required:
+                - id
+                - title
+                - isbn
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                isbn:
+                  type: string
+                coverImageUrl:
+                  type: string
+                  format: uri
+                  nullable: true
+            member:
+              type: object
+              required:
+                - id
+                - firstName
+                - lastName
+                - email
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+            copy:
+              type: object
+              required:
+                - id
+                - code
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                code:
+                  type: string
+
+    LoanDetail:
+      allOf:
+        - $ref: '#/components/schemas/Loan'
+        - type: object
+          required:
+            - book
+            - copy
+            - canRenew
+            - isOverdue
+            - overdueDays
+          properties:
+            book:
+              $ref: '#/components/schemas/BookDetail'
+            copy:
+              $ref: '#/components/schemas/BookCopy'
+            member:
+              $ref: '#/components/schemas/MemberProfile'
+              description: Only included in admin view
+            canRenew:
+              type: boolean
+              description: Whether renewal is currently allowed
+            isOverdue:
+              type: boolean
+              description: Whether loan is past due date
+            overdueDays:
+              type: integer
+              description: Number of days overdue (0 if not overdue)
+
+    # =========================
+    # REQUEST SCHEMAS
+    # =========================
+    CreateBookRequest:
+      type: object
+      required:
+        - title
+        - isbn
+        - authorIds
+        - categoryIds
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Book title
+        subtitle:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Book subtitle
+        description:
+          type: string
+          nullable: true
+          description: Book description/synopsis
+        isbn:
+          type: string
+          pattern: '^[0-9-]{10,17}$'
+          description: ISBN (10 or 13 digits, may include hyphens)
+          example: '978-0-545-01022-1'
+        publicationYear:
+          type: integer
+          nullable: true
+          minimum: 1000
+          maximum: 2100
+          description: Year of publication
+        language:
+          type: string
+          nullable: true
+          maxLength: 50
+          description: Primary language
+        coverImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to cover image
+        authorIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          description: Array of author UUIDs
+        categoryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          description: Array of category UUIDs
+
+    UpdateBookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 500
+        subtitle:
+          type: string
+          nullable: true
+          maxLength: 500
+        description:
+          type: string
+          nullable: true
+        isbn:
+          type: string
+          pattern: '^[0-9-]{10,17}$'
+        publicationYear:
+          type: integer
+          nullable: true
+          minimum: 1000
+          maximum: 2100
+        language:
+          type: string
+          nullable: true
+          maxLength: 50
+        coverImageUrl:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: '#/components/schemas/BookStatus'
+        authorIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of author UUIDs (replaces existing)
+        categoryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of category UUIDs (replaces existing)
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        approvalsRequired:
+          type: boolean
+        loanDays:
+          type: integer
+          minimum: 1
+          maximum: 90
+        renewalDays:
+          type: integer
+          minimum: 1
+          maximum: 90
+        renewalMinDaysBeforeDue:
+          type: integer
+          minimum: 0
+          maximum: 30
+        maxRenewals:
+          type: integer
+          minimum: 0
+          maximum: 10
+        overdueFeePerDay:
+          type: number
+          format: decimal
+          minimum: 0
+        overdueFeeCapPerLoan:
+          type: number
+          format: decimal
+          minimum: 0
+        currency:
+          $ref: '#/components/schemas/Currency'
+        maxConcurrentLoans:
+          type: integer
+          minimum: 1
+          maximum: 50
+        notificationsEnabled:
+          type: boolean
+        dueSoonDays:
+          type: integer
+          minimum: 1
+          maximum: 14
+        dueDateNotificationsEnabled:
+          type: boolean
+        fromEmail:
+          type: string
+          format: email
+        smtpProvider:
+          $ref: '#/components/schemas/SmtpProvider'
+        sendHourUTC:
+          type: integer
+          minimum: 0
+          maximum: 23
+        timeZone:
+          type: string
+
+    # =========================
+    # RESPONSE SCHEMAS
+    # =========================
+    PaginatedResponse:
+      type: object
+      required:
+        - items
+        - page
+        - pageSize
+        - total
+        - totalPages
+      properties:
+        items:
+          type: array
+          items: {}
+          description: Array of items for current page
+        page:
+          type: integer
+          description: Current page number (1-indexed)
+          example: 1
+        pageSize:
+          type: integer
+          description: Number of items per page
+          example: 20
+        total:
+          type: integer
+          description: Total number of items across all pages
+          example: 150
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 8
+
+    Error:
+      type: object
+      required:
+        - statusCode
+        - message
+        - error
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 400
+        message:
+          type: string
+          description: Human-readable error message
+          example: Validation failed
+        error:
+          type: string
+          description: Error type
+          example: Bad Request
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field that failed validation
+              message:
+                type: string
+                description: Validation error message
+          description: Detailed validation errors (if applicable)
+
+  responses:
+    BadRequest:
+      description: Bad request - validation errors or malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 400
+            message: Validation failed
+            error: Bad Request
+            details:
+              - field: email
+                message: Invalid email format
+
+    Unauthorized:
+      description: Unauthorized - authentication required or session invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 401
+            message: Authentication required
+            error: Unauthorized
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 403
+            message: Admin role required
+            error: Forbidden
+
+    NotFound:
+      description: Not found - resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 404
+            message: Resource not found
+            error: Not Found
+
+    Conflict:
+      description: Conflict - resource already exists or business rule violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 409
+            message: Resource already exists
+            error: Conflict
+
+    UnprocessableEntity:
+      description: Unprocessable entity - semantic validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 422
+            message: Business rule validation failed
+            error: Unprocessable Entity
+
+    InternalServerError:
+      description: Internal server error - unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 500
+            message: An unexpected error occurred
+            error: Internal Server Error
