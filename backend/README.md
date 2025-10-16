@@ -20,7 +20,7 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js:** v20.x LTS or higher ([Download](https://nodejs.org/))
 - **pnpm:** v9.x or higher ([Install](https://pnpm.io/installation))
-- **PostgreSQL:** v15.x or higher ([Download](https://www.postgresql.org/download/))
+- **Docker & Docker Compose:** (Recommended) OR **PostgreSQL:** v15.x ([Download](https://www.postgresql.org/download/))
 
 ## 🛠️ Installation
 
@@ -70,6 +70,39 @@ SMTP_FROM_EMAIL=admin-library@mail.com
 ```
 
 ### 4. Database Setup
+
+**Option A: Using Docker (Recommended)**
+
+Run the automated setup script:
+
+```bash
+# Make sure Docker is running first!
+./setup-docker-db.sh
+```
+
+This script will:
+- ✅ Start PostgreSQL in a Docker container
+- ✅ Update your `.env` file
+- ✅ Run database migrations
+- ✅ Seed the database with sample data
+
+Or manually:
+
+```bash
+# Start PostgreSQL container
+docker-compose up -d postgres
+
+# Update .env file
+cp .env.docker .env
+
+# Run migrations
+pnpm prisma migrate deploy
+
+# Seed database
+pnpm prisma db seed
+```
+
+**Option B: Using Local PostgreSQL**
 
 Create the database:
 

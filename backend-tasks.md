@@ -1,9 +1,11 @@
 # Backend Development Tasks - Library Management System
 
 ## Overview
+
 This document outlines all backend development tasks for the Library Management System using NestJS, PostgreSQL, Prisma, and Better Auth. Tasks are organized by feature area and prioritized to enable parallel development with the frontend team.
 
 **Tech Stack:**
+
 - NestJS 11.x + TypeScript 5.x
 - PostgreSQL 15.x + Prisma 5.x
 - Better Auth (session-based authentication)
@@ -16,12 +18,14 @@ This document outlines all backend development tasks for the Library Management 
 ## Phase 1: Foundation & Infrastructure (Week 1)
 
 ### TASK BE-1.1: Project Setup and Configuration ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** None
 
 **Description:**
 Initialize NestJS project with TypeScript, configure ESLint, Prettier, and set up development environment.
 
 **Acceptance Criteria:**
+
 - [x] NestJS project initialized with `@nestjs/cli`
 - [x] TypeScript 5.x configured with strict mode enabled
 - [x] ESLint and Prettier configured with consistent rules
@@ -31,6 +35,7 @@ Initialize NestJS project with TypeScript, configure ESLint, Prettier, and set u
 - [x] README.md with setup instructions
 
 **Environment Variables Required:**
+
 ```
 NODE_ENV=development
 PORT=3000
@@ -45,11 +50,13 @@ SMTP_FROM_EMAIL=admin-library@mail.com
 ```
 
 **Definition of Done:**
+
 - [x] Project runs successfully with `pnpm run dev`
 - [x] All linting and formatting rules pass
 - [x] Environment variables are properly typed and validated
 
 **Completion Notes:**
+
 - NestJS 11.0.1 project initialized in `backend/` directory
 - TypeScript 5.7.3 with full strict mode enabled
 - ESLint 9.18.0 with flat config and Prettier integration
@@ -67,12 +74,14 @@ SMTP_FROM_EMAIL=admin-library@mail.com
 ---
 
 ### TASK BE-1.2: PostgreSQL Database Setup and Prisma Configuration ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Set up PostgreSQL database, configure Prisma ORM, and create initial schema with enums.
 
 **Acceptance Criteria:**
+
 - [x] PostgreSQL 15.x installed and running locally
 - [x] Database created: `library_db`
 - [x] Prisma installed and configured with PostgreSQL provider
@@ -81,16 +90,19 @@ Set up PostgreSQL database, configure Prisma ORM, and create initial schema with
 - [x] Database connection tested and working
 
 **Technical Details:**
+
 - Use `gen_random_uuid()` for UUID generation
 - Enable `pg_trgm` extension for full-text search
 - Configure connection pooling
 
 **Definition of Done:**
+
 - [x] `prisma generate` runs successfully
 - [x] Database connection is validated in main.ts
 - [x] All enums are properly typed in TypeScript
 
 **Completion Notes:**
+
 - PostgreSQL 14.19 (Homebrew) already installed and running
 - Database `library_db` created and accessible
 - Prisma 6.17.1 and @prisma/client 6.17.1 installed
@@ -105,12 +117,14 @@ Set up PostgreSQL database, configure Prisma ORM, and create initial schema with
 ---
 
 ### TASK BE-1.3: Database Schema Implementation (Part 1: Core Entities) ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-1.2
 
 **Description:**
 Implement core database models: User, MemberProfile, Author, Category, Book, BookAuthor, BookCategory.
 
 **Acceptance Criteria:**
+
 - [x] User model created with all fields and relations
 - [x] MemberProfile model with 1:1 relation to User
 - [x] Author model with unique name constraint
@@ -122,6 +136,7 @@ Implement core database models: User, MemberProfile, Author, Category, Book, Boo
 - [x] All indexes defined as per ERD
 
 **Technical Details:**
+
 ```prisma
 // Key indexes to implement:
 @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, name: "idx_books_title_trgm")
@@ -130,11 +145,13 @@ Implement core database models: User, MemberProfile, Author, Category, Book, Boo
 ```
 
 **Definition of Done:**
+
 - [x] Initial migration created and applied successfully
 - [x] No foreign key errors
 - [x] All constraints are enforced at database level
 
 **Completion Notes:**
+
 - All core entity models implemented in schema.prisma
 - User model with email uniqueness, role enum, and timestamps
 - MemberProfile with 1:1 relation to User (CASCADE delete)
@@ -153,12 +170,14 @@ Implement core database models: User, MemberProfile, Author, Category, Book, Boo
 ---
 
 ### TASK BE-1.4: Database Schema Implementation (Part 2: Copies, Loans, Settings) ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-1.3
 
 **Description:**
 Implement remaining models: BookCopy, Loan, Setting, AuditLog, and create the v_book_available_copies view.
 
 **Acceptance Criteria:**
+
 - [x] BookCopy model with unique code constraint
 - [x] Loan model with all status transitions
 - [ ] Unique constraint on Loan.copyId for open loans (APPROVED, ACTIVE, OVERDUE) - To be added in next migration
@@ -169,6 +188,7 @@ Implement remaining models: BookCopy, Loan, Setting, AuditLog, and create the v_
 - [x] Migration for pg_trgm extension
 
 **Technical Details:**
+
 ```sql
 -- Partial unique index for loans
 @@unique([copyId], where: { status: { in: [APPROVED, ACTIVE, OVERDUE] } })
@@ -178,11 +198,13 @@ CREATE OR REPLACE VIEW v_book_available_copies AS ...
 ```
 
 **Definition of Done:**
+
 - [x] All migrations applied successfully
 - [ ] View returns correct available copy counts - Pending view creation
 - [ ] Unique constraint on open loans enforced - Pending partial unique index
 
 **Completion Notes:**
+
 - BookCopy model implemented with unique code constraint, status enum, location tracking
 - Loan model with all fields: userId, bookId, copyId, status, dates, renewalCount, penaltyAccrued
 - All Loan indexes created: idx_loan_user, idx_loan_book, idx_loan_copy, idx_loan_status_due, idx_loan_due_date
@@ -198,12 +220,14 @@ CREATE OR REPLACE VIEW v_book_available_copies AS ...
 ---
 
 ### TASK BE-1.5: Database Seed Script ✅ COMPLETED
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-1.4
 
 **Description:**
 Create comprehensive seed script with admin user, sample member, authors, categories, books, and settings.
 
 **Acceptance Criteria:**
+
 - [x] Seed script creates admin user (admin@library.com / Admin@123)
 - [x] Seed script creates sample member with active profile
 - [x] 5-10 sample authors created
@@ -214,15 +238,18 @@ Create comprehensive seed script with admin user, sample member, authors, catego
 - [x] Seed script is idempotent (can run multiple times)
 
 **Default Credentials:**
+
 - Admin: `admin@library.com` / `Admin@123`
 - Member: `member@example.com` / `Member@123`
 
 **Definition of Done:**
+
 - [x] `pnpm prisma db seed` runs successfully
 - [x] Database is populated with realistic sample data
 - [x] All relationships are correctly established
 
 **Completion Notes:**
+
 - bcrypt 6.0.0 and @types/bcrypt 6.0.0 installed for password hashing
 - Comprehensive seed script created in prisma/seed.ts
 - Admin user created: admin@library.com / Admin@123 (ADMIN role, isActive=true)
@@ -244,12 +271,14 @@ Create comprehensive seed script with admin user, sample member, authors, catego
 ---
 
 ### TASK BE-1.6: Prisma Service Module ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 2 hours | **Dependencies:** BE-1.4
 
 **Description:**
 Create reusable Prisma service module for database access across the application.
 
 **Acceptance Criteria:**
+
 - [x] PrismaService created extending PrismaClient
 - [x] Connection lifecycle managed (onModuleInit, enableShutdownHooks)
 - [x] PrismaModule created as a global module
@@ -257,15 +286,16 @@ Create reusable Prisma service module for database access across the application
 - [x] Logging configured for queries in development
 
 **Technical Details:**
+
 ```typescript
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
   }
-  
+
   async enableShutdownHooks(app: INestApplication) {
-    this.$on('beforeExit', async () => {
+    this.$on("beforeExit", async () => {
       await app.close();
     });
   }
@@ -273,11 +303,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 ```
 
 **Definition of Done:**
+
 - [x] PrismaService can be injected in any module
 - [x] Connection pooling works correctly
 - [x] Graceful shutdown on application termination
 
 **Completion Notes:**
+
 - PrismaService created in src/prisma/prisma.service.ts extending PrismaClient
 - Implements OnModuleInit and OnModuleDestroy interfaces for proper lifecycle management
 - onModuleInit() connects to database on module initialization with error handling
@@ -305,33 +337,88 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
 ## Phase 2: Authentication & Authorization (Week 1-2)
 
-### TASK BE-2.1: Better Auth Integration
+### TASK BE-2.1: Better Auth Integration ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-1.6
 
 **Description:**
 Integrate Better Auth for session-based authentication with email/password strategy.
 
 **Acceptance Criteria:**
-- [ ] Better Auth library installed and configured
-- [ ] Email/password provider configured
-- [ ] Session storage configured (database-backed)
-- [ ] Secure cookie configuration (HTTPOnly, SameSite, Secure)
-- [ ] Password hashing with bcrypt (salt rounds: 10)
-- [ ] CSRF protection enabled for state-changing operations
+
+- [x] Better Auth library installed and configured
+- [x] Email/password provider configured
+- [x] Session storage configured (database-backed)
+- [x] Secure cookie configuration (HTTPOnly, SameSite, Secure)
+- [x] Password hashing with bcrypt (salt rounds: 10)
+- [x] CSRF protection enabled for state-changing operations
 
 **Technical Details:**
+
 - Session expiry: 7 days (rolling)
 - Cookie name: `session`
 - SameSite: `Lax` for development, `Strict` for production
 
 **Definition of Done:**
+
 - Better Auth authentication flow works end-to-end
 - Sessions persist across server restarts (DB-backed)
 - Password hashing is secure and performant
 
+**Completion Notes:**
+
+- better-auth 1.3.27 and @thallesp/nestjs-better-auth 2.1.0 installed ✓
+- Better Auth instance created in src/lib/auth.ts with comprehensive configuration ✓
+- Prisma adapter configured with PostgreSQL provider ✓
+- Email/password authentication enabled (min: 8 chars, max: 128 chars) ✓
+- Session configuration:
+  - Expires in 7 days (604800 seconds) ✓
+  - Rolling sessions with updateAge of 1 day ✓
+  - Cookie cache enabled (5 minutes for performance) ✓
+- Cookie security configuration:
+  - httpOnly: true (prevents XSS attacks) ✓
+  - sameSite: 'lax' for development, 'strict' for production ✓
+  - secure: true in production (HTTPS only) ✓
+  - maxAge: 7 days ✓
+- CSRF protection via trustedOrigins (FRONTEND_URL) ✓
+- Base path configured: /api/auth ✓
+- Prisma schema updated with Better Auth tables:
+  - Session table (with user relation, token, expiry, ip, user agent) ✓
+  - Account table (for OAuth and email/password providers) ✓
+  - Verification table (for email verification tokens) ✓
+  - User table extended (name, emailVerified, image fields) ✓
+- Migration 20251016071729_add_better_auth_tables applied successfully ✓
+- main.ts updated with bodyParser: false (required by Better Auth) ✓
+- app.module.ts updated with AuthModule.forRoot({ auth }) ✓
+- .env.example updated with Better Auth environment variables:
+  - BETTER_AUTH_SECRET (for session signing) ✓
+  - BETTER_AUTH_URL (base URL for callbacks) ✓
+- Application builds successfully with no TypeScript errors ✓
+- Better Auth endpoints available at /api/auth/\* (sign-up, sign-in, sign-out, session) ✓
+- Database-backed sessions persist across server restarts ✓
+- Password hashing handled by Better Auth internally with industry-standard bcrypt ✓
+
+**Available Better Auth Endpoints:**
+
+- POST /api/auth/sign-up/email - Register new user with email/password
+- POST /api/auth/sign-in/email - Login with email/password
+- POST /api/auth/sign-out - Logout and invalidate session
+- GET /api/auth/session - Get current session (with session cookie)
+- Additional endpoints for email verification, password reset, etc.
+
+**Next Steps:**
+
+- Ready for BE-2.2: Auth Module - Registration Endpoint (custom wrapper/validation)
+- Ready for BE-2.3: Auth Module - Login Endpoint (custom wrapper/validation)
+- AuthGuard from @thallesp/nestjs-better-auth is registered globally
+- Use @Session() decorator to access authenticated user in controllers
+- Use @AllowAnonymous() decorator for public routes
+- Use @OptionalAuth() decorator for optional authentication routes
+
 ---
 
-### TASK BE-2.2: Auth Module - Registration Endpoint
+### TASK BE-2.2: Auth Module - Registration Endpoint ✅ COMPLETED
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.1
 
 **Description:**
@@ -340,26 +427,44 @@ Implement user registration endpoint with validation and automatic member profil
 **API Endpoint:** `POST /api/auth/register`
 
 **Acceptance Criteria:**
-- [ ] RegisterDto with Zod validation (email, password, firstName, lastName, phone?, address?)
-- [ ] Email uniqueness check (case-insensitive)
-- [ ] Password validation (min 8 chars, complexity requirements)
-- [ ] User created with hashed password
-- [ ] MemberProfile automatically created with ACTIVE status
-- [ ] Session created and returned
-- [ ] Audit log entry created
-- [ ] Returns 201 with user, memberProfile, and session
-- [ ] Returns 409 if email already exists
-- [ ] Returns 400 for validation errors
+
+- [x] RegisterDto with Zod validation (email, password, firstName, lastName, phone?, address?)
+- [x] Email uniqueness check (case-insensitive)
+- [x] Password validation (min 8 chars, complexity requirements)
+- [x] User created with hashed password
+- [x] MemberProfile automatically created with ACTIVE status
+- [x] Session created and returned
+- [x] Audit log entry created
+- [x] Returns 201 with user, memberProfile, and session
+- [x] Returns 409 if email already exists
+- [x] Returns 400 for validation errors
 
 **Definition of Done:**
-- Registration creates both User and MemberProfile in a transaction
-- Email is stored in lowercase
-- Session cookie is set in response
-- Comprehensive error handling with proper status codes
+
+- [x] Registration creates both User and MemberProfile in a transaction
+- [x] Email is stored in lowercase
+- [x] Session cookie is set in response
+- [x] Comprehensive error handling with proper status codes
+
+**Completion Notes:**
+
+- RegisterDto created in `src/modules/auth/dto/register.dto.ts` with Zod schema validation
+- Password requirements: 8-128 chars, uppercase, lowercase, digit, special character
+- Email validation with uniqueness check (case-insensitive query)
+- AuthService implements registration method with bcrypt password hashing
+- Prisma transaction ensures atomic User + MemberProfile creation
+- MemberProfile created with status='ACTIVE' automatically
+- Session generated with 7-day expiry (rolling sessions)
+- Audit log entry created with action='user.registered' and metadata
+- AuthController POST /api/auth/register endpoint with AllowAnonymous decorator
+- Secure session cookie: httpOnly=true, sameSite=lax (strict in production)
+- All 15 unit tests passing ✓
+- Build successful with no TypeScript errors ✓
 
 ---
 
 ### TASK BE-2.3: Auth Module - Login Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** BE-2.1
 
 **Description:**
@@ -368,6 +473,7 @@ Implement user login endpoint with credential validation and session creation.
 **API Endpoint:** `POST /api/auth/login`
 
 **Acceptance Criteria:**
+
 - [ ] LoginDto with email and password validation
 - [ ] Email lookup is case-insensitive
 - [ ] Password verification using bcrypt
@@ -380,10 +486,12 @@ Implement user login endpoint with credential validation and session creation.
 - [ ] Returns 401 for inactive accounts
 
 **Security Features:**
+
 - Rate limiting on login endpoint (10 requests per minute per IP)
 - Generic error message to prevent user enumeration
 
 **Definition of Done:**
+
 - Login works with valid credentials
 - Session cookie is properly set
 - Failed login attempts are logged
@@ -392,6 +500,7 @@ Implement user login endpoint with credential validation and session creation.
 ---
 
 ### TASK BE-2.4: Auth Module - Logout Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 2 hours | **Dependencies:** BE-2.1
 
 **Description:**
@@ -400,6 +509,7 @@ Implement logout endpoint to invalidate current session.
 **API Endpoint:** `POST /api/auth/logout`
 
 **Acceptance Criteria:**
+
 - [ ] Session invalidated in database
 - [ ] Session cookie cleared
 - [ ] Audit log entry created
@@ -407,6 +517,7 @@ Implement logout endpoint to invalidate current session.
 - [ ] Handles cases where session doesn't exist gracefully
 
 **Definition of Done:**
+
 - Logout invalidates session immediately
 - Subsequent requests with old session cookie return 401
 - Cookie is cleared in browser
@@ -414,12 +525,14 @@ Implement logout endpoint to invalidate current session.
 ---
 
 ### TASK BE-2.5: Auth Guards - Session and Roles Guards
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.3
 
 **Description:**
 Implement authentication and authorization guards for protecting routes.
 
 **Acceptance Criteria:**
+
 - [ ] AuthGuard validates session cookie and extracts user
 - [ ] User attached to request object for downstream use
 - [ ] RolesGuard checks user role against required roles
@@ -429,6 +542,7 @@ Implement authentication and authorization guards for protecting routes.
 - [ ] Guards are reusable across all modules
 
 **Technical Details:**
+
 ```typescript
 @Roles(Role.ADMIN)
 @UseGuards(AuthGuard, RolesGuard)
@@ -438,6 +552,7 @@ async adminOnlyEndpoint(@CurrentUser() user: User) {
 ```
 
 **Definition of Done:**
+
 - Protected routes require valid session
 - Role-based authorization works correctly
 - Unauthorized requests return proper error codes
@@ -448,18 +563,21 @@ async adminOnlyEndpoint(@CurrentUser() user: User) {
 ## Phase 3: Books & Catalog Management (Week 2-3)
 
 ### TASK BE-3.1: Authors Module - CRUD Endpoints
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
 **Description:**
 Implement complete CRUD operations for authors management.
 
 **API Endpoints:**
+
 - `GET /api/authors` (public, paginated, searchable)
 - `POST /api/authors` (admin only)
 - `PATCH /api/authors/:id` (admin only)
 - `DELETE /api/authors/:id` (admin only, check references)
 
 **Acceptance Criteria:**
+
 - [ ] List authors with pagination, search (name), and sorting
 - [ ] Create author with unique name validation
 - [ ] Update author (name uniqueness check if changed)
@@ -469,6 +587,7 @@ Implement complete CRUD operations for authors management.
 - [ ] Audit logs for create, update, delete
 
 **Definition of Done:**
+
 - All CRUD operations work as specified
 - Proper authorization (admin only for CUD)
 - Comprehensive input validation
@@ -477,18 +596,21 @@ Implement complete CRUD operations for authors management.
 ---
 
 ### TASK BE-3.2: Categories Module - CRUD Endpoints
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
 **Description:**
 Implement complete CRUD operations for categories/genres management.
 
 **API Endpoints:**
+
 - `GET /api/categories` (public, paginated, searchable)
 - `POST /api/categories` (admin only)
 - `PATCH /api/categories/:id` (admin only)
 - `DELETE /api/categories/:id` (admin only, check references)
 
 **Acceptance Criteria:**
+
 - [ ] List categories with pagination, search (name), and sorting
 - [ ] Create category with unique name validation
 - [ ] Update category (name uniqueness check if changed)
@@ -498,6 +620,7 @@ Implement complete CRUD operations for categories/genres management.
 - [ ] Audit logs for create, update, delete
 
 **Definition of Done:**
+
 - All CRUD operations work as specified
 - Proper authorization (admin only for CUD)
 - Comprehensive input validation
@@ -506,6 +629,7 @@ Implement complete CRUD operations for categories/genres management.
 ---
 
 ### TASK BE-3.3: Books Module - List and Search Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-3.1, BE-3.2
 
 **Description:**
@@ -514,6 +638,7 @@ Implement public book catalog listing with advanced search, filtering, and sorti
 **API Endpoint:** `GET /api/books`
 
 **Acceptance Criteria:**
+
 - [ ] Public endpoint (no authentication required)
 - [ ] Pagination (page, pageSize: default 20, max 100)
 - [ ] Search by title and author name (case-insensitive, partial match)
@@ -525,11 +650,13 @@ Implement public book catalog listing with advanced search, filtering, and sorti
 - [ ] Only returns books with status=ACTIVE
 
 **Query Example:**
+
 ```
 GET /api/books?q=harry&categoryId=uuid&availability=true&sortBy=title&sortOrder=asc&page=1&pageSize=20
 ```
 
 **Response Format:**
+
 ```json
 {
   "items": [
@@ -552,6 +679,7 @@ GET /api/books?q=harry&categoryId=uuid&availability=true&sortBy=title&sortOrder=
 ```
 
 **Definition of Done:**
+
 - Search and filters work correctly
 - Performance meets target (<300ms P95)
 - Proper pagination with total count
@@ -560,6 +688,7 @@ GET /api/books?q=harry&categoryId=uuid&availability=true&sortBy=title&sortOrder=
 ---
 
 ### TASK BE-3.4: Books Module - Book Detail Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** BE-3.3
 
 **Description:**
@@ -568,6 +697,7 @@ Implement endpoint to retrieve detailed information about a specific book.
 **API Endpoint:** `GET /api/books/:id`
 
 **Acceptance Criteria:**
+
 - [ ] Public endpoint (no authentication required)
 - [ ] Returns full book details including:
   - All book fields (title, subtitle, description, ISBN, publicationYear, language, coverImageUrl, status)
@@ -579,6 +709,7 @@ Implement endpoint to retrieve detailed information about a specific book.
 - [ ] Returns 404 if book status is ARCHIVED (unless admin)
 
 **Definition of Done:**
+
 - Detailed book information returned
 - Available copies count is accurate
 - Proper error handling for non-existent books
@@ -586,6 +717,7 @@ Implement endpoint to retrieve detailed information about a specific book.
 ---
 
 ### TASK BE-3.5: Books Module - Create Book Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** BE-3.3
 
 **Description:**
@@ -594,6 +726,7 @@ Implement endpoint for admin to create new books with authors and categories.
 **API Endpoint:** `POST /api/books`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only (AuthGuard + RolesGuard)
 - [ ] CreateBookDto with validation:
   - title (required, max 500 chars)
@@ -618,6 +751,7 @@ Implement endpoint for admin to create new books with authors and categories.
 - [ ] Returns 404 if author or category doesn't exist
 
 **Definition of Done:**
+
 - Books can be created with multiple authors and categories
 - All validations work correctly
 - Transaction ensures data consistency (rollback on error)
@@ -626,6 +760,7 @@ Implement endpoint for admin to create new books with authors and categories.
 ---
 
 ### TASK BE-3.6: Books Module - Update Book Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** BE-3.5
 
 **Description:**
@@ -634,6 +769,7 @@ Implement endpoint for admin to update existing books, including authors and cat
 **API Endpoint:** `PATCH /api/books/:id`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] UpdateBookDto with all fields optional
 - [ ] If ISBN changed, validate uniqueness
@@ -647,10 +783,12 @@ Implement endpoint for admin to update existing books, including authors and cat
 - [ ] Returns 400 for validation errors
 
 **Technical Details:**
+
 - Use transaction to ensure atomic updates
 - Delete and recreate junction table entries for authors/categories
 
 **Definition of Done:**
+
 - Books can be updated including relationships
 - ISBN uniqueness validated if changed
 - Transaction ensures data consistency
@@ -659,6 +797,7 @@ Implement endpoint for admin to update existing books, including authors and cat
 ---
 
 ### TASK BE-3.7: Books Module - Delete/Archive Book Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-3.5
 
 **Description:**
@@ -667,6 +806,7 @@ Implement endpoint for admin to delete books (if no loans) or enforce archival.
 **API Endpoint:** `DELETE /api/books/:id`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Check if book has any loans (historical or active)
 - [ ] If loans exist, return 409 error with message to archive instead
@@ -677,10 +817,12 @@ Implement endpoint for admin to delete books (if no loans) or enforce archival.
 - [ ] Returns 409 if book has loans
 
 **Business Rule:**
+
 - Books with historical loans must be archived (set status=ARCHIVED) instead of deleted
 - Future enhancement: Add separate archive endpoint `POST /api/books/:id/archive`
 
 **Definition of Done:**
+
 - Books without loans can be deleted
 - Books with loans cannot be deleted (clear error message)
 - Cascade delete works for junction tables
@@ -689,6 +831,7 @@ Implement endpoint for admin to delete books (if no loans) or enforce archival.
 ---
 
 ### TASK BE-3.8: Book Copies Module - List Copies Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-3.4
 
 **Description:**
@@ -697,6 +840,7 @@ Implement endpoint for admin to view all copies of a specific book.
 **API Endpoint:** `GET /api/books/:id/copies`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Returns paginated list of copies for a book
 - [ ] Filter by status (AVAILABLE, ON_LOAN, LOST, DAMAGED)
@@ -705,6 +849,7 @@ Implement endpoint for admin to view all copies of a specific book.
 - [ ] Pagination support
 
 **Definition of Done:**
+
 - Admin can view all copies for inventory management
 - Filter by status works correctly
 - Proper pagination
@@ -712,6 +857,7 @@ Implement endpoint for admin to view all copies of a specific book.
 ---
 
 ### TASK BE-3.9: Book Copies Module - Add Copies Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-3.8
 
 **Description:**
@@ -720,6 +866,7 @@ Implement endpoint for admin to add N copies to a book's inventory.
 **API Endpoint:** `POST /api/books/:id/copies`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] AddCopiesDto with validation:
   - count (required, integer, min 1, max 100)
@@ -732,16 +879,22 @@ Implement endpoint for admin to add N copies to a book's inventory.
 - [ ] Returns 400 for validation errors
 
 **Technical Details:**
+
 ```typescript
 // Example code generation
-const codePrefix = book.isbn.replace(/-/g, '');
-const existingCopiesCount = await this.prisma.bookCopy.count({ where: { bookId } });
-const codes = Array.from({ length: count }, (_, i) => 
-  `${codePrefix}-${String(existingCopiesCount + i + 1).padStart(4, '0')}`
+const codePrefix = book.isbn.replace(/-/g, "");
+const existingCopiesCount = await this.prisma.bookCopy.count({
+  where: { bookId },
+});
+const codes = Array.from(
+  { length: count },
+  (_, i) =>
+    `${codePrefix}-${String(existingCopiesCount + i + 1).padStart(4, "0")}`
 );
 ```
 
 **Definition of Done:**
+
 - Copies are created with unique codes
 - Bulk creation is efficient (single query)
 - Transaction ensures atomicity
@@ -750,6 +903,7 @@ const codes = Array.from({ length: count }, (_, i) =>
 ---
 
 ### TASK BE-3.10: Book Copies Module - Update Copy Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-3.9
 
 **Description:**
@@ -758,6 +912,7 @@ Implement endpoint for admin to update copy status or location.
 **API Endpoint:** `PATCH /api/copies/:copyId`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] UpdateCopyDto with optional fields:
   - status (enum: AVAILABLE, ON_LOAN, LOST, DAMAGED)
@@ -770,9 +925,11 @@ Implement endpoint for admin to update copy status or location.
 - [ ] Returns 409 if status change conflicts with active loan
 
 **Business Rule:**
+
 - Cannot set status to AVAILABLE if copy has an open loan (APPROVED, ACTIVE, OVERDUE)
 
 **Definition of Done:**
+
 - Copy status can be updated
 - Location code can be updated
 - Business rules enforced
@@ -781,6 +938,7 @@ Implement endpoint for admin to update copy status or location.
 ---
 
 ### TASK BE-3.11: Book Copies Module - Delete Copy Endpoint
+
 **Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** BE-3.9
 
 **Description:**
@@ -789,6 +947,7 @@ Implement endpoint for admin to delete a copy from inventory (if not on loan).
 **API Endpoint:** `DELETE /api/copies/:copyId`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Check if copy has any loans (historical or active)
 - [ ] If loans exist, return 409 error
@@ -799,6 +958,7 @@ Implement endpoint for admin to delete a copy from inventory (if not on loan).
 - [ ] Returns 409 if copy has loans
 
 **Definition of Done:**
+
 - Copies without loans can be deleted
 - Copies with loans cannot be deleted
 - Proper error messages
@@ -809,6 +969,7 @@ Implement endpoint for admin to delete a copy from inventory (if not on loan).
 ## Phase 4: Membership Management (Week 3)
 
 ### TASK BE-4.1: Members Module - List Members Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
 **Description:**
@@ -817,6 +978,7 @@ Implement endpoint for admin to view all members with filtering and search.
 **API Endpoint:** `GET /api/members`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Pagination (page, pageSize)
 - [ ] Filter by status (PENDING, ACTIVE, SUSPENDED)
@@ -827,6 +989,7 @@ Implement endpoint for admin to view all members with filtering and search.
 - [ ] Returns 200 with paginated member list
 
 **Response Format:**
+
 ```json
 {
   "items": [
@@ -852,6 +1015,7 @@ Implement endpoint for admin to view all members with filtering and search.
 ```
 
 **Definition of Done:**
+
 - Admin can view all members
 - Filters and search work correctly
 - Member statistics included
@@ -860,6 +1024,7 @@ Implement endpoint for admin to view all members with filtering and search.
 ---
 
 ### TASK BE-4.2: Members Module - Member Detail Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.1
 
 **Description:**
@@ -868,6 +1033,7 @@ Implement endpoint for admin to view detailed information about a specific membe
 **API Endpoint:** `GET /api/members/:id`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Returns full member profile including:
   - User data (id, email, role, isActive, lastLoginAt)
@@ -878,6 +1044,7 @@ Implement endpoint for admin to view detailed information about a specific membe
 - [ ] Returns 404 if member not found
 
 **Definition of Done:**
+
 - Detailed member information displayed
 - Useful for admin to assess member status
 - Includes borrowing statistics
@@ -885,6 +1052,7 @@ Implement endpoint for admin to view detailed information about a specific membe
 ---
 
 ### TASK BE-4.3: Members Module - Update Member Profile Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
 **Description:**
@@ -893,6 +1061,7 @@ Implement endpoint for admin to update member profile information.
 **API Endpoint:** `PATCH /api/members/:id`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] UpdateMemberDto with optional fields:
   - firstName, lastName, phone, address, notes
@@ -904,10 +1073,12 @@ Implement endpoint for admin to update member profile information.
 - [ ] Returns 400 for validation errors
 
 **Business Rule:**
+
 - Status changes should use dedicated endpoints (activate, suspend)
 - Email changes not allowed (account security)
 
 **Definition of Done:**
+
 - Admin can update member profile fields
 - Validation works correctly
 - Audit trail captured
@@ -915,6 +1086,7 @@ Implement endpoint for admin to update member profile information.
 ---
 
 ### TASK BE-4.4: Members Module - Activate Member Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
 **Description:**
@@ -923,6 +1095,7 @@ Implement endpoint for admin to activate pending members.
 **API Endpoint:** `POST /api/members/:id/activate`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Check current status (must be PENDING)
 - [ ] Update status to ACTIVE
@@ -933,6 +1106,7 @@ Implement endpoint for admin to activate pending members.
 - [ ] Returns 409 if member already active
 
 **Definition of Done:**
+
 - Member status changed to ACTIVE
 - Member can now borrow books
 - Notification email sent
@@ -941,6 +1115,7 @@ Implement endpoint for admin to activate pending members.
 ---
 
 ### TASK BE-4.5: Members Module - Suspend Member Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
 **Description:**
@@ -949,6 +1124,7 @@ Implement endpoint for admin to suspend active members.
 **API Endpoint:** `POST /api/members/:id/suspend`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Optional reason in request body (stored in notes)
 - [ ] Check current status (must be ACTIVE)
@@ -960,11 +1136,13 @@ Implement endpoint for admin to suspend active members.
 - [ ] Returns 409 if member already suspended
 
 **Business Rule:**
+
 - Suspended members cannot create new loans
 - Suspended members cannot renew existing loans
 - Active loans remain but must be returned
 
 **Definition of Done:**
+
 - Member status changed to SUSPENDED
 - New borrow attempts return 403 error
 - Renewal attempts return 403 error
@@ -976,16 +1154,19 @@ Implement endpoint for admin to suspend active members.
 ## Phase 5: Loans Management (Week 4-5)
 
 ### TASK BE-5.1: Settings Module - Get and Update Settings
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
 **Description:**
 Implement endpoints for admin to view and update system settings (borrowing policy, fees, notifications).
 
 **API Endpoints:**
+
 - `GET /api/settings` (admin only)
 - `PATCH /api/settings` (admin only)
 
 **Acceptance Criteria:**
+
 - [ ] GET returns all settings fields
 - [ ] PATCH accepts UpdateSettingsDto with all fields optional
 - [ ] Validate settings values (e.g., loanDays between 1-90, fees >= 0)
@@ -995,6 +1176,7 @@ Implement endpoints for admin to view and update system settings (borrowing poli
 - [ ] Returns 422 for invalid values
 
 **Settings Fields:**
+
 ```typescript
 {
   approvalsRequired: boolean;
@@ -1004,19 +1186,20 @@ Implement endpoints for admin to view and update system settings (borrowing poli
   maxRenewals: number; // 0-5
   overdueFeePerDay: number; // >= 0
   overdueFeeCapPerLoan: number; // >= 0
-  currency: 'IDR';
+  currency: "IDR";
   maxConcurrentLoans: number; // 1-20
   notificationsEnabled: boolean;
   dueSoonDays: number; // 1-14
   dueDateNotificationsEnabled: boolean;
   fromEmail: string; // validated email
-  smtpProvider: 'MAILTRAP';
+  smtpProvider: "MAILTRAP";
   sendHourUTC: number; // 0-23
   timeZone: string;
 }
 ```
 
 **Definition of Done:**
+
 - Settings can be retrieved and updated
 - Validation ensures sane values
 - Changes take effect immediately
@@ -1025,6 +1208,7 @@ Implement endpoints for admin to view and update system settings (borrowing poli
 ---
 
 ### TASK BE-5.2: Loans Module - Create Loan (Borrow Book) Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 8 hours | **Dependencies:** BE-5.1, BE-4.1
 
 **Description:**
@@ -1033,6 +1217,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 **API Endpoint:** `POST /api/loans`
 
 **Acceptance Criteria:**
+
 - [ ] Member only (authenticated, role=MEMBER)
 - [ ] CreateLoanDto with bookId
 - [ ] Validate member status is ACTIVE (not PENDING or SUSPENDED)
@@ -1052,6 +1237,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 - [ ] Returns 409 if member over loan limit
 
 **Business Logic:**
+
 ```typescript
 // Validation steps
 1. Get member profile and settings
@@ -1068,6 +1254,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 ```
 
 **Definition of Done:**
+
 - Borrow flow works end-to-end
 - All business rules enforced
 - Proper error messages for each failure case
@@ -1078,6 +1265,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 ---
 
 ### TASK BE-5.3: Loans Module - Approve Loan Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1086,6 +1274,7 @@ Implement endpoint for admin to approve requested loans (when approvals are enab
 **API Endpoint:** `POST /api/loans/:id/approve`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Validate loan exists and status=REQUESTED
 - [ ] Update loan:
@@ -1100,6 +1289,7 @@ Implement endpoint for admin to approve requested loans (when approvals are enab
 - [ ] Returns 409 if loan not in REQUESTED status
 
 **Definition of Done:**
+
 - Approval changes loan to ACTIVE
 - Due date calculated correctly
 - Copy marked as ON_LOAN
@@ -1109,6 +1299,7 @@ Implement endpoint for admin to approve requested loans (when approvals are enab
 ---
 
 ### TASK BE-5.4: Loans Module - Reject Loan Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1117,6 +1308,7 @@ Implement endpoint for admin to reject requested loans.
 **API Endpoint:** `POST /api/loans/:id/reject`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Optional rejection reason in request body
 - [ ] Validate loan exists and status=REQUESTED
@@ -1129,6 +1321,7 @@ Implement endpoint for admin to reject requested loans.
 - [ ] Returns 409 if loan not in REQUESTED status
 
 **Definition of Done:**
+
 - Rejection updates loan status
 - Copy remains available for others
 - Notification sent with reason
@@ -1137,6 +1330,7 @@ Implement endpoint for admin to reject requested loans.
 ---
 
 ### TASK BE-5.5: Loans Module - Renew Loan Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1145,6 +1339,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 **API Endpoint:** `POST /api/loans/:id/renew`
 
 **Acceptance Criteria:**
+
 - [ ] Member only (can only renew own loans)
 - [ ] Get settings for renewal policy
 - [ ] Validate loan ownership (loan.userId === currentUser.id)
@@ -1167,6 +1362,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 - [ ] Returns 409 with specific error for each validation failure
 
 **Business Logic:**
+
 ```typescript
 // Validation steps
 1. Verify loan ownership
@@ -1182,6 +1378,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 ```
 
 **Error Messages:**
+
 - "Not authorized to renew this loan"
 - "Can only renew active loans"
 - "Cannot renew loan while membership is suspended"
@@ -1190,6 +1387,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 - "Renewal must be requested at least 1 day(s) before due date"
 
 **Definition of Done:**
+
 - Renewal extends due date correctly
 - All business rules enforced with clear errors
 - Renewal count incremented
@@ -1199,6 +1397,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 ---
 
 ### TASK BE-5.6: Loans Module - Return Loan Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1207,6 +1406,7 @@ Implement endpoint for members/admin to return borrowed books with penalty calcu
 **API Endpoint:** `POST /api/loans/:id/return`
 
 **Acceptance Criteria:**
+
 - [ ] Member (own loans) or Admin
 - [ ] Validate loan ownership if member (admin can return any loan)
 - [ ] Validate loan not already returned (status !== RETURNED)
@@ -1214,7 +1414,7 @@ Implement endpoint for members/admin to return borrowed books with penalty calcu
 - [ ] Calculate penalty if overdue:
   - returnDate = now
   - overdueDays = max(0, ceil((returnDate - dueDate) / 1 day))
-  - penalty = min(overdueDays * overdueFeePerDay, overdueFeeCapPerLoan)
+  - penalty = min(overdueDays \* overdueFeePerDay, overdueFeeCapPerLoan)
 - [ ] Update loan:
   - status = RETURNED
   - returnedAt = now
@@ -1228,11 +1428,14 @@ Implement endpoint for members/admin to return borrowed books with penalty calcu
 - [ ] Returns 409 if loan already returned
 
 **Penalty Calculation Example:**
+
 ```typescript
 const returnDate = new Date();
 const overdueDays = Math.max(
   0,
-  Math.ceil((returnDate.getTime() - loan.dueDate.getTime()) / (1000 * 60 * 60 * 24))
+  Math.ceil(
+    (returnDate.getTime() - loan.dueDate.getTime()) / (1000 * 60 * 60 * 24)
+  )
 );
 const penalty = Math.min(
   overdueDays * Number(settings.overdueFeePerDay),
@@ -1241,6 +1444,7 @@ const penalty = Math.min(
 ```
 
 **Definition of Done:**
+
 - Return marks loan as completed
 - Penalty calculated correctly for overdue returns
 - Copy marked as AVAILABLE
@@ -1251,6 +1455,7 @@ const penalty = Math.min(
 ---
 
 ### TASK BE-5.7: Loans Module - List All Loans (Admin) Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1259,6 +1464,7 @@ Implement endpoint for admin to view all loans with advanced filtering.
 **API Endpoint:** `GET /api/loans`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Pagination (page, pageSize)
 - [ ] Filter by:
@@ -1273,6 +1479,7 @@ Implement endpoint for admin to view all loans with advanced filtering.
 - [ ] Returns 200 with paginated loan list
 
 **Response Format:**
+
 ```json
 {
   "items": [
@@ -1300,6 +1507,7 @@ Implement endpoint for admin to view all loans with advanced filtering.
 ```
 
 **Definition of Done:**
+
 - Admin can view and filter all loans
 - Date range filters work correctly
 - Useful for monitoring overdue items
@@ -1308,6 +1516,7 @@ Implement endpoint for admin to view all loans with advanced filtering.
 ---
 
 ### TASK BE-5.8: Loans Module - List My Loans (Member) Endpoint
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1316,6 +1525,7 @@ Implement endpoint for members to view their own loans (active and history).
 **API Endpoint:** `GET /api/my/loans`
 
 **Acceptance Criteria:**
+
 - [ ] Member only (authenticated)
 - [ ] Filter to current user's loans automatically
 - [ ] Optional filter by status
@@ -1327,6 +1537,7 @@ Implement endpoint for members to view their own loans (active and history).
 - [ ] Returns 200 with paginated loan list
 
 **Response Format:**
+
 ```json
 {
   "items": [
@@ -1355,10 +1566,12 @@ Implement endpoint for members to view their own loans (active and history).
 ```
 
 **Derived Fields:**
+
 - `canRenew`: Based on renewalCount, status, dueDate, member status
 - `isOverdue`: dueDate < now && status === ACTIVE
 
 **Definition of Done:**
+
 - Member can view their loans
 - Active loans prioritized in default sort
 - Renewal eligibility clearly indicated
@@ -1369,12 +1582,14 @@ Implement endpoint for members to view their own loans (active and history).
 ## Phase 6: Notifications & Scheduler (Week 5-6)
 
 ### TASK BE-6.1: Email Service - SMTP Configuration and Base Service
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Set up email service using Nodemailer with Mailtrap for development.
 
 **Acceptance Criteria:**
+
 - [ ] Nodemailer installed and configured
 - [ ] EmailService created with sendEmail method
 - [ ] SMTP configuration from environment variables
@@ -1384,22 +1599,23 @@ Set up email service using Nodemailer with Mailtrap for development.
 - [ ] Returns email info (messageId, accepted, rejected)
 
 **Technical Details:**
+
 ```typescript
 @Injectable()
 export class EmailService {
   private transporter: Transporter;
-  
+
   constructor(private config: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: this.config.get('SMTP_HOST'),
-      port: this.config.get('SMTP_PORT'),
+      host: this.config.get("SMTP_HOST"),
+      port: this.config.get("SMTP_PORT"),
       auth: {
-        user: this.config.get('SMTP_USER'),
-        pass: this.config.get('SMTP_PASS'),
+        user: this.config.get("SMTP_USER"),
+        pass: this.config.get("SMTP_PASS"),
       },
     });
   }
-  
+
   async sendEmail(to: string, subject: string, html: string): Promise<any> {
     // Implementation
   }
@@ -1407,6 +1623,7 @@ export class EmailService {
 ```
 
 **Definition of Done:**
+
 - Emails can be sent via Mailtrap
 - Errors logged properly
 - Service can be injected in other modules
@@ -1414,12 +1631,14 @@ export class EmailService {
 ---
 
 ### TASK BE-6.2: Email Templates - Create HTML Templates
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-6.1
 
 **Description:**
 Create reusable HTML email templates for all notification types.
 
 **Templates Required:**
+
 1. Loan Created/Requested
 2. Loan Approved
 3. Loan Rejected
@@ -1431,6 +1650,7 @@ Create reusable HTML email templates for all notification types.
 9. Member Suspended
 
 **Acceptance Criteria:**
+
 - [ ] Each template has HTML and plain text versions
 - [ ] Templates use variables for personalization
 - [ ] Responsive design for mobile devices
@@ -1440,11 +1660,13 @@ Create reusable HTML email templates for all notification types.
 - [ ] Unsubscribe link placeholder (future)
 
 **Technical Details:**
+
 - Use template literals or template engine (e.g., Handlebars)
 - Store templates in `src/modules/notifications/templates/`
 - Create template helper function for variable substitution
 
 **Definition of Done:**
+
 - All 9 templates created
 - Templates are tested in Mailtrap
 - Variables are properly substituted
@@ -1453,12 +1675,14 @@ Create reusable HTML email templates for all notification types.
 ---
 
 ### TASK BE-6.3: Notifications Service - Implement Notification Logic
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-6.2
 
 **Description:**
 Implement NotificationsService with methods for each notification type.
 
 **Acceptance Criteria:**
+
 - [ ] NotificationsService created
 - [ ] Check settings.notificationsEnabled before sending
 - [ ] Implement methods:
@@ -1476,36 +1700,37 @@ Implement NotificationsService with methods for each notification type.
 - [ ] Notification attempts logged in audit_log (optional)
 
 **Technical Details:**
+
 ```typescript
 @Injectable()
 export class NotificationsService {
   constructor(
     private emailService: EmailService,
-    private prisma: PrismaService,
+    private prisma: PrismaService
   ) {}
-  
+
   async sendLoanCreatedNotification(loan: LoanWithRelations): Promise<void> {
     const settings = await this.prisma.setting.findFirst();
     if (!settings?.notificationsEnabled) return;
-    
+
     const { email } = loan.user;
-    const subject = loan.status === 'REQUESTED' 
-      ? 'Loan Request Received' 
-      : 'Loan Approved';
+    const subject =
+      loan.status === "REQUESTED" ? "Loan Request Received" : "Loan Approved";
     const html = this.renderLoanCreatedTemplate(loan);
-    
+
     try {
       await this.emailService.sendEmail(email, subject, html);
     } catch (error) {
-      this.logger.error('Failed to send notification:', error);
+      this.logger.error("Failed to send notification:", error);
     }
   }
-  
+
   // Other methods...
 }
 ```
 
 **Definition of Done:**
+
 - All notification methods implemented
 - Settings respected
 - Errors don't break main flow
@@ -1514,6 +1739,7 @@ export class NotificationsService {
 ---
 
 ### TASK BE-6.4: Scheduler Service - Due Soon Reminders Job
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-6.3
 
 **Description:**
@@ -1522,6 +1748,7 @@ Implement scheduled job to send due-soon reminder emails daily.
 **API Cron Job:** Runs daily at 08:00 UTC (configurable in settings)
 
 **Acceptance Criteria:**
+
 - [ ] Use @nestjs/schedule for cron jobs
 - [ ] Schedule job based on settings.sendHourUTC (default 8)
 - [ ] Query loans:
@@ -1533,25 +1760,26 @@ Implement scheduled job to send due-soon reminder emails daily.
 - [ ] Job doesn't run if notificationsEnabled = false
 
 **Technical Details:**
+
 ```typescript
 @Injectable()
 export class SchedulerService {
-  @Cron('0 8 * * *') // Daily at 08:00 UTC
+  @Cron("0 8 * * *") // Daily at 08:00 UTC
   async sendDueSoonReminders() {
     const settings = await this.prisma.setting.findFirst();
     if (!settings?.notificationsEnabled) return;
-    
+
     const dueSoonDate = new Date();
     dueSoonDate.setDate(dueSoonDate.getDate() + settings.dueSoonDays);
-    
+
     const loans = await this.prisma.loan.findMany({
       where: {
-        status: 'ACTIVE',
+        status: "ACTIVE",
         dueDate: { gte: new Date(), lte: dueSoonDate },
       },
       include: { book: true, user: { include: { memberProfile: true } } },
     });
-    
+
     for (const loan of loans) {
       await this.notificationsService.sendDueSoonReminder(loan);
     }
@@ -1560,6 +1788,7 @@ export class SchedulerService {
 ```
 
 **Definition of Done:**
+
 - Cron job runs daily at specified hour
 - Due-soon reminders sent to eligible members
 - Job execution logged
@@ -1568,6 +1797,7 @@ export class SchedulerService {
 ---
 
 ### TASK BE-6.5: Scheduler Service - Update Overdue Loans Job
+
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-5.2
 
 **Description:**
@@ -1576,6 +1806,7 @@ Implement scheduled job to update loan status from ACTIVE to OVERDUE for past-du
 **API Cron Job:** Runs daily at 09:00 UTC
 
 **Acceptance Criteria:**
+
 - [ ] Schedule job at 09:00 UTC daily
 - [ ] Query loans:
   - status = ACTIVE
@@ -1585,6 +1816,7 @@ Implement scheduled job to update loan status from ACTIVE to OVERDUE for past-du
 - [ ] Job execution logged
 
 **Technical Details:**
+
 ```typescript
 @Cron('0 9 * * *') // Daily at 09:00 UTC
 async updateOverdueLoans() {
@@ -1595,17 +1827,19 @@ async updateOverdueLoans() {
     },
     data: { status: 'OVERDUE' },
   });
-  
+
   this.logger.log(`Updated ${result.count} loans to overdue status`);
 }
 ```
 
 **Business Rule:**
+
 - Loans are marked OVERDUE automatically at 09:00 UTC each day
 - No email notification for overdue (MVP scope)
 - Overdue loans cannot be renewed
 
 **Definition of Done:**
+
 - Loans past due date marked as OVERDUE
 - Batch update is efficient
 - Job execution logged
@@ -1615,6 +1849,7 @@ async updateOverdueLoans() {
 ## Phase 7: Audit Logging & Error Handling (Week 6)
 
 ### TASK BE-7.1: Audit Logs Module - Create Audit Log Endpoint
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
 **Description:**
@@ -1623,6 +1858,7 @@ Implement endpoint for admin to view system audit logs with filtering.
 **API Endpoint:** `GET /api/audit-logs`
 
 **Acceptance Criteria:**
+
 - [ ] Admin only
 - [ ] Pagination (page, pageSize)
 - [ ] Filter by:
@@ -1638,6 +1874,7 @@ Implement endpoint for admin to view system audit logs with filtering.
 - [ ] Returns 200 with paginated log list
 
 **Response Format:**
+
 ```json
 {
   "items": [
@@ -1660,6 +1897,7 @@ Implement endpoint for admin to view system audit logs with filtering.
 ```
 
 **Definition of Done:**
+
 - Admin can view audit trail
 - Filters work correctly
 - Useful for compliance and debugging
@@ -1668,12 +1906,14 @@ Implement endpoint for admin to view system audit logs with filtering.
 ---
 
 ### TASK BE-7.2: Exception Filters - Global Exception Handler
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Implement global exception filter for consistent error responses and error tracking.
 
 **Acceptance Criteria:**
+
 - [ ] HttpExceptionFilter catches all exceptions
 - [ ] Format all errors consistently:
   ```json
@@ -1693,11 +1933,13 @@ Implement global exception filter for consistent error responses and error track
 - [ ] Don't leak sensitive information in production
 
 **Error Type Mappings:**
+
 - PrismaClientKnownRequestError P2002 → 409 Conflict (unique violation)
 - PrismaClientKnownRequestError P2003 → 409 Conflict (foreign key violation)
 - PrismaClientKnownRequestError P2025 → 404 Not Found (record not found)
 
 **Definition of Done:**
+
 - All errors formatted consistently
 - Proper status codes returned
 - Errors logged and tracked
@@ -1706,12 +1948,14 @@ Implement global exception filter for consistent error responses and error track
 ---
 
 ### TASK BE-7.3: Logging Interceptor - Request/Response Logging
+
 **Priority:** LOW | **Estimated Time:** 3 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Implement interceptor to log all HTTP requests and responses for debugging and monitoring.
 
 **Acceptance Criteria:**
+
 - [ ] LoggingInterceptor logs:
   - Request: method, URL, userId, timestamp
   - Response: status code, duration
@@ -1725,11 +1969,13 @@ Implement interceptor to log all HTTP requests and responses for debugging and m
 - [ ] Performance overhead < 5ms per request
 
 **Log Format:**
+
 ```
 [RequestId: abc123] GET /api/books - User: user@example.com - 200 OK - 45ms
 ```
 
 **Definition of Done:**
+
 - All requests logged with context
 - Useful for debugging
 - No sensitive data logged
@@ -1738,6 +1984,7 @@ Implement interceptor to log all HTTP requests and responses for debugging and m
 ---
 
 ### TASK BE-7.4: Health Check Endpoint
+
 **Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** BE-1.6
 
 **Description:**
@@ -1746,6 +1993,7 @@ Implement health check endpoint for monitoring and deployment orchestration.
 **API Endpoint:** `GET /api/health`
 
 **Acceptance Criteria:**
+
 - [ ] Public endpoint (no authentication)
 - [ ] Check database connectivity
 - [ ] Check SMTP connectivity (optional)
@@ -1754,6 +2002,7 @@ Implement health check endpoint for monitoring and deployment orchestration.
 - [ ] Returns 200 if healthy, 503 if down
 
 **Response Format:**
+
 ```json
 {
   "status": "ok",
@@ -1767,6 +2016,7 @@ Implement health check endpoint for monitoring and deployment orchestration.
 ```
 
 **Definition of Done:**
+
 - Health endpoint returns accurate status
 - Can be used by load balancers
 - Database check uses simple query
@@ -1776,12 +2026,14 @@ Implement health check endpoint for monitoring and deployment orchestration.
 ## Phase 8: Testing (Week 7)
 
 ### TASK BE-8.1: Unit Tests - Services Layer
+
 **Priority:** HIGH | **Estimated Time:** 16 hours | **Dependencies:** All service implementations
 
 **Description:**
 Write comprehensive unit tests for all service classes using Jest.
 
 **Acceptance Criteria:**
+
 - [ ] Test coverage > 80% for services
 - [ ] Mock Prisma client using jest.mock
 - [ ] Test all business logic branches
@@ -1791,6 +2043,7 @@ Write comprehensive unit tests for all service classes using Jest.
 - [ ] Tests are fast (< 5 seconds total)
 
 **Services to Test:**
+
 - AuthService (register, login, validate)
 - BooksService (CRUD, search, filters)
 - AuthorsService (CRUD)
@@ -1803,6 +2056,7 @@ Write comprehensive unit tests for all service classes using Jest.
 - EmailService (sendEmail)
 
 **Definition of Done:**
+
 - All services have unit tests
 - Coverage target met
 - All tests pass
@@ -1811,12 +2065,14 @@ Write comprehensive unit tests for all service classes using Jest.
 ---
 
 ### TASK BE-8.2: Integration Tests - API Endpoints
+
 **Priority:** HIGH | **Estimated Time:** 20 hours | **Dependencies:** All endpoint implementations
 
 **Description:**
 Write integration tests for all API endpoints using Supertest and test database.
 
 **Acceptance Criteria:**
+
 - [ ] Test database configured (separate from dev)
 - [ ] Test setup/teardown scripts (seed, clean)
 - [ ] Test all endpoints with authenticated and unauthenticated requests
@@ -1828,6 +2084,7 @@ Write integration tests for all API endpoints using Supertest and test database.
 - [ ] Use factories for test data creation
 
 **Endpoints to Test:**
+
 - Auth: register, login, logout
 - Books: list, detail, create, update, delete
 - Authors, Categories, Copies: CRUD
@@ -1837,6 +2094,7 @@ Write integration tests for all API endpoints using Supertest and test database.
 - AuditLogs: list
 
 **Definition of Done:**
+
 - All endpoints have integration tests
 - Tests cover happy paths and error cases
 - All tests pass
@@ -1845,13 +2103,16 @@ Write integration tests for all API endpoints using Supertest and test database.
 ---
 
 ### TASK BE-8.3: E2E Tests - Critical User Flows
+
 **Priority:** MEDIUM | **Estimated Time:** 8 hours | **Dependencies:** BE-8.2
 
 **Description:**
 Write end-to-end tests for critical business flows.
 
 **Flows to Test:**
+
 1. **Member Registration and Borrowing Flow:**
+
    - Register new member
    - Login
    - Browse catalog
@@ -1861,6 +2122,7 @@ Write end-to-end tests for critical business flows.
    - Return book
 
 2. **Admin Workflow:**
+
    - Login as admin
    - Create author, category, book
    - Add copies to book
@@ -1876,6 +2138,7 @@ Write end-to-end tests for critical business flows.
    - Verify penalty calculation
 
 **Acceptance Criteria:**
+
 - [ ] All flows tested end-to-end
 - [ ] Tests use real database (test DB)
 - [ ] Tests clean up after themselves
@@ -1883,6 +2146,7 @@ Write end-to-end tests for critical business flows.
 - [ ] Tests verify notifications sent (mock email)
 
 **Definition of Done:**
+
 - Critical flows work end-to-end
 - Tests are reliable (no flakiness)
 - All tests pass
@@ -1893,12 +2157,14 @@ Write end-to-end tests for critical business flows.
 ## Phase 9: Documentation & Deployment Preparation (Week 7-8)
 
 ### TASK BE-9.1: API Documentation - Swagger/OpenAPI
+
 **Priority:** MEDIUM | **Estimated Time:** 6 hours | **Dependencies:** All endpoint implementations
 
 **Description:**
 Complete Swagger/OpenAPI documentation for all API endpoints.
 
 **Acceptance Criteria:**
+
 - [ ] All endpoints documented with @ApiOperation
 - [ ] All DTOs documented with @ApiProperty
 - [ ] Request/response schemas defined
@@ -1909,6 +2175,7 @@ Complete Swagger/OpenAPI documentation for all API endpoints.
 - [ ] OpenAPI spec exported to `openapi.json`
 
 **Definition of Done:**
+
 - Complete API documentation in Swagger UI
 - Frontend team can use Swagger for integration
 - API spec matches api-contract.yaml
@@ -1916,12 +2183,14 @@ Complete Swagger/OpenAPI documentation for all API endpoints.
 ---
 
 ### TASK BE-9.2: Environment Configuration - Production Setup
+
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Prepare production-ready environment configuration and deployment scripts.
 
 **Acceptance Criteria:**
+
 - [ ] Production environment variables documented
 - [ ] Docker support (Dockerfile, docker-compose.yml)
 - [ ] Database migration strategy documented
@@ -1932,6 +2201,7 @@ Prepare production-ready environment configuration and deployment scripts.
 - [ ] Error tracking (Sentry) configured
 
 **Environment Variables (Production):**
+
 ```
 NODE_ENV=production
 PORT=3000
@@ -1946,6 +2216,7 @@ SESSION_SECRET=... (randomly generated)
 ```
 
 **Definition of Done:**
+
 - Application can be built for production
 - Docker image can be created
 - Environment variables documented
@@ -1954,12 +2225,14 @@ SESSION_SECRET=... (randomly generated)
 ---
 
 ### TASK BE-9.3: Performance Optimization - Database Queries
+
 **Priority:** MEDIUM | **Estimated Time:** 6 hours | **Dependencies:** All query implementations
 
 **Description:**
 Optimize database queries to meet performance targets (P95 < 300ms).
 
 **Acceptance Criteria:**
+
 - [ ] Analyze slow queries using Prisma query logging
 - [ ] Add missing indexes if needed
 - [ ] Optimize N+1 queries using include/select
@@ -1970,6 +2243,7 @@ Optimize database queries to meet performance targets (P95 < 300ms).
 - [ ] P95 response time < 300ms for catalog queries
 
 **Optimizations:**
+
 - Use `include` for relations to avoid multiple queries
 - Use `select` to limit fields returned
 - Index foreign keys and filter columns
@@ -1977,6 +2251,7 @@ Optimize database queries to meet performance targets (P95 < 300ms).
 - Consider Redis caching for frequently accessed data (future)
 
 **Definition of Done:**
+
 - Performance targets met
 - No N+1 query issues
 - Database indexes optimized
@@ -1985,12 +2260,14 @@ Optimize database queries to meet performance targets (P95 < 300ms).
 ---
 
 ### TASK BE-9.4: Security Hardening - Production Security
+
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-1.1
 
 **Description:**
 Implement security best practices for production deployment.
 
 **Acceptance Criteria:**
+
 - [ ] Helmet.js configured for HTTP headers
 - [ ] CORS configured with strict origin
 - [ ] Rate limiting implemented (@nestjs/throttler)
@@ -2005,6 +2282,7 @@ Implement security best practices for production deployment.
 - [ ] OWASP Top 10 vulnerabilities addressed
 
 **Security Checklist:**
+
 - [x] Password hashing (bcrypt)
 - [x] Session-based auth (Better Auth)
 - [ ] Rate limiting
@@ -2017,6 +2295,7 @@ Implement security best practices for production deployment.
 - [ ] Error handling (no sensitive data leak)
 
 **Definition of Done:**
+
 - All security measures implemented
 - Security audit passed
 - OWASP guidelines followed
@@ -2025,12 +2304,14 @@ Implement security best practices for production deployment.
 ---
 
 ### TASK BE-9.5: README and Developer Documentation
+
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** None
 
 **Description:**
 Create comprehensive documentation for developers.
 
 **Documentation to Create:**
+
 - [ ] README.md with:
   - Project overview
   - Tech stack
@@ -2055,6 +2336,7 @@ Create comprehensive documentation for developers.
   - Link to Swagger docs
 
 **Definition of Done:**
+
 - Documentation is complete and accurate
 - New developers can onboard using docs
 - All commands documented and tested
@@ -2066,18 +2348,20 @@ Create comprehensive documentation for developers.
 ### Total Estimated Time: **40-45 days** (single developer)
 
 ### Task Dependencies Flow:
+
 ```
-Phase 1 (Foundation) 
-  → Phase 2 (Auth) 
-    → Phase 3 (Books & Catalog) 
+Phase 1 (Foundation)
+  → Phase 2 (Auth)
+    → Phase 3 (Books & Catalog)
       → Phase 4 (Memberships)
-        → Phase 5 (Loans) 
+        → Phase 5 (Loans)
           → Phase 6 (Notifications)
             → Phase 7 (Testing)
               → Phase 8 (Docs & Deploy)
 ```
 
 ### Parallelization Opportunities:
+
 - Authors, Categories modules can be built in parallel with Books
 - Members module can be built while Loans is in progress
 - Notifications can be developed alongside Loans
@@ -2085,6 +2369,7 @@ Phase 1 (Foundation)
 - Documentation can be written incrementally
 
 ### Critical Path (High Priority):
+
 1. Database setup and schema (BE-1.2 to BE-1.5)
 2. Authentication (BE-2.1 to BE-2.5)
 3. Books catalog (BE-3.3 to BE-3.6)
@@ -2092,6 +2377,7 @@ Phase 1 (Foundation)
 5. Integration testing (BE-8.2)
 
 ### Integration Points for Frontend:
+
 - **API Contract**: Refer to `api-contract.yaml` for all endpoint specifications
 - **Authentication**: Session cookie-based, obtained via `/api/auth/login`
 - **Authorization**: Role-based (Admin vs Member), enforced server-side
@@ -2100,6 +2386,7 @@ Phase 1 (Foundation)
 - **CORS**: Frontend URL must be configured in backend environment variables
 
 ### Notes:
+
 - All tasks include acceptance criteria and definition of done
 - Audit logging should be added to all state-changing operations
 - Transactions should be used for multi-step operations (e.g., loan creation)
@@ -2110,6 +2397,7 @@ Phase 1 (Foundation)
 ---
 
 ## Next Steps:
+
 1. Review and approve task breakdown with team
 2. Set up project tracking (e.g., GitHub Projects, Jira)
 3. Assign tasks based on dependencies and developer availability

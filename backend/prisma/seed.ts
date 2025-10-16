@@ -63,6 +63,9 @@ async function main() {
       data: {
         email: adminEmail,
         passwordHash: hashedAdminPassword,
+        name: 'Library Administrator',
+        emailVerified: false,
+        image: null,
         role: Role.ADMIN,
         isActive: true,
       },
@@ -90,6 +93,9 @@ async function main() {
       data: {
         email: memberEmail,
         passwordHash: hashedMemberPassword,
+        name: 'John Doe',
+        emailVerified: false,
+        image: null,
         role: Role.MEMBER,
         isActive: true,
         memberProfile: {
