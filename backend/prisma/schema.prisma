@@ -1,0 +1,258 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum BookStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CopyStatus {
+  AVAILABLE
+  ON_LOAN
+  LOST
+  DAMAGED
+}
+
+enum LoanStatus {
+  REQUESTED
+  APPROVED
+  ACTIVE
+  OVERDUE
+  RETURNED
+  REJECTED
+}
+
+enum Currency {
+  IDR
+}
+
+enum SmtpProvider {
+  MAILTRAP
+}
+
+// ============================================================
+// MODELS
+// ============================================================
+
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role      @default(MEMBER)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  memberProfile MemberProfile?
+  loans         Loan[]
+  auditLogs     AuditLog[]
+
+  @@map("user")
+}
+
+model MemberProfile {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String           @unique @map("user_id") @db.Uuid
+  firstName String           @map("first_name")
+  lastName  String           @map("last_name")
+  phone     String?
+  address   String?
+  status    MembershipStatus @default(ACTIVE)
+  notes     String?
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("member_profile")
+}
+
+model Author {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @unique
+  bio       String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bookAuthors BookAuthor[]
+
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_authors_name_trgm")
+  @@map("author")
+}
+
+model Category {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bookCategories BookCategory[]
+
+  @@map("category")
+}
+
+model Book {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String
+  subtitle        String?
+  description     String?
+  isbn            String     @unique
+  publicationYear Int?       @map("publication_year") @db.SmallInt
+  language        String?
+  coverImageUrl   String?    @map("cover_image_url")
+  status          BookStatus @default(ACTIVE)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bookAuthors    BookAuthor[]
+  bookCategories BookCategory[]
+  bookCopies     BookCopy[]
+  loans          Loan[]
+
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_books_title_trgm")
+  @@index([status], map: "idx_books_status")
+  @@index([createdAt, id], map: "idx_books_created_at")
+  @@map("book")
+}
+
+model BookAuthor {
+  bookId   String @map("book_id") @db.Uuid
+  authorId String @map("author_id") @db.Uuid
+
+  // Relations
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, authorId])
+  @@index([authorId, bookId], map: "idx_book_author_auth")
+  @@map("book_author")
+}
+
+model BookCategory {
+  bookId     String @map("book_id") @db.Uuid
+  categoryId String @map("category_id") @db.Uuid
+
+  // Relations
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, categoryId])
+  @@index([categoryId, bookId], map: "idx_book_category_cat")
+  @@map("book_category")
+}
+
+// Placeholder models for Part 2 (to be implemented in BE-1.4)
+model BookCopy {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId       String     @map("book_id") @db.Uuid
+  code         String     @unique
+  status       CopyStatus @default(AVAILABLE)
+  locationCode String?    @map("location_code")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  book  Book   @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  loans Loan[]
+
+  @@index([bookId], map: "idx_copy_book")
+  @@map("book_copy")
+}
+
+model Loan {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String     @map("user_id") @db.Uuid
+  bookId         String     @map("book_id") @db.Uuid
+  copyId         String     @map("copy_id") @db.Uuid
+  status         LoanStatus @default(REQUESTED)
+  borrowedAt     DateTime?  @map("borrowed_at") @db.Timestamptz(6)
+  dueDate        DateTime?  @map("due_date") @db.Timestamptz(6)
+  returnedAt     DateTime?  @map("returned_at") @db.Timestamptz(6)
+  renewalCount   Int        @default(0) @map("renewal_count")
+  penaltyAccrued Decimal    @default(0) @map("penalty_accrued") @db.Decimal(12, 2)
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  book Book     @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  copy BookCopy @relation(fields: [copyId], references: [id], onDelete: Restrict)
+
+  @@index([userId], map: "idx_loan_user")
+  @@index([bookId], map: "idx_loan_book")
+  @@index([copyId], map: "idx_loan_copy")
+  @@index([status, dueDate], map: "idx_loan_status_due")
+  @@index([dueDate], map: "idx_loan_due_date")
+  @@index([createdAt, id], map: "idx_loans_created_at")
+  @@map("loan")
+}
+
+model Setting {
+  id                          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  approvalsRequired           Boolean      @default(true) @map("approvals_required")
+  loanDays                    Int          @default(14) @map("loan_days")
+  renewalDays                 Int          @default(7) @map("renewal_days")
+  renewalMinDaysBeforeDue     Int          @default(1) @map("renewal_min_days_before_due")
+  maxRenewals                 Int          @default(1) @map("max_renewals")
+  overdueFeePerDay            Decimal      @default(1000) @map("overdue_fee_per_day") @db.Decimal(12, 2)
+  overdueFeeCapPerLoan        Decimal      @default(1000000) @map("overdue_fee_cap_per_loan") @db.Decimal(12, 2)
+  currency                    Currency     @default(IDR)
+  maxConcurrentLoans          Int          @default(5) @map("max_concurrent_loans")
+  notificationsEnabled        Boolean      @default(true) @map("notifications_enabled")
+  dueSoonDays                 Int          @default(3) @map("due_soon_days")
+  dueDateNotificationsEnabled Boolean      @default(true) @map("due_date_notifications_enabled")
+  fromEmail                   String       @default("admin-library@mail.com") @map("from_email")
+  smtpProvider                SmtpProvider @default(MAILTRAP) @map("smtp_provider")
+  sendHourUTC                 Int          @default(8) @map("send_hour_UTC")
+  timeZone                    String       @default("UTC") @map("time_zone")
+  createdAt                   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("setting")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  metadata   Json     @default("{}") @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_log")
+}
