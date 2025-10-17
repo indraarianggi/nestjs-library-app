@@ -61,7 +61,6 @@ enum SmtpProvider {
 model User {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email         String    @unique
-  passwordHash  String    @map("password_hash")
   name          String    @default("") // Required by Better Auth
   emailVerified Boolean   @default(false) @map("email_verified") // Required by Better Auth
   image         String?   // Optional profile image for Better Auth

@@ -66,7 +66,7 @@ paths:
   # =========================
   # AUTH ENDPOINTS
   # =========================
-  /auth/register:
+  /members/register:
     post:
       tags:
         - Auth
@@ -134,8 +134,6 @@ paths:
                     $ref: '#/components/schemas/User'
                   memberProfile:
                     $ref: '#/components/schemas/MemberProfile'
-                  session:
-                    $ref: '#/components/schemas/Session'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
@@ -149,7 +147,7 @@ paths:
                 message: Email already registered
                 error: Conflict
 
-  /auth/login:
+  /members/login:
     post:
       tags:
         - Auth
@@ -214,7 +212,7 @@ paths:
                 message: Invalid email or password
                 error: Unauthorized
 
-  /auth/logout:
+  /members/logout:
     post:
       tags:
         - Auth
