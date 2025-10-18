@@ -9,6 +9,7 @@ erDiagram
     USER ||--o| MEMBER_PROFILE : has
     USER ||--o{ LOAN : creates
     USER ||--o{ AUDIT_LOG : actor
+    USER ||--o{ REFRESH_TOKEN : has
 
     BOOK ||--o{ BOOK_COPY : has
 
@@ -21,6 +22,7 @@ erDiagram
     BOOK_COPY ||--o{ LOAN : borrowed_by
 
     %% SETTING is a singleton table configured by Admin
+    %% REFRESH_TOKEN stores JWT refresh tokens for revocation capability
 ```
 
 Legend: `||` = exactly one, `o|` = zero or one, `o{` = zero or many.
@@ -152,11 +154,22 @@ Columns list PostgreSQL types, PK/FK, uniques, and defaults. All tables include 
 - metadata jsonb NOT NULL DEFAULT '{}'::jsonb
 - created_at timestamptz NOT NULL DEFAULT now()
 
+### refresh_token
+
+- id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- user_id uuid NOT NULL REFERENCES user(id) ON DELETE CASCADE
+- token text NOT NULL UNIQUE  — hashed refresh token
+- expires_at timestamptz NOT NULL
+- is_revoked boolean NOT NULL DEFAULT false
+- created_at timestamptz NOT NULL DEFAULT now()
+- updated_at timestamptz NOT NULL DEFAULT now()
+
 ## Relationships
 
 - user 1:1 member_profile (unique FK on member_profile.user_id). Deleting a user cascades to its member_profile, but is RESTRICTED by existing loans.
 - user 1:N loan (user_id)
 - user 1:N audit_log (user_id)
+- user 1:N refresh_token (user_id, CASCADE on delete)
 - book 1:N book_copy (RESTRICT delete when copies exist)
 - book M:N author via book_author
 - book M:N category via book_category
@@ -192,6 +205,15 @@ CREATE UNIQUE INDEX ux_loans_one_open_per_copy
   WHERE status IN ('APPROVED','ACTIVE','OVERDUE');
 ```
 - Single-loan renewal tracked in loan.renewal_count (application ensures <= max_renewals from settings)
+
+### Additional indexes for refresh tokens
+
+```sql
+-- Refresh token lookups
+CREATE INDEX IF NOT EXISTS idx_refresh_token_user ON refresh_token (user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_token_expires ON refresh_token (expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_refresh_token_token ON refresh_token (token);
+```
 
 ### Search and filtering indexes
 
@@ -250,7 +272,7 @@ CREATE TYPE smtp_provider_enum AS ENUM ('MAILTRAP');
 - IDs are UUIDs generated via `gen_random_uuid()`; application ensures single Settings row.
 - Books with historical references are archived (status='ARCHIVED'); deletes are restricted by FKs.
 - Availability is derived; BookCopy.status is authoritative; DB index prevents multiple open loans per copy.
-- Authentication handled by Better Auth; password hashing and email normalization occur in the app layer.
+- Authentication handled by Passport.js with JWT; password hashing (bcrypt) and email normalization occur in the app layer; refresh tokens stored for revocation capability.
 - VIEW for available copies per book (used by catalog and detail pages):
 ```sql
 CREATE OR REPLACE VIEW v_book_available_copies AS

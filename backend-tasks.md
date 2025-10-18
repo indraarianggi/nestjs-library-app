@@ -337,248 +337,428 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
 ## Phase 2: Authentication & Authorization (Week 1-2)
 
-### TASK BE-2.1: Better Auth Integration ✅ COMPLETED
+### TASK BE-2.1: Passport.js + JWT Authentication Setup
 
-**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-1.6
+**Priority:** HIGH | **Estimated Time:** 8 hours | **Dependencies:** BE-1.6
 
 **Description:**
-Integrate Better Auth for session-based authentication with email/password strategy.
+Integrate Passport.js with JWT strategy for stateless token-based authentication with refresh token support.
 
 **Acceptance Criteria:**
 
-- [x] Better Auth library installed and configured
-- [x] Email/password provider configured
-- [x] Session storage configured (database-backed)
-- [x] Secure cookie configuration (HTTPOnly, SameSite, Secure)
-- [x] Password hashing with bcrypt (salt rounds: 10)
-- [x] CSRF protection enabled for state-changing operations
+- [ ] Install dependencies: @nestjs/passport, @nestjs/jwt, passport, passport-local, passport-jwt, bcrypt
+- [ ] Configure JwtModule in AuthModule with access and refresh token secrets
+- [ ] Implement LocalStrategy for email/password authentication
+- [ ] Implement JwtStrategy for access token validation
+- [ ] Create RefreshTokenStrategy for refresh token validation
+- [ ] Password hashing using bcrypt (salt rounds: 10)
+- [ ] Access token expiry: 15 minutes
+- [ ] Refresh token expiry: 7 days
+- [ ] Refresh tokens stored in database (hashed) with expiry and revocation support
+- [ ] CORS configured to allow credentials from frontend origin
+
+**Environment Variables Required:**
+```
+JWT_ACCESS_SECRET=your-access-secret-key-min-256-bits
+JWT_REFRESH_SECRET=your-refresh-secret-key-min-256-bits
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+```
 
 **Technical Details:**
 
-- Session expiry: 7 days (rolling)
-- Cookie name: `session`
-- SameSite: `Lax` for development, `Strict` for production
+**LocalStrategy** - Validates email/password:
+```typescript
+@Injectable()
+export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
+  constructor(private authService: AuthService) {
+    super({ usernameField: 'email' });
+  }
+
+  async validate(email: string, password: string): Promise<any> {
+    const user = await this.authService.validateUser(email, password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return user;
+  }
+}
+```
+
+**JwtStrategy** - Validates access tokens:
+```typescript
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET'),
+    });
+  }
+
+  async validate(payload: any) {
+    return { userId: payload.sub, email: payload.email, role: payload.role };
+  }
+}
+```
+
+**RefreshToken Schema** (already in ERD):
+- id, userId, token (hashed), expiresAt, isRevoked
+- Enables token revocation on logout
 
 **Definition of Done:**
 
-- Better Auth authentication flow works end-to-end
-- Sessions persist across server restarts (DB-backed)
-- Password hashing is secure and performant
-
-**Completion Notes:**
-
-- better-auth 1.3.27 and @thallesp/nestjs-better-auth 2.1.0 installed ✓
-- Better Auth instance created in src/lib/auth.ts with comprehensive configuration ✓
-- Prisma adapter configured with PostgreSQL provider ✓
-- Email/password authentication enabled (min: 8 chars, max: 128 chars) ✓
-- Session configuration:
-  - Expires in 7 days (604800 seconds) ✓
-  - Rolling sessions with updateAge of 1 day ✓
-  - Cookie cache enabled (5 minutes for performance) ✓
-- Cookie security configuration:
-  - httpOnly: true (prevents XSS attacks) ✓
-  - sameSite: 'lax' for development, 'strict' for production ✓
-  - secure: true in production (HTTPS only) ✓
-  - maxAge: 7 days ✓
-- CSRF protection via trustedOrigins (FRONTEND_URL) ✓
-- Base path configured: /api/auth ✓
-- Prisma schema updated with Better Auth tables:
-  - Session table (with user relation, token, expiry, ip, user agent) ✓
-  - Account table (for OAuth and email/password providers) ✓
-  - Verification table (for email verification tokens) ✓
-  - User table extended (name, emailVerified, image fields) ✓
-- Migration 20251016071729_add_better_auth_tables applied successfully ✓
-- main.ts updated with bodyParser: false (required by Better Auth) ✓
-- app.module.ts updated with AuthModule.forRoot({ auth }) ✓
-- .env.example updated with Better Auth environment variables:
-  - BETTER_AUTH_SECRET (for session signing) ✓
-  - BETTER_AUTH_URL (base URL for callbacks) ✓
-- Application builds successfully with no TypeScript errors ✓
-- Better Auth endpoints available at /api/auth/\* (sign-up, sign-in, sign-out, session) ✓
-- Database-backed sessions persist across server restarts ✓
-- Password hashing handled by Better Auth internally with industry-standard bcrypt ✓
-
-**Available Better Auth Endpoints:**
-
-- POST /api/auth/sign-up/email - Register new user with email/password
-- POST /api/auth/sign-in/email - Login with email/password
-- POST /api/auth/sign-out - Logout and invalidate session
-- GET /api/auth/session - Get current session (with session cookie)
-- Additional endpoints for email verification, password reset, etc.
-
-**Next Steps:**
-
-- Ready for BE-2.2: Auth Module - Registration Endpoint (custom wrapper/validation)
-- Ready for BE-2.3: Auth Module - Login Endpoint (custom wrapper/validation)
-- AuthGuard from @thallesp/nestjs-better-auth is registered globally
-- Use @Session() decorator to access authenticated user in controllers
-- Use @AllowAnonymous() decorator for public routes
-- Use @OptionalAuth() decorator for optional authentication routes
+- [ ] Passport.js configured with Local and JWT strategies
+- [ ] JWT tokens signed and validated correctly
+- [ ] Refresh tokens stored in database
+- [ ] Password hashing secure (bcrypt 10 rounds)
+- [ ] All authentication strategies tested
 
 ---
 
-### TASK BE-2.2: Auth Module - Registration Endpoint ✅ COMPLETED
+### TASK BE-2.2: Auth Module - Registration Endpoint
 
-**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.1
+**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** BE-2.1
 
 **Description:**
-Implement user registration endpoint with validation and automatic member profile creation.
+Implement user registration endpoint with validation, automatic member profile creation, and JWT token generation.
 
 **API Endpoint:** `POST /api/members/register`
 
-**Acceptance Criteria:**
-
-- [x] RegisterDto with Zod validation (email, password, firstName, lastName, phone?, address?)
-- [x] Email uniqueness check (case-insensitive)
-- [x] Password validation (min 8 chars, complexity requirements)
-- [x] User created with hashed password
-- [x] MemberProfile automatically created with ACTIVE status
-- [x] Session created and returned
-- [x] Audit log entry created
-- [x] Returns 201 with user, memberProfile, and session
-- [x] Returns 409 if email already exists
-- [x] Returns 400 for validation errors
-
-**Definition of Done:**
-
-- [x] Registration creates both User and MemberProfile in a transaction
-- [x] Email is stored in lowercase
-- [x] Session cookie is set in response
-- [x] Comprehensive error handling with proper status codes
-
-**Completion Notes:**
-
-- RegisterDto created in `src/modules/auth/dto/register.dto.ts` with Zod schema validation
-- Password requirements: 8-128 chars, uppercase, lowercase, digit, special character
-- Email validation with uniqueness check (case-insensitive query)
-- AuthService implements registration method with bcrypt password hashing
-- Prisma transaction ensures atomic User + MemberProfile creation
-- MemberProfile created with status='ACTIVE' automatically
-- Session generated with 7-day expiry (rolling sessions)
-- Audit log entry created with action='user.registered' and metadata
-- AuthController POST /api/auth/register endpoint with AllowAnonymous decorator
-- Secure session cookie: httpOnly=true, sameSite=lax (strict in production)
-- All 15 unit tests passing ✓
-- Build successful with no TypeScript errors ✓
-
----
-
-### TASK BE-2.3: Auth Module - Login Endpoint ✅ COMPLETED
-
-**Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** BE-2.1
-
-**Description:**
-Implement user login endpoint with credential validation and session creation.
-
-**API Endpoint:** `POST /api/members/login`
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecureP@ssw0rd",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "+628123456789",
+  "address": "123 Main St"
+}
+```
 
 **Acceptance Criteria:**
 
-- [x] LoginDto with email and password validation
-- [x] Email lookup is case-insensitive
-- [x] Password verification using Better Auth (not bcrypt directly)
-- [x] Check user.isActive status
-- [x] Update lastLoginAt timestamp
-- [x] Create session and set cookie (handled by Better Auth)
-- [x] Audit log entry created
-- [x] Returns 200 with user, memberProfile (if MEMBER), and session
-- [x] Returns 401 for invalid credentials
-- [x] Returns 401 for inactive accounts
+- [ ] RegisterDto with class-validator and Zod validation:
+  - email (required, unique, case-insensitive)
+  - password (required, min 8 chars, must contain uppercase, lowercase, digit, special char)
+  - firstName (required, max 100 chars)
+  - lastName (required, max 100 chars)
+  - phone (optional)
+  - address (optional)
+- [ ] Email uniqueness check before creation
+- [ ] Password hashed with bcrypt (10 salt rounds)
+- [ ] User and MemberProfile created in transaction
+- [ ] MemberProfile status set to ACTIVE by default
+- [ ] Generate access token (15 min expiry) with payload: { sub: userId, email, role }
+- [ ] Generate refresh token (7 days expiry)
+- [ ] Store hashed refresh token in database
+- [ ] Audit log entry created with action='user.registered'
+- [ ] Returns 201 with: { user, memberProfile, accessToken, refreshToken }
+- [ ] Returns 409 if email already exists
+- [ ] Returns 400 for validation errors
 
-**Security Features:**
-
-- Rate limiting on login endpoint (10 requests per minute per IP)
-- Generic error message to prevent user enumeration
-
-**Definition of Done:**
-
-- Login works with valid credentials
-- Session cookie is properly set
-- Failed login attempts are logged
-- Account lockout after 5 failed attempts (future enhancement)
-
-**Completion Notes:**
-
-- LoginDto created in `src/modules/auth/dto/login.dto.ts` with Zod schema validation
-- Email validation with case-insensitive conversion (lowercase)
-- Password validation: minimum 8 characters
-- AuthService.login() method implemented using Better Auth's `signInEmail` API
-- Better Auth handles: password verification (bcrypt), session creation, and cookie management
-- After Better Auth authentication: check user.isActive, return 401 if false
-- Update user.lastLoginAt timestamp in Prisma transaction
-- If user is MEMBER, include memberProfile in response
-- Audit log created with action='user.login' and metadata (email, role)
-- Generic 401 error message: "Invalid email or password" to prevent user enumeration
-- Specific 401 error for inactive accounts: "Your account has been deactivated. Please contact support."
-- AuthController POST /api/auth/login endpoint with @AllowAnonymous() decorator
-- Rate limiting configured: @Throttle({ default: { limit: 10, ttl: 60000 } })
-- @nestjs/throttler 6.4.0 installed and configured in app.module.ts
-- ThrottlerModule configured globally: 10 requests per minute
-- Unit tests added for login validation (email format, password length, error handling)
-- TypeScript build successful with no errors ✓
-- Login returns LoginResult interface: { user, memberProfile?, session, message }
-- Session token and expiry date included in response for client-side storage
-
----
-
-### TASK BE-2.4: Auth Module - Logout Endpoint ✅ COMPLETED
-
-**Priority:** MEDIUM | **Estimated Time:** 2 hours | **Dependencies:** BE-2.1
-
-**Description:**
-Implement logout endpoint to invalidate current session using Better Auth's signOut API.
-
-**API Endpoint:** `POST /api/members/logout`
-
-**Acceptance Criteria:**
-
-- [ ] Session invalidated in database
-- [ ] Session cookie cleared
-- [ ] Audit log entry created
-- [ ] Returns 204 No Content
-- [ ] Handles cases where session doesn't exist gracefully
-
-**Definition of Done:**
-
-- Logout invalidates session immediately
-- Subsequent requests with old session cookie return 401
-- Cookie is cleared in browser
-
----
-
-### TASK BE-2.5: Auth Guards - Session and Roles Guards
-
-**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.3
-
-**Description:**
-Implement authentication and authorization guards for protecting routes.
-
-**Acceptance Criteria:**
-
-- [ ] AuthGuard validates session cookie and extracts user
-- [ ] User attached to request object for downstream use
-- [ ] RolesGuard checks user role against required roles
-- [ ] @Roles() decorator created for controller methods
-- [ ] @CurrentUser() decorator for accessing authenticated user
-- [ ] Proper error responses (401 Unauthorized, 403 Forbidden)
-- [ ] Guards are reusable across all modules
-
-**Technical Details:**
-
-```typescript
-@Roles(Role.ADMIN)
-@UseGuards(AuthGuard, RolesGuard)
-async adminOnlyEndpoint(@CurrentUser() user: User) {
-  // ...
+**Response:**
+```json
+{
+  "user": { "id": "uuid", "email": "user@example.com", "role": "MEMBER", "isActive": true },
+  "memberProfile": { "id": "uuid", "firstName": "John", "lastName": "Doe", "status": "ACTIVE" },
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG..."
 }
 ```
 
 **Definition of Done:**
 
-- Protected routes require valid session
-- Role-based authorization works correctly
-- Unauthorized requests return proper error codes
-- Guards are thoroughly tested
+- [ ] Registration creates User, MemberProfile, and RefreshToken atomically
+- [ ] Email stored in lowercase
+- [ ] JWT tokens returned in response body
+- [ ] Client can store tokens (localStorage or httpOnly cookie)
+- [ ] Comprehensive error handling with proper status codes
+- [ ] Unit tests pass
+
+---
+
+### TASK BE-2.3: Auth Module - Login Endpoint
+
+**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.1
+
+**Description:**
+Implement user login endpoint with credential validation using Passport LocalStrategy and JWT token generation.
+
+**API Endpoint:** `POST /api/members/login`
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecureP@ssw0rd"
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] LoginDto with class-validator validation (email, password)
+- [ ] Use @UseGuards(LocalAuthGuard) to trigger Passport LocalStrategy
+- [ ] LocalStrategy validates credentials:
+  - Email lookup (case-insensitive)
+  - Password verification using bcrypt.compare()
+  - Check user.isActive status
+- [ ] Update user.lastLoginAt timestamp
+- [ ] Generate new access token (15 min expiry)
+- [ ] Generate new refresh token (7 days expiry)
+- [ ] Store hashed refresh token in database (revoke old tokens for same user)
+- [ ] Audit log entry created with action='user.login'
+- [ ] Returns 200 with: { user, memberProfile (if MEMBER), accessToken, refreshToken }
+- [ ] Returns 401 for invalid credentials (generic message: "Invalid email or password")
+- [ ] Returns 401 for inactive accounts (specific message: "Account deactivated")
+- [ ] Rate limiting: 10 requests per minute per IP
+
+**Response:**
+```json
+{
+  "user": { "id": "uuid", "email": "user@example.com", "role": "MEMBER", "isActive": true, "lastLoginAt": "2024-..." },
+  "memberProfile": { "id": "uuid", "firstName": "John", "lastName": "Doe", "status": "ACTIVE" },
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG..."
+}
+```
+
+**Security Features:**
+
+- Generic error message prevents user enumeration
+- Rate limiting prevents brute force attacks
+- Refresh token rotation (old tokens revoked)
+- Account lockout after N failed attempts (future enhancement)
+
+**Definition of Done:**
+
+- [ ] Login works with valid credentials
+- [ ] Passport LocalStrategy validates credentials
+- [ ] JWT tokens returned in response
+- [ ] Failed login attempts logged
+- [ ] Rate limiting active
+- [ ] Unit tests pass
+
+---
+
+### TASK BE-2.4: Auth Module - Logout Endpoint
+
+**Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-2.1
+
+**Description:**
+Implement logout endpoint to revoke refresh token using JWT authentication.
+
+**API Endpoint:** `POST /api/members/logout`
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbG..."
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Authenticated endpoint (requires valid access token)
+- [ ] LogoutDto with refreshToken validation
+- [ ] Find refresh token in database by hashed value
+- [ ] Mark refresh token as revoked (isRevoked = true)
+- [ ] Audit log entry created with action='user.logout'
+- [ ] Returns 204 No Content on success
+- [ ] Returns 401 if access token invalid
+- [ ] Returns 404 if refresh token not found (handles gracefully)
+- [ ] Client should delete tokens from storage
+
+**Technical Details:**
+
+```typescript
+// AuthService.logout()
+async logout(userId: string, refreshToken: string): Promise<void> {
+  const hashedToken = await bcrypt.hash(refreshToken, 10);
+  
+  await this.prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      token: hashedToken,
+      isRevoked: false,
+    },
+    data: { isRevoked: true },
+  });
+  
+  // Create audit log
+  await this.auditLogService.create({
+    userId,
+    action: 'user.logout',
+    entityType: 'auth',
+    entityId: userId,
+    metadata: {},
+  });
+}
+```
+
+**Definition of Done:**
+
+- [ ] Logout revokes refresh token immediately
+- [ ] Subsequent requests with revoked refresh token fail
+- [ ] Access token remains valid until expiry (stateless)
+- [ ] Audit trail captured
+- [ ] Unit tests pass
+
+---
+
+### TASK BE-2.5: Auth Guards and Decorators
+
+**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** BE-2.3
+
+**Description:**
+Implement JWT authentication guard, roles guard, and utility decorators for protecting routes.
+
+**Components to Create:**
+
+1. **JwtAuthGuard** - Uses Passport JWT strategy
+2. **RolesGuard** - Checks user role
+3. **@Roles()** decorator - Specify required roles
+4. **@CurrentUser()** decorator - Extract user from request
+5. **@Public()** decorator - Mark routes as public (skip JWT guard)
+
+**Acceptance Criteria:**
+
+- [ ] JwtAuthGuard extends @nestjs/passport AuthGuard('jwt')
+- [ ] JwtAuthGuard validates access token and attaches user to request
+- [ ] RolesGuard reads @Roles() metadata and compares with user.role
+- [ ] @Roles() decorator sets role metadata using SetMetadata
+- [ ] @CurrentUser() decorator extracts user from request using createParamDecorator
+- [ ] @Public() decorator bypasses JwtAuthGuard using SetMetadata + Reflector
+- [ ] Global JwtAuthGuard applied to all routes (except @Public)
+- [ ] Returns 401 Unauthorized for invalid/missing tokens
+- [ ] Returns 403 Forbidden for insufficient permissions
+- [ ] Guards are reusable across all modules
+
+**Technical Details:**
+
+```typescript
+// jwt-auth.guard.ts
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
+    return super.canActivate(context);
+  }
+}
+
+// roles.guard.ts
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) return true;
+
+    const { user } = context.switchToHttp().getRequest();
+    return requiredRoles.includes(user.role);
+  }
+}
+
+// Usage in controller
+@UseGuards(RolesGuard)
+@Roles(Role.ADMIN)
+@Get('admin-only')
+async adminEndpoint(@CurrentUser() user: User) {
+  return { message: `Hello ${user.email}` };
+}
+
+@Public()
+@Get('public')
+async publicEndpoint() {
+  return { message: 'Public endpoint' };
+}
+```
+
+**App Module Setup:**
+```typescript
+// app.module.ts
+{
+  provide: APP_GUARD,
+  useClass: JwtAuthGuard, // Global guard
+}
+```
+
+**Definition of Done:**
+
+- [ ] Protected routes require valid JWT access token
+- [ ] Role-based authorization works correctly
+- [ ] Public routes accessible without authentication
+- [ ] Proper error responses (401, 403)
+- [ ] Guards thoroughly tested
+- [ ] Decorators work as expected
+
+---
+
+### TASK BE-2.6: Refresh Token Endpoint
+
+**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.1, BE-2.3
+
+**Description:**
+Implement endpoint to exchange refresh token for new access and refresh tokens.
+
+**API Endpoint:** `POST /api/members/refresh`
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbG..."
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Public endpoint (no access token required)
+- [ ] RefreshTokenDto with refreshToken validation
+- [ ] Verify refresh token signature and expiry using JWT
+- [ ] Find refresh token in database by hashed value
+- [ ] Check if token is revoked (isRevoked = false)
+- [ ] Check if token is expired (expiresAt > now)
+- [ ] Generate new access token (15 min expiry)
+- [ ] Generate new refresh token (7 days expiry)
+- [ ] Revoke old refresh token (token rotation)
+- [ ] Store new hashed refresh token in database
+- [ ] Returns 200 with: { accessToken, refreshToken }
+- [ ] Returns 401 if refresh token invalid, expired, or revoked
+
+**Response:**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG..."
+}
+```
+
+**Security:**
+- Refresh token rotation prevents token reuse
+- Old tokens immediately revoked
+- Refresh token reuse detection (optional future enhancement)
+
+**Definition of Done:**
+
+- [ ] Refresh endpoint works correctly
+- [ ] Token rotation implemented
+- [ ] Old tokens revoked
+- [ ] Proper error handling
+- [ ] Unit tests pass
 
 ---
 

@@ -3,7 +3,7 @@
 ## 1) Overview and Goals
 
 - Product: Web-based Library Management System (LMS)
-- Stack: TypeScript, NestJS (backend), React + Vite (frontend), Tailwind CSS + shadcn/ui (UI), PostgreSQL + Prisma ORM (DB), Better Auth (authentication)
+- Stack: TypeScript, NestJS (backend), React + Vite (frontend), Tailwind CSS + shadcn/ui (UI), PostgreSQL + Prisma ORM (DB), Passport.js + JWT (authentication)
 - Roles: Admin, Member
 - Summary: Provide an end-to-end library management solution enabling administrators to manage books and memberships, and members/public users to browse, borrow, and manage loans. Membership is evergreen (no expiry) and can be suspended by Admin. Include email notifications for key loan events.
 
@@ -29,7 +29,7 @@ In Scope (MVP)
 - Admin Dashboard: CRUD for books, authors, categories/genres, copies/stock; manage memberships (approve/activate, suspend, profile updates); monitor borrowing & returns; basic overdue fee calculation.
 - Member Dashboard: View membership status and profile, borrowing history, active loans, and renewals (single renewal per loan).
 - Public Website: Home, Catalog (search, filter, sorting), Book detail, Borrow action (requires auth), Login/Register.
-- Authentication & Authorization: Better Auth for authN; role-based authZ; session handling.
+- Authentication & Authorization: Passport.js with JWT strategy for authN; role-based authZ; stateless token-based authentication.
 - Borrowing Policy (default): 14-day loan, one renewal per loan (+7 days), overdue fee per day (configurable, currency IDR), no reservations queue in MVP.
 - Notifications (Email via SMTP/Mailtrap): Loan created/approved/rejected, loan returned confirmations, due-soon (3 days before due date at 08:00 UTC), and due-date notifications (08:00 UTC). No overdue reminders in MVP. From email: admin-library@mail.com.
 
@@ -123,7 +123,7 @@ Out of Scope (MVP)
 4. Authentication Pages
 
 - As a visitor, I can register and log in.
-  - Acceptance Criteria: Registration creates a Member user; email/password validated via Better Auth; login establishes secure session.
+  - Acceptance Criteria: Registration creates a Member user; email/password validated; login returns JWT access and refresh tokens stored securely.
 
 ## 6) Information Architecture & Navigation
 
@@ -190,11 +190,11 @@ Sitemaps
 - Book Detail: show metadata, authors, categories, availability count.
 - Borrow Action: available to authenticated active members; if not authed -> redirect to login; if suspended -> error.
 
-### E) Authentication, Authorization, Session (Better Auth)
+### E) Authentication, Authorization, Tokens (Passport.js + JWT)
 
-- AuthN: Email/password via Better Auth; secure cookies (HTTPOnly, SameSite=Lax/Strict), CSRF protection for state-changing actions.
-- AuthZ: Role-based (Admin vs Member); server-side guards for NestJS controllers; client routes protected in React.
-- Session: Rolling session expiry (e.g., 7 days); logout invalidates session; device/session management optional later.
+- AuthN: Email/password via Passport.js local strategy; JWT access tokens (short-lived, 15 min) and refresh tokens (long-lived, 7 days); tokens stored in httpOnly cookies or Authorization header.
+- AuthZ: Role-based (Admin vs Member); server-side guards for NestJS controllers using Passport JWT strategy; client routes protected in React.
+- Token Management: Access token for API requests; refresh token for obtaining new access tokens; logout invalidates refresh token; token blacklist for revoked tokens (optional).
 
 ### F) Notifications (Email)
 
@@ -381,14 +381,14 @@ Performance
 
 Security
 
-- Better Auth for email/password; salted hashing (Argon2/bcrypt per library); secure cookies (HTTPOnly, SameSite), CSRF protection.
-- RBAC enforced in NestJS guards; input validation with DTOs (class-validator).
+- Passport.js with JWT for email/password; salted hashing (bcrypt); JWT signed with secret key; access tokens short-lived (15 min), refresh tokens long-lived (7 days).
+- RBAC enforced in NestJS guards using Passport JWT strategy; input validation with DTOs (class-validator).
 - Rate limiting on auth endpoints; lockout after repeated failed logins.
-- Secrets via environment variables; no secrets in repo.
+- Secrets (JWT secret, refresh secret) via environment variables; no secrets in repo; HTTPS required in production.
 
 Privacy & Compliance
 
-- Store minimal PII; allow profile edits; log access in audit logs; data retention policy TBD.
+- Store minimal PII; allow profile edits; log access in audit logs; data retention policy TBD; JWT tokens contain minimal claims (user ID, role, exp).
 
 Reliability & Backup
 
@@ -420,8 +420,8 @@ Audit Logs (security/ops)
 
 Phase 1: Foundations (Weeks 1–2)
 
-- Set up project scaffolds (NestJS, React+Vite, Tailwind, shadcn/ui, Prisma, Better Auth); DB schema; migrations; seed data.
-- Implement auth, roles, and base entities (User, MemberProfile, Author, Category, Book, BookCopy).
+- Set up project scaffolds (NestJS, React+Vite, Tailwind, shadcn/ui, Prisma, Passport.js + JWT); DB schema; migrations; seed data.
+- Implement auth with Passport.js local and JWT strategies, roles, and base entities (User, MemberProfile, Author, Category, Book, BookCopy).
 
 Phase 2: Catalog & Admin (Weeks 3–5)
 
@@ -449,6 +449,7 @@ Assumptions
 - Evergreen membership (no expiry); suspension is the only membership restriction mechanism.
 - Email is the only notification channel in MVP; no overdue reminders, only due-soon (3 days) and due-date notifications.
 - Single library instance; no multi-tenant.
+- JWT-based stateless authentication; refresh tokens stored in database for revocation capability.
 
 Open Questions
 
