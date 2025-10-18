@@ -424,7 +424,7 @@ Integrate Better Auth for session-based authentication with email/password strat
 **Description:**
 Implement user registration endpoint with validation and automatic member profile creation.
 
-**API Endpoint:** `POST /api/auth/register`
+**API Endpoint:** `POST /api/members/register`
 
 **Acceptance Criteria:**
 
@@ -463,27 +463,27 @@ Implement user registration endpoint with validation and automatic member profil
 
 ---
 
-### TASK BE-2.3: Auth Module - Login Endpoint
+### TASK BE-2.3: Auth Module - Login Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** BE-2.1
 
 **Description:**
 Implement user login endpoint with credential validation and session creation.
 
-**API Endpoint:** `POST /api/auth/login`
+**API Endpoint:** `POST /api/members/login`
 
 **Acceptance Criteria:**
 
-- [ ] LoginDto with email and password validation
-- [ ] Email lookup is case-insensitive
-- [ ] Password verification using bcrypt
-- [ ] Check user.isActive status
-- [ ] Update lastLoginAt timestamp
-- [ ] Create session and set cookie
-- [ ] Audit log entry created
-- [ ] Returns 200 with user, memberProfile (if MEMBER), and session
-- [ ] Returns 401 for invalid credentials
-- [ ] Returns 401 for inactive accounts
+- [x] LoginDto with email and password validation
+- [x] Email lookup is case-insensitive
+- [x] Password verification using Better Auth (not bcrypt directly)
+- [x] Check user.isActive status
+- [x] Update lastLoginAt timestamp
+- [x] Create session and set cookie (handled by Better Auth)
+- [x] Audit log entry created
+- [x] Returns 200 with user, memberProfile (if MEMBER), and session
+- [x] Returns 401 for invalid credentials
+- [x] Returns 401 for inactive accounts
 
 **Security Features:**
 
@@ -497,16 +497,38 @@ Implement user login endpoint with credential validation and session creation.
 - Failed login attempts are logged
 - Account lockout after 5 failed attempts (future enhancement)
 
+**Completion Notes:**
+
+- LoginDto created in `src/modules/auth/dto/login.dto.ts` with Zod schema validation
+- Email validation with case-insensitive conversion (lowercase)
+- Password validation: minimum 8 characters
+- AuthService.login() method implemented using Better Auth's `signInEmail` API
+- Better Auth handles: password verification (bcrypt), session creation, and cookie management
+- After Better Auth authentication: check user.isActive, return 401 if false
+- Update user.lastLoginAt timestamp in Prisma transaction
+- If user is MEMBER, include memberProfile in response
+- Audit log created with action='user.login' and metadata (email, role)
+- Generic 401 error message: "Invalid email or password" to prevent user enumeration
+- Specific 401 error for inactive accounts: "Your account has been deactivated. Please contact support."
+- AuthController POST /api/auth/login endpoint with @AllowAnonymous() decorator
+- Rate limiting configured: @Throttle({ default: { limit: 10, ttl: 60000 } })
+- @nestjs/throttler 6.4.0 installed and configured in app.module.ts
+- ThrottlerModule configured globally: 10 requests per minute
+- Unit tests added for login validation (email format, password length, error handling)
+- TypeScript build successful with no errors ✓
+- Login returns LoginResult interface: { user, memberProfile?, session, message }
+- Session token and expiry date included in response for client-side storage
+
 ---
 
-### TASK BE-2.4: Auth Module - Logout Endpoint
+### TASK BE-2.4: Auth Module - Logout Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 2 hours | **Dependencies:** BE-2.1
 
 **Description:**
-Implement logout endpoint to invalidate current session.
+Implement logout endpoint to invalidate current session using Better Auth's signOut API.
 
-**API Endpoint:** `POST /api/auth/logout`
+**API Endpoint:** `POST /api/members/logout`
 
 **Acceptance Criteria:**
 

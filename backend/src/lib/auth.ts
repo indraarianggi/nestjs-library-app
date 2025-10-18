@@ -26,6 +26,12 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    cookiePrefix: process.env.BETTER_AUTH_COOKIE_PREFIX || 'libray-app',
+    cookies: {
+      session_token: {
+        name: process.env.BETTER_AUTH_COOKIE_NAME || 'session_token',
+      },
+    },
     cookieOptions: {
       httpOnly: true,
       sameSite:
