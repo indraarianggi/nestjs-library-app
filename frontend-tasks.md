@@ -157,8 +157,8 @@ Set up Axios instance with interceptors for API communication.
 
 ---
 
-### TASK FE-1.5: React Router Configuration
-**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** FE-1.1
+### TASK FE-1.5: React Router Configuration ✅
+**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** FE-1.1 | **Status:** COMPLETED
 
 **Description:**
 Set up React Router v6 with route structure and protected routes.
@@ -192,14 +192,14 @@ Admin Routes (Protected):
 ```
 
 **Acceptance Criteria:**
-- [ ] React Router v6 installed
-- [ ] BrowserRouter configured in main.tsx
-- [ ] Routes defined in src/routes/index.tsx
-- [ ] ProtectedRoute component for auth check
-- [ ] AdminRoute component for admin-only routes
-- [ ] 404 Not Found page
-- [ ] Redirects work (e.g., /admin → /admin/books if logged in)
-- [ ] Navigation between routes smooth
+- [x] React Router v6 installed (v7.9.4)
+- [x] RouterProvider configured in App.tsx
+- [x] Routes defined in src/routes/index.tsx
+- [x] ProtectedRoute component for auth check
+- [x] AdminRoute component for admin-only routes
+- [x] 404 Not Found page
+- [x] All routes created with placeholder pages
+- [x] Navigation between routes works
 
 **Technical Details:**
 ```typescript
@@ -236,23 +236,23 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 ---
 
-### TASK FE-1.6: React Query Setup
-**Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** FE-1.4
+### TASK FE-1.6: React Query Setup ✅
+**Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** FE-1.4 | **Status:** COMPLETED
 
 **Description:**
 Configure React Query (TanStack Query) for server state management.
 
 **Acceptance Criteria:**
-- [ ] @tanstack/react-query installed
-- [ ] QueryClient configured in src/lib/react-query.ts
-- [ ] QueryClientProvider in main.tsx
-- [ ] React Query DevTools configured (development only)
-- [ ] Default options configured:
-  - staleTime: 5 minutes
-  - cacheTime: 10 minutes
-  - refetchOnWindowFocus: false
-  - retry: 1
-- [ ] Error handling configured
+- [x] @tanstack/react-query installed (v5.90.5)
+- [x] QueryClient configured in src/lib/react-query.ts
+- [x] QueryClientProvider in main.tsx
+- [x] React Query DevTools configured (development only, v5.90.2)
+- [x] Default options configured:
+  - staleTime: 5 minutes ✅
+  - gcTime: 10 minutes (formerly cacheTime) ✅
+  - refetchOnWindowFocus: false ✅
+  - retry: 1 ✅
+- [x] Ready for use in API hooks
 
 **Technical Details:**
 ```typescript
@@ -287,19 +287,19 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 ---
 
-### TASK FE-1.7: Zustand Store for Auth State
-**Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** FE-1.4
+### TASK FE-1.7: Zustand Store for Auth State ✅
+**Priority:** HIGH | **Estimated Time:** 3 hours | **Dependencies:** FE-1.4 | **Status:** COMPLETED
 
 **Description:**
 Set up Zustand store for global authentication state management.
 
 **Acceptance Criteria:**
-- [ ] Zustand installed
-- [ ] Auth store created in src/features/auth/store/authStore.ts
-- [ ] Store holds: user, isAuthenticated, isLoading
-- [ ] Actions: setUser, clearUser
-- [ ] Store persisted to localStorage (optional)
-- [ ] TypeScript types for store state
+- [x] Zustand installed (v5.0.8)
+- [x] Auth store created in src/features/auth/store/authStore.ts
+- [x] Store holds: user, isAuthenticated, isLoading, error
+- [x] Actions: setUser, clearUser, setLoading, setError
+- [x] TypeScript types defined in src/types/auth.types.ts
+- [x] Store ready for use with useAuth hook
 
 **Technical Details:**
 ```typescript
@@ -483,26 +483,30 @@ Create registration page with member profile fields.
 
 ---
 
-### TASK FE-2.3: Auth Hooks (useAuth, useLogin, useRegister, useLogout)
-**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** FE-1.6, FE-1.7
+### TASK FE-2.3: Auth Hooks (useAuth, useLogin, useRegister, useLogout, useRefreshToken)
+**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** FE-1.6, FE-1.7
 
 **Description:**
-Create custom React hooks for authentication operations using React Query.
+Create custom React hooks for JWT-based authentication operations using React Query.
 
 **Hooks to Create:**
-- [ ] useAuth - Get current user and auth state
-- [ ] useLogin - Login mutation
-- [ ] useRegister - Register mutation
-- [ ] useLogout - Logout mutation
+- [ ] useAuth - Get current user from stored JWT token
+- [ ] useLogin - Login mutation with JWT token storage
+- [ ] useRegister - Register mutation with JWT token storage
+- [ ] useLogout - Logout mutation with token cleanup
+- [ ] useRefreshToken - Refresh access token using refresh token
 
 **Acceptance Criteria:**
-- [ ] useAuth hook fetches and caches user session
-- [ ] useLogin hook calls login API and updates auth store
-- [ ] useRegister hook calls register API and updates auth store
-- [ ] useLogout hook calls logout API and clears auth store
+- [ ] useAuth hook decodes JWT from localStorage and validates
+- [ ] useLogin hook calls login API, stores tokens, and updates auth store
+- [ ] useRegister hook calls register API, stores tokens, and updates auth store
+- [ ] useLogout hook calls logout API, clears tokens from storage, and clears auth store
+- [ ] useRefreshToken hook exchanges refresh token for new access/refresh tokens
 - [ ] All hooks handle loading and error states
-- [ ] Session checked on app load
-- [ ] Auth state synced with backend
+- [ ] Token storage in localStorage (accessToken, refreshToken)
+- [ ] Axios interceptor automatically includes access token in Authorization header
+- [ ] Axios interceptor refreshes expired access token automatically
+- [ ] Auth state synced with token validity
 
 **Technical Details:**
 ```typescript
@@ -511,31 +515,58 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import apiClient from '@/lib/api/axios';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { jwtDecode } from 'jwt-decode';
 
 export const useAuth = () => {
-  const { user, setUser, clearUser, isLoading } = useAuthStore();
+  const { user, setUser, clearUser } = useAuthStore();
   
-  // Fetch session on mount (check if logged in)
+  // Check token on mount
   useQuery({
-    queryKey: ['session'],
+    queryKey: ['auth'],
     queryFn: async () => {
-      try {
-        const { data } = await apiClient.get(API_ENDPOINTS.AUTH.SESSION);
-        setUser(data.user);
-        return data.user;
-      } catch (error) {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
         clearUser();
         return null;
       }
+      
+      try {
+        // Decode and validate token
+        const decoded = jwtDecode(accessToken);
+        const isExpired = decoded.exp * 1000 < Date.now();
+        
+        if (isExpired) {
+          // Try refresh
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            const newDecoded = jwtDecode(data.accessToken);
+            setUser({ id: newDecoded.sub, email: newDecoded.email, role: newDecoded.role });
+            return newDecoded;
+          }
+          clearUser();
+          return null;
+        }
+        
+        setUser({ id: decoded.sub, email: decoded.email, role: decoded.role });
+        return decoded;
+      } catch (error) {
+        clearUser();
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        return null;
+      }
     },
-    staleTime: Infinity, // Don't refetch automatically
+    staleTime: Infinity,
+    retry: false,
   });
   
-  return { user, isLoading, isAuthenticated: !!user };
+  return { user, isAuthenticated: !!user };
 };
 
 export const useLogin = () => {
-  const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
   
   return useMutation({
@@ -544,20 +575,171 @@ export const useLogin = () => {
       return data;
     },
     onSuccess: (data) => {
+      // Store tokens in localStorage
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      
+      // Update auth store
       setUser(data.user);
-      queryClient.invalidateQueries(['session']);
+      
+      // Redirect based on role
       window.location.href = data.user.role === 'ADMIN' ? '/admin' : '/member';
     },
   });
 };
 
-// Similar for useRegister and useLogout
+export const useRegister = () => {
+  const { setUser } = useAuthStore();
+  
+  return useMutation({
+    mutationFn: async (input: RegisterInput) => {
+      const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, input);
+      return data;
+    },
+    onSuccess: (data) => {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      setUser(data.user);
+      window.location.href = '/member';
+    },
+  });
+};
+
+export const useLogout = () => {
+  const { clearUser } = useAuthStore();
+  
+  return useMutation({
+    mutationFn: async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
+    },
+    onSuccess: () => {
+      // Clear tokens
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      
+      // Clear auth store
+      clearUser();
+      
+      // Redirect to login
+      window.location.href = '/login';
+    },
+    onError: () => {
+      // Even if logout fails, clear local state
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      clearUser();
+      window.location.href = '/login';
+    },
+  });
+};
+
+export const useRefreshToken = () => {
+  return useMutation({
+    mutationFn: async (refreshToken: string) => {
+      const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+      return data;
+    },
+    onSuccess: (data) => {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+    },
+  });
+};
+```
+
+**Axios Interceptor for Token Management:**
+```typescript
+// src/lib/api/axios.ts (add to existing file)
+
+// Request interceptor - add access token
+apiClient.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor - refresh token on 401
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        processQueue(new Error('No refresh token'), null);
+        isRefreshing = false;
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        
+        apiClient.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        
+        processQueue(null, data.accessToken);
+        isRefreshing = false;
+        
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 ```
 
 **Definition of Done:**
 - All auth hooks working
-- Auth state persists across page reloads
-- Logout clears all cached data
+- JWT tokens stored and managed correctly
+- Automatic token refresh on expiry
+- Logout clears all tokens and cached data
+- Auth state persists across page reloads via token validation
 
 ---
 

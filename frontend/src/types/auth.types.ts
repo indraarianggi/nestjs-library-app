@@ -1,20 +1,11 @@
-/**
- * Authentication related types
- */
-
-export type Role = 'ADMIN' | 'MEMBER';
-
-export type MembershipStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED';
+export type UserRole = 'ADMIN' | 'MEMBER';
 
 export interface User {
   id: string;
   email: string;
-  role: Role;
+  role: UserRole;
   isActive: boolean;
-  lastLoginAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  memberProfile?: MemberProfile;
+  lastLoginAt: string | null;
 }
 
 export interface MemberProfile {
@@ -22,10 +13,45 @@ export interface MemberProfile {
   userId: string;
   firstName: string;
   lastName: string;
-  phone?: string;
-  address?: string;
-  status: MembershipStatus;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  phone: string | null;
+  address: string | null;
+  status: string;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LoginResponse {
+  user: User;
+  memberProfile?: MemberProfile;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RegisterResponse {
+  user: User;
+  memberProfile: MemberProfile;
+  tokens: AuthTokens;
+  message: string;
+}
+
+export interface RefreshResponse {
+  user: User;
+  memberProfile?: MemberProfile;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  memberProfile: MemberProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  setUser: (user: User | null, memberProfile?: MemberProfile | null) => void;
+  clearUser: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
 }

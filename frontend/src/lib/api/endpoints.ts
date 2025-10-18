@@ -8,9 +8,10 @@
 export const API_ENDPOINTS = {
   // ==================== Authentication ====================
   AUTH: {
-    REGISTER: '/auth/register',
-    LOGIN: '/auth/login',
-    LOGOUT: '/auth/logout',
+    REGISTER: '/members/register',
+    LOGIN: '/members/login',
+    LOGOUT: '/members/logout',
+    REFRESH: '/members/refresh',
   },
 
   // ==================== Books ====================
