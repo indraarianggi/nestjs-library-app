@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { CustomAuthModule } from './modules/auth/auth.module';
-import { auth } from './lib/auth';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -23,10 +23,17 @@ import { auth } from './lib/auth';
       },
     ]),
     PrismaModule,
-    AuthModule.forRoot({ auth }),
-    CustomAuthModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Global JWT authentication guard
+    // All routes require authentication by default unless marked with @Public() decorator
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

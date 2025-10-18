@@ -4,18 +4,21 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import type { Response } from 'express';
 import {
   AuthService,
   type RegistrationResult,
-  type LoginResult,
+  type TokenPair,
+  type UserWithProfile,
 } from './auth.service';
 import type { RegisterDto } from './dto/register.dto';
-import type { LoginDto } from './dto/login.dto';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
+import { Public } from '../../common/decorators/public.decorator';
+import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
+import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { ValidatedRefreshUser } from '../auth/strategies/refresh-token.strategy';
 
 @Controller('members')
 export class AuthController {
@@ -24,48 +27,70 @@ export class AuthController {
   /**
    * POST /api/members/register
    * Register a new member with email, password, and profile information
-   * Uses Better Auth for user creation (without auto sign-in) and creates MemberProfile
-   * Note: Users must sign in separately after registration
+   * Creates user account and member profile, returns JWT tokens
    *
    * @param registerDto Registration data
-   * @returns User and memberProfile information with success message
+   * @returns User, memberProfile, and JWT tokens
    */
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @AllowAnonymous()
   async register(
     @Body() registerDto: RegisterDto,
   ): Promise<RegistrationResult> {
-    // NestJS automatically:
-    // - Serializes the return value to JSON
-    // - Sets the HTTP status to 201 (via @HttpCode)
-    // - Handles exceptions via exception filters
     return this.authService.register(registerDto);
   }
 
   /**
    * POST /api/members/login
-   * Login user with email and password using Better Auth
+   * Login user with email and password using Passport Local Strategy
    * Rate limited to 10 requests per minute per IP to prevent brute force attacks
-   * Manually sets session cookie in response after Better Auth authentication
+   * Returns JWT access and refresh tokens
    *
-   * @param loginDto Login credentials (email and password)
-   * @param res Express Response object (for setting cookies)
-   * @returns User, memberProfile (if MEMBER), and session information
+   * @param req Request object with validated user from LocalStrategy
+   * @returns User, memberProfile (if MEMBER), and JWT tokens
    */
+  @Public()
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @AllowAnonymous()
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<LoginResult> {
-    // Call auth service to authenticate and get result with session
-    const result = await this.authService.login(loginDto, res);
+  async login(@CurrentUser() user: UserWithProfile): Promise<TokenPair> {
+    // User is already validated by LocalAuthGuard
+    return this.authService.login(user);
+  }
 
-    // NestJS with passthrough: true automatically:
-    // - Enforces rate limiting via @Throttle decorator
-    return result;
+  /**
+   * POST /api/members/refresh
+   * Refresh access and refresh tokens using valid refresh token
+   * Returns new JWT token pair and revokes old refresh token
+   *
+   * @param user Validated user from RefreshTokenStrategy
+   * @returns New access and refresh tokens
+   */
+  @Public()
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@CurrentUser() user: ValidatedRefreshUser): Promise<TokenPair> {
+    return this.authService.refreshTokens(user.userId, user.refreshToken);
+  }
+
+  /**
+   * POST /api/members/logout
+   * Logout user by revoking refresh token
+   *
+   * @param user Validated user from RefreshTokenStrategy
+   * @returns Success message
+   */
+  @Public()
+  @UseGuards(RefreshTokenGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @CurrentUser() user: ValidatedRefreshUser,
+  ): Promise<{ message: string }> {
+    await this.authService.logout(user.userId, user.refreshToken);
+    return { message: 'Logout successful' };
   }
 }

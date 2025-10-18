@@ -44,6 +44,7 @@ enum LoanStatus {
   OVERDUE
   RETURNED
   REJECTED
+  CANCELLED
 }
 
 enum Currency {
@@ -59,23 +60,20 @@ enum SmtpProvider {
 // ============================================================
 
 model User {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String    @unique
-  name          String    @default("") // Required by Better Auth
-  emailVerified Boolean   @default(false) @map("email_verified") // Required by Better Auth
-  image         String?   // Optional profile image for Better Auth
-  role          Role      @default(MEMBER)
-  isActive      Boolean   @default(true) @map("is_active")
-  lastLoginAt   DateTime? @map("last_login_at") @db.Timestamptz(6)
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role      @default(MEMBER)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   // Relations
   memberProfile MemberProfile?
   loans         Loan[]
   auditLogs     AuditLog[]
-  sessions      Session[] // Better Auth sessions
-  accounts      Account[] // Better Auth accounts
+  refreshTokens RefreshToken[]
 
   @@map("user")
 }
@@ -262,59 +260,22 @@ model AuditLog {
 }
 
 // ============================================================
-// BETTER AUTH TABLES
+// AUTHENTICATION TABLES (PASSPORT.JS + JWT)
 // ============================================================
 
-model Session {
+model RefreshToken {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   token     String   @unique
   expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
+  isRevoked Boolean  @default(false) @map("is_revoked")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId], map: "idx_session_user")
-  @@index([token], map: "idx_session_token")
-  @@map("session")
-}
-
-model Account {
-  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId                  String    @map("user_id") @db.Uuid
-  accountId               String    @map("account_id")
-  providerId              String    @map("provider_id")
-  accessToken             String?   @map("access_token")
-  refreshToken            String?   @map("refresh_token")
-  accessTokenExpiresAt    DateTime? @map("access_token_expires_at") @db.Timestamptz(6)
-  refreshTokenExpiresAt   DateTime? @map("refresh_token_expires_at") @db.Timestamptz(6)
-  scope                   String?
-  idToken                 String?   @map("id_token")
-  password                String?
-  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId], map: "idx_account_user")
-  @@index([providerId, accountId], map: "idx_account_provider")
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  identifier String
-  value      String
-  expiresAt  DateTime @map("expires_at") @db.Timestamptz(6)
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@unique([identifier, value])
-  @@index([identifier], map: "idx_verification_identifier")
-  @@map("verification")
+  @@index([userId], map: "idx_refresh_token_user")
+  @@index([expiresAt], map: "idx_refresh_token_expires")
+  @@map("refresh_token")
 }

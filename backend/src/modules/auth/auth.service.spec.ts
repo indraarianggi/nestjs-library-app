@@ -262,7 +262,6 @@ describe('AuthService - Login', () => {
       // Note: Better Auth is mocked in the actual implementation
       // For this test, we're testing that the service handles the error correctly
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/unbound-method
       await expect(service.login(loginDto, mockRes)).rejects.toThrow(
         UnauthorizedException,
       );

@@ -60,25 +60,13 @@ async function main() {
   if (!existingAdmin) {
     const hashedAdminPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
 
-    // Create user and account (Better Auth compatible)
-    const adminUser = await prisma.user.create({
+    // Create admin user
+    await prisma.user.create({
       data: {
         email: adminEmail,
-        name: 'Library Administrator',
-        emailVerified: false,
-        image: null,
+        passwordHash: hashedAdminPassword,
         role: Role.ADMIN,
         isActive: true,
-      },
-    });
-
-    // Create account with password (Better Auth stores passwords here)
-    await prisma.account.create({
-      data: {
-        userId: adminUser.id,
-        accountId: adminUser.id,
-        providerId: 'credential',
-        password: hashedAdminPassword,
       },
     });
 
@@ -102,13 +90,11 @@ async function main() {
   if (!existingMember) {
     const hashedMemberPassword = await bcrypt.hash(memberPassword, SALT_ROUNDS);
 
-    // Create user and member profile (Better Auth compatible)
-    const memberUser = await prisma.user.create({
+    // Create member user with profile
+    await prisma.user.create({
       data: {
         email: memberEmail,
-        name: 'John Doe',
-        emailVerified: false,
-        image: null,
+        passwordHash: hashedMemberPassword,
         role: Role.MEMBER,
         isActive: true,
         memberProfile: {
@@ -120,16 +106,6 @@ async function main() {
             status: MembershipStatus.ACTIVE,
           },
         },
-      },
-    });
-
-    // Create account with password (Better Auth stores passwords here)
-    await prisma.account.create({
-      data: {
-        userId: memberUser.id,
-        accountId: memberUser.id,
-        providerId: 'credential',
-        password: hashedMemberPassword,
       },
     });
 
