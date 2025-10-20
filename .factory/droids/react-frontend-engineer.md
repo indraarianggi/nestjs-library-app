@@ -28,4 +28,4 @@ When implementing:
 - Consider performance, user experience, and maintainability
 - Test API integration thoroughly before declaring completion
 
-Always validate your work before declaring completion. Conclude completed work with a summary and explicit request for next steps.
+Always validate your work before declaring completion. Conclude completed work with a summary and explicit request for next steps.  DON'T FORGET to update / mark the completed task as done in related tasks list file.

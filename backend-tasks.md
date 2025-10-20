@@ -1240,7 +1240,7 @@ Implement endpoint for admin to delete books (if no loans) or enforce archival.
 
 ---
 
-### TASK BE-3.8: Book Copies Module - List Copies Endpoint
+### TASK BE-3.8: Book Copies Module - List Copies Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-3.4
 
@@ -1251,22 +1251,33 @@ Implement endpoint for admin to view all copies of a specific book.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Returns paginated list of copies for a book
-- [ ] Filter by status (AVAILABLE, ON_LOAN, LOST, DAMAGED)
-- [ ] Each copy includes: id, code, status, locationCode, createdAt, updatedAt
-- [ ] Returns 404 if book not found
-- [ ] Pagination support
+- [x] Admin only
+- [x] Returns paginated list of copies for a book
+- [x] Filter by status (AVAILABLE, ON_LOAN, LOST, DAMAGED)
+- [x] Each copy includes: id, code, status, locationCode, createdAt, updatedAt
+- [x] Returns 404 if book not found
+- [x] Pagination support
 
 **Definition of Done:**
 
-- Admin can view all copies for inventory management
-- Filter by status works correctly
-- Proper pagination
+- [x] Admin can view all copies for inventory management
+- [x] Filter by status works correctly
+- [x] Proper pagination
+
+**Completion Notes:**
+
+- GET /api/books/:id/copies endpoint implemented
+- Admin only using @Roles(Role.ADMIN) decorator
+- Paginated response with page, pageSize, total, totalPages
+- Filter by status (AVAILABLE, ON_LOAN, LOST, DAMAGED) via query parameter
+- Returns full copy details: id, code, status, locationCode, createdAt, updatedAt
+- Returns 404 if book not found
+- Query validation using Zod schema
+- Comprehensive error handling with proper HTTP status codes
 
 ---
 
-### TASK BE-3.9: Book Copies Module - Add Copies Endpoint
+### TASK BE-3.9: Book Copies Module - Add Copies Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-3.8
 
@@ -1277,16 +1288,16 @@ Implement endpoint for admin to add N copies to a book's inventory.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] AddCopiesDto with validation:
+- [x] Admin only
+- [x] AddCopiesDto with validation:
   - count (required, integer, min 1, max 100)
   - locationCode (optional, max 50 chars)
-- [ ] Generate unique codes for each copy (e.g., `{bookISBN}-{sequential}`)
-- [ ] Create N copies with status=AVAILABLE
-- [ ] All copies share the same locationCode if provided
-- [ ] Returns 201 with array of created copies and success message
-- [ ] Returns 404 if book not found
-- [ ] Returns 400 for validation errors
+- [x] Generate unique codes for each copy (e.g., `{bookISBN}-{sequential}`)
+- [x] Create N copies with status=AVAILABLE
+- [x] All copies share the same locationCode if provided
+- [x] Returns 201 with array of created copies and success message
+- [x] Returns 404 if book not found
+- [x] Returns 400 for validation errors
 
 **Technical Details:**
 
@@ -1305,14 +1316,28 @@ const codes = Array.from(
 
 **Definition of Done:**
 
-- Copies are created with unique codes
-- Bulk creation is efficient (single query)
-- Transaction ensures atomicity
-- Success message includes count
+- [x] Copies are created with unique codes
+- [x] Bulk creation is efficient (single query)
+- [x] Transaction ensures atomicity
+- [x] Success message includes count
+
+**Completion Notes:**
+
+- POST /api/books/:id/copies endpoint implemented
+- Admin only using @Roles(Role.ADMIN) decorator
+- AddCopiesDto with Zod validation (count: 1-100, locationCode optional max 50 chars)
+- Unique code generation: {ISBN_WITHOUT_DASHES}-{SEQUENTIAL_NUMBER} format
+- Codes are sequential based on existing copies count for the book
+- All copies created with status=AVAILABLE in single transaction
+- Shared locationCode applied to all copies if provided
+- Returns 201 with array of created copies and success message
+- Returns 404 if book not found
+- Audit log entry with action='copies.created'
+- Transaction ensures atomicity (rollback on error)
 
 ---
 
-### TASK BE-3.10: Book Copies Module - Update Copy Endpoint
+### TASK BE-3.10: Book Copies Module - Update Copy Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-3.9
 
@@ -1323,16 +1348,16 @@ Implement endpoint for admin to update copy status or location.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] UpdateCopyDto with optional fields:
+- [x] Admin only
+- [x] UpdateCopyDto with optional fields:
   - status (enum: AVAILABLE, ON_LOAN, LOST, DAMAGED)
   - locationCode (string, max 50 chars)
-- [ ] Validate copy exists
-- [ ] If changing status to AVAILABLE, check no active loan on copy
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated copy
-- [ ] Returns 404 if copy not found
-- [ ] Returns 409 if status change conflicts with active loan
+- [x] Validate copy exists
+- [x] If changing status to AVAILABLE, check no active loan on copy
+- [x] Audit log entry created
+- [x] Returns 200 with updated copy
+- [x] Returns 404 if copy not found
+- [x] Returns 409 if status change conflicts with active loan
 
 **Business Rule:**
 
@@ -1340,14 +1365,27 @@ Implement endpoint for admin to update copy status or location.
 
 **Definition of Done:**
 
-- Copy status can be updated
-- Location code can be updated
-- Business rules enforced
-- Audit trail captured
+- [x] Copy status can be updated
+- [x] Location code can be updated
+- [x] Business rules enforced
+- [x] Audit trail captured
+
+**Completion Notes:**
+
+- PATCH /api/copies/:copyId endpoint implemented
+- Admin only using @Roles(Role.ADMIN) decorator
+- UpdateCopyDto with Zod validation (status enum, locationCode max 50 chars)
+- Business rule enforced: Cannot set status to AVAILABLE if copy has open loan (APPROVED, ACTIVE, OVERDUE)
+- Returns 409 ConflictException with clear message if business rule violated
+- Updates copy status and/or locationCode atomically in transaction
+- Audit log entry with action='copy.updated' including before/after metadata
+- Returns 200 with updated copy
+- Returns 404 if copy not found
+- Comprehensive error handling with proper HTTP status codes
 
 ---
 
-### TASK BE-3.11: Book Copies Module - Delete Copy Endpoint
+### TASK BE-3.11: Book Copies Module - Delete Copy Endpoint ✅ COMPLETED
 
 **Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** BE-3.9
 
@@ -1358,21 +1396,34 @@ Implement endpoint for admin to delete a copy from inventory (if not on loan).
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Check if copy has any loans (historical or active)
-- [ ] If loans exist, return 409 error
-- [ ] If no loans, delete copy
-- [ ] Audit log entry created
-- [ ] Returns 204 on success
-- [ ] Returns 404 if copy not found
-- [ ] Returns 409 if copy has loans
+- [x] Admin only
+- [x] Check if copy has any loans (historical or active)
+- [x] If loans exist, return 409 error
+- [x] If no loans, delete copy
+- [x] Audit log entry created
+- [x] Returns 204 on success
+- [x] Returns 404 if copy not found
+- [x] Returns 409 if copy has loans
 
 **Definition of Done:**
 
-- Copies without loans can be deleted
-- Copies with loans cannot be deleted
-- Proper error messages
-- Audit trail captured
+- [x] Copies without loans can be deleted
+- [x] Copies with loans cannot be deleted
+- [x] Proper error messages
+- [x] Audit trail captured
+
+**Completion Notes:**
+
+- DELETE /api/copies/:copyId endpoint implemented
+- Admin only using @Roles(Role.ADMIN) decorator
+- Checks if copy has any loans (historical or active) before deletion
+- Returns 409 ConflictException if copy has loans with clear error message
+- Hard deletes copy if no loans exist
+- Audit log entry with action='copy.deleted'
+- Returns 204 No Content on successful deletion
+- Returns 404 if copy not found
+- Transaction ensures atomicity
+- Clear error message prevents deletion of copies with loan history
 
 ---
 

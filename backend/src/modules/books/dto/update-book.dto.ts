@@ -75,6 +75,11 @@ export const updateBookSchema = z.object({
     .nullable()
     .describe('URL to the book cover image'),
 
+  status: z
+    .enum(['ACTIVE', 'ARCHIVED'])
+    .optional()
+    .describe('Book status (ACTIVE or ARCHIVED)'),
+
   authorIds: z
     .array(z.string().uuid('Each author ID must be a valid UUID'))
     .min(1, 'At least one author is required')

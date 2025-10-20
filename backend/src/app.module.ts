@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthorsModule } from './modules/authors/authors.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { BooksModule } from './modules/books/books.module';
+import { BookCopiesModule } from './modules/book-copies/book-copies.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -30,6 +31,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     AuthorsModule,
     CategoriesModule,
     BooksModule,
+    BookCopiesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -22,7 +22,6 @@ export class ZodValidationPipe implements PipeTransform {
       const parsedValue = this.schema.parse(value);
       return parsedValue;
     } catch (error) {
-      console.log('ERROR: ', error);
       if (error instanceof ZodError) {
         // Format Zod errors into a readable structure
         const errors = error.issues.map((err: ZodIssue) => ({
