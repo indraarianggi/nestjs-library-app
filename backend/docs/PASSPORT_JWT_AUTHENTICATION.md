@@ -107,7 +107,7 @@ model RefreshToken {
 # JWT Authentication Configuration
 JWT_ACCESS_SECRET=your-access-secret-key-min-256-bits-change-in-production
 JWT_REFRESH_SECRET=your-refresh-secret-key-min-256-bits-change-in-production
-JWT_ACCESS_EXPIRES_IN=15m
+JWT_ACCESS_EXPIRES_IN=1h
 JWT_REFRESH_EXPIRES_IN=7d
 ```
 
@@ -124,7 +124,7 @@ app.enableCors({
 ### 8. Security Features
 
 - **Password Hashing**: bcrypt with 10 salt rounds
-- **Token Expiration**: Access tokens 15min, Refresh tokens 7 days (configurable)
+- **Token Expiration**: Access tokens 1 hour, Refresh tokens 7 days (configurable)
 - **Token Revocation**: Refresh tokens can be revoked (logout, token rotation)
 - **Token Rotation**: Old refresh tokens revoked when new ones generated
 - **Rate Limiting**: Login endpoint limited to 10 requests per minute
@@ -150,7 +150,7 @@ All TypeScript types properly defined:
 ✅ JwtStrategy implemented for access token validation
 ✅ RefreshTokenStrategy implemented for refresh token validation
 ✅ Password hashing using bcrypt (10 salt rounds)
-✅ Access token expiry: 15 minutes (configurable)
+✅ Access token expiry: 1 hour (configurable)
 ✅ Refresh token expiry: 7 days (configurable)
 ✅ Refresh tokens stored in database (hashed, with expiry and revocation)
 ✅ CORS configured to allow credentials from frontend origin

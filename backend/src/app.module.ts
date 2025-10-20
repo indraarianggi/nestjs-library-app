@@ -6,6 +6,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AuthorsModule } from './modules/authors/authors.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { BooksModule } from './modules/books/books.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -24,6 +27,9 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     ]),
     PrismaModule,
     AuthModule,
+    AuthorsModule,
+    CategoriesModule,
+    BooksModule,
   ],
   controllers: [AppController],
   providers: [

@@ -66,20 +66,35 @@ export class PrismaService
    * We rely on onModuleDestroy() for cleanup instead.
    */
   // eslint-disable-next-line @typescript-eslint/require-await
-  async enableShutdownHooks(app: any) {
+  async enableShutdownHooks(app: any, server?: any) {
+    const shutdown = async (signal: string) => {
+      this.logger.log(`Received ${signal} signal`);
+
+      // Close server first (stops accepting new connections)
+      if (server) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        server.close(() => {
+          this.logger.log('HTTP server closed');
+        });
+      }
+
+      // Then close NestJS app (cleanup resources)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      await app.close();
+      process.exit(0);
+    };
+
     // Register process-level shutdown handlers
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     process.on('SIGINT', async () => {
       this.logger.log('Received SIGINT signal');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      await app.close();
+      await shutdown('SIGINT');
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     process.on('SIGTERM', async () => {
       this.logger.log('Received SIGTERM signal');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      await app.close();
+      await shutdown('SIGTERM');
     });
   }
 

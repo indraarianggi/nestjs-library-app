@@ -1,0 +1,1219 @@
+{
+  "info": {
+    "name": "Library Management System API",
+    "description": "Comprehensive API specification for the Library Management System (LMS). Built with NestJS backend, PostgreSQL database, and Passport.js with JWT for authentication.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "library-management-system"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecureP@ssw0rd\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+62812345678\",\n  \"address\": \"Jl. Merdeka No. 123, Jakarta\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "register"]
+            },
+            "description": "Creates a new member user account with associated member profile. Registration is public and does not require authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"SecureP@ssw0rd\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "login"]
+            },
+            "description": "Authenticates a user with email and password. Returns user information and JWT tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "logout"]
+            },
+            "description": "Revokes the provided refresh token to prevent further use."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", "refresh"]
+            },
+            "description": "Exchanges a valid refresh token for a new access token and refresh token pair."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication and session management endpoints"
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "List Books",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books?page=1&pageSize=20&sortBy=title&sortOrder=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Harry Potter",
+                  "disabled": true,
+                  "description": "Search query"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by category UUID"
+                },
+                {
+                  "key": "authorId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by author UUID"
+                },
+                {
+                  "key": "availability",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Filter by availability"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "title",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of books with support for search, filtering, and sorting. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book Details",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Book UUID"
+                }
+              ]
+            },
+            "description": "Retrieves detailed information about a specific book including authors, categories, and available copies count."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Harry Potter and the Philosopher's Stone\",\n  \"subtitle\": \"Book 1\",\n  \"description\": \"The first book in the Harry Potter series\",\n  \"isbn\": \"978-0-545-01022-1\",\n  \"publicationYear\": 1997,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://example.com/cover.jpg\",\n  \"authorIds\": [],\n  \"categoryIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            },
+            "description": "Creates a new book in the catalog with metadata, authors, and categories. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"description\": \"Updated description\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Book UUID"
+                }
+              ]
+            },
+            "description": "Updates an existing book's metadata, authors, or categories. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Book UUID"
+                }
+              ]
+            },
+            "description": "Deletes a book if it has no associated loans. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Book catalog operations (CRUD, search, filtering)"
+    },
+    {
+      "name": "Authors",
+      "item": [
+        {
+          "name": "List Authors",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors?page=1&pageSize=20&sortBy=name&sortOrder=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Search query"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of authors with optional search. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Author",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"J.K. Rowling\",\n  \"bio\": \"British author, best known for the Harry Potter series\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            },
+            "description": "Creates a new author. Name must be unique. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Author",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"bio\": \"Updated biography\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authors/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Author UUID"
+                }
+              ]
+            },
+            "description": "Updates an existing author's information. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Author",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Author UUID"
+                }
+              ]
+            },
+            "description": "Deletes an author if not referenced by any books. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Author management endpoints"
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories?page=1&pageSize=20&sortBy=name&sortOrder=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Search query"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of categories/genres with optional search. Public endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Science Fiction\",\n  \"description\": \"Books featuring futuristic science and technology\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Creates a new category/genre. Name must be unique. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Category UUID"
+                }
+              ]
+            },
+            "description": "Updates an existing category's information. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Category UUID"
+                }
+              ]
+            },
+            "description": "Deletes a category if not referenced by any books. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Category/genre management endpoints"
+    },
+    {
+      "name": "Copies",
+      "item": [
+        {
+          "name": "List Book Copies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/:id/copies?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", ":id", "copies"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "AVAILABLE",
+                  "disabled": true,
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Book UUID"
+                }
+              ]
+            },
+            "description": "Retrieves all copies (inventory items) for a specific book. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Book Copies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 5,\n  \"locationCode\": \"SHELF-A3\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/books/:id/copies",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", ":id", "copies"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Book UUID"
+                }
+              ]
+            },
+            "description": "Adds N new copies to a book's inventory. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book Copy",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\",\n  \"locationCode\": \"SHELF-B5\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/copies/:copyId",
+              "host": ["{{baseUrl}}"],
+              "path": ["copies", ":copyId"],
+              "variable": [
+                {
+                  "key": "copyId",
+                  "value": "",
+                  "description": "Copy UUID"
+                }
+              ]
+            },
+            "description": "Updates a copy's status or location code. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book Copy",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/copies/:copyId",
+              "host": ["{{baseUrl}}"],
+              "path": ["copies", ":copyId"],
+              "variable": [
+                {
+                  "key": "copyId",
+                  "value": "",
+                  "description": "Copy UUID"
+                }
+              ]
+            },
+            "description": "Deletes a copy from inventory. Cannot delete if on loan. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Book copy/inventory management endpoints"
+    },
+    {
+      "name": "Memberships",
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["members"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": true,
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Search query"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of members with optional filtering. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Member Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Member profile UUID"
+                }
+              ]
+            },
+            "description": "Retrieves detailed information about a specific member. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated First Name\",\n  \"lastName\": \"Updated Last Name\",\n  \"phone\": \"+62812345678\",\n  \"address\": \"New Address\",\n  \"notes\": \"Admin notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Member profile UUID"
+                }
+              ]
+            },
+            "description": "Updates a member's profile information. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Member",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members/:id/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", ":id", "activate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Member profile UUID"
+                }
+              ]
+            },
+            "description": "Activates a pending member. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Suspend Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Policy violation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/:id/suspend",
+              "host": ["{{baseUrl}}"],
+              "path": ["members", ":id", "suspend"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Member profile UUID"
+                }
+              ]
+            },
+            "description": "Suspends an active member. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Member profile and status management endpoints"
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "List All Loans (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loans?page=1&pageSize=20&sortBy=dueDate&sortOrder=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": true,
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "memberId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by member UUID"
+                },
+                {
+                  "key": "bookId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by book UUID"
+                },
+                {
+                  "key": "dueBefore",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter loans due before date"
+                },
+                {
+                  "key": "dueAfter",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter loans due after date"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "dueDate",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of all loans with advanced filtering. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "List My Loans (Member)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my/loans?page=1&pageSize=20&sortBy=dueDate&sortOrder=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["my", "loans"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": true,
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "dueDate",
+                  "description": "Sort by field"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of loans for the authenticated member. Member only."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Loan (Borrow Book)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans"]
+            },
+            "description": "Creates a new loan for the authenticated member. Member only."
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Loan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loans/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans", ":id", "approve"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Loan UUID"
+                }
+              ]
+            },
+            "description": "Approves a loan in REQUESTED status. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Loan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"No copies available\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loans/:id/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans", ":id", "reject"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Loan UUID"
+                }
+              ]
+            },
+            "description": "Rejects a loan in REQUESTED status. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Renew Loan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loans/:id/renew",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans", ":id", "renew"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Loan UUID"
+                }
+              ]
+            },
+            "description": "Renews an active loan, extending the due date. Member only."
+          },
+          "response": []
+        },
+        {
+          "name": "Return Loan",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loans/:id/return",
+              "host": ["{{baseUrl}}"],
+              "path": ["loans", ":id", "return"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Loan UUID"
+                }
+              ]
+            },
+            "description": "Marks a loan as returned and calculates penalties. Member or Admin."
+          },
+          "response": []
+        }
+      ],
+      "description": "Borrowing, returns, renewals, and loan lifecycle management"
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            },
+            "description": "Retrieves current system configuration. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvalsRequired\": true,\n  \"loanDays\": 14,\n  \"renewalDays\": 7,\n  \"renewalMinDaysBeforeDue\": 1,\n  \"maxRenewals\": 1,\n  \"overdueFeePerDay\": 1000.00,\n  \"overdueFeeCapPerLoan\": 1000000.00,\n  \"currency\": \"IDR\",\n  \"maxConcurrentLoans\": 5,\n  \"notificationsEnabled\": true,\n  \"dueSoonDays\": 3,\n  \"dueDateNotificationsEnabled\": true,\n  \"fromEmail\": \"admin-library@mail.com\",\n  \"smtpProvider\": \"MAILTRAP\",\n  \"sendHourUTC\": 8,\n  \"timeZone\": \"UTC\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["settings"]
+            },
+            "description": "Updates system configuration. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "System configuration and borrowing policy settings"
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "List Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audit-logs?page=1&pageSize=20&sortOrder=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["audit-logs"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by user UUID"
+                },
+                {
+                  "key": "action",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by action type"
+                },
+                {
+                  "key": "entityType",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by entity type"
+                },
+                {
+                  "key": "entityId",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter by entity UUID"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter logs from date"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filter logs until date"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort direction"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of audit log entries. Admin only."
+          },
+          "response": []
+        }
+      ],
+      "description": "Audit trail and system activity logs"
+    }
+  ]
+}

@@ -158,7 +158,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(accessPayload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
-        '15m') as `${number}${'s' | 'm' | 'h' | 'd'}`,
+        '1h') as `${number}${'s' | 'm' | 'h' | 'd'}`,
     });
 
     const refreshToken = this.jwtService.sign(refreshPayload, {
@@ -213,6 +213,7 @@ export class AuthService {
         `Registration validation failed: ${JSON.stringify(errors)}`,
       );
       throw new BadRequestException({
+        statusCode: 400,
         message: 'Validation failed',
         errors: errors,
       });
@@ -366,7 +367,7 @@ export class AuthService {
     const newAccessToken = this.jwtService.sign(accessPayload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
-        '15m') as `${number}${'s' | 'm' | 'h' | 'd'}`,
+        '1h') as `${number}${'s' | 'm' | 'h' | 'd'}`,
     });
 
     const newRefreshToken = this.jwtService.sign(refreshPayload, {

@@ -31,6 +31,7 @@ export class LocalAuthGuard extends AuthGuard('local') implements CanActivate {
       }));
       this.logger.warn(`Login validation failed: ${JSON.stringify(errors)}`);
       throw new BadRequestException({
+        statusCode: 400,
         message: 'Validation failed',
         errors: errors,
       });

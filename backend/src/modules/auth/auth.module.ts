@@ -18,7 +18,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const expiresIn =
-          configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m';
+          configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '1h';
         return {
           secret:
             configService.get<string>('JWT_ACCESS_SECRET') || 'default-secret',

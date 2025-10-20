@@ -9,10 +9,6 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
 
-  // Enable Prisma shutdown hooks for graceful shutdown
-  const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
-
   // Enable global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -59,7 +55,12 @@ async function bootstrap(): Promise<void> {
   );
 
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const server = await app.listen(port);
+
+  // Enable Prisma shutdown hooks for graceful shutdown with server reference
+  const prismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app, server);
 
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(
