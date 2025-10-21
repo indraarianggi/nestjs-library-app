@@ -12,6 +12,15 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { BookCopiesService, PaginatedCopies } from './book-copies.service';
 import type { AddCopiesDto, UpdateCopyDto } from './dto';
 import { queryCopiesSchema, addCopiesSchema, updateCopySchema } from './dto';
@@ -25,6 +34,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
  * BookCopiesController - Handles HTTP requests for book copy management
  * All endpoints are admin-only
  */
+@ApiTags('Book Copies')
 @Controller()
 @UseGuards(RolesGuard)
 export class BookCopiesController {
@@ -43,6 +53,49 @@ export class BookCopiesController {
    * @param queryParams Query parameters for filtering and pagination
    * @returns Paginated list of book copies
    */
+  @ApiOperation({
+    summary: 'List copies for a book',
+    description:
+      'Retrieves all physical copies for a specific book. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Book UUID',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['AVAILABLE', 'ON_LOAN', 'LOST', 'DAMAGED'],
+    description: 'Filter by copy status',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Copies retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Book not found' })
   @Roles(Role.ADMIN)
   @Get('books/:id/copies')
   @HttpCode(HttpStatus.OK)
@@ -84,6 +137,56 @@ export class BookCopiesController {
    * @param user Current authenticated user (from JWT)
    * @returns Created copies and success message
    */
+  @ApiOperation({
+    summary: 'Add copies to a book',
+    description: 'Adds multiple physical copies to a book. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Book UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['count'],
+      properties: {
+        count: {
+          type: 'number',
+          minimum: 1,
+          maximum: 100,
+          example: 5,
+          description: 'Number of copies to add',
+        },
+        locationCode: {
+          type: 'string',
+          maxLength: 50,
+          nullable: true,
+          example: 'SHELF-A1',
+          description: 'Physical location code',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Copies added successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Book not found' })
   @Roles(Role.ADMIN)
   @Post('books/:id/copies')
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +220,53 @@ export class BookCopiesController {
    * @param user Current authenticated user (from JWT)
    * @returns Updated copy
    */
+  @ApiOperation({
+    summary: 'Update a book copy',
+    description:
+      'Updates a physical copy. Cannot set status to AVAILABLE if copy has an open loan. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'copyId',
+    type: String,
+    format: 'uuid',
+    description: 'Copy UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['AVAILABLE', 'ON_LOAN', 'LOST', 'DAMAGED'],
+          description: 'Copy status',
+        },
+        locationCode: {
+          type: 'string',
+          maxLength: 50,
+          nullable: true,
+          description: 'Physical location code',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Copy updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or business rule violation',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Copy not found' })
   @Roles(Role.ADMIN)
   @Patch('copies/:copyId')
   @HttpCode(HttpStatus.OK)
@@ -147,6 +297,35 @@ export class BookCopiesController {
    * @param user Current authenticated user (from JWT)
    * @returns No content (204)
    */
+  @ApiOperation({
+    summary: 'Delete a book copy',
+    description:
+      'Deletes a physical copy if it has no loan history. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'copyId',
+    type: String,
+    format: 'uuid',
+    description: 'Copy UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Copy deleted successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Copy not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Copy has loan history and cannot be deleted',
+  })
   @Roles(Role.ADMIN)
   @Delete('copies/:copyId')
   @HttpCode(HttpStatus.NO_CONTENT)

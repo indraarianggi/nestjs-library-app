@@ -12,6 +12,15 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthorsService, PaginatedAuthors } from './authors.service';
 import type { CreateAuthorDto, UpdateAuthorDto } from './dto';
 import {
@@ -30,6 +39,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
  * AuthorsController - Handles HTTP requests for author management
  * Implements CRUD operations with proper authorization
  */
+@ApiTags('Authors')
 @Controller('authors')
 @UseGuards(RolesGuard)
 export class AuthorsController {
@@ -43,6 +53,49 @@ export class AuthorsController {
    * @param query Query parameters for filtering, sorting, and pagination
    * @returns Paginated list of authors
    */
+  @ApiOperation({
+    summary: 'List all authors',
+    description:
+      'Retrieves a paginated list of authors with search and sorting.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Search query for author name',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'createdAt'],
+    description: 'Sort field',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Authors retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid query parameters',
+  })
   @Public()
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -75,6 +128,46 @@ export class AuthorsController {
    * @param user Current authenticated user (from JWT)
    * @returns Created author
    */
+  @ApiOperation({
+    summary: 'Create a new author',
+    description: 'Creates a new author. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 200,
+          example: 'F. Scott Fitzgerald',
+        },
+        biography: {
+          type: 'string',
+          nullable: true,
+          example: 'American novelist and short story writer',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Author created successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or author already exists',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(Role.ADMIN)
@@ -100,6 +193,46 @@ export class AuthorsController {
    * @param user Current authenticated user (from JWT)
    * @returns Updated author
    */
+  @ApiOperation({
+    summary: 'Update an author',
+    description: 'Updates an existing author. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Author UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', minLength: 1, maxLength: 200 },
+        biography: { type: 'string', nullable: true },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Author updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Author not found',
+  })
   @Roles(Role.ADMIN)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
@@ -127,6 +260,38 @@ export class AuthorsController {
    * @param user Current authenticated user (from JWT)
    * @returns No content (204)
    */
+  @ApiOperation({
+    summary: 'Delete an author',
+    description:
+      'Deletes an author if not referenced by any books. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Author UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Author deleted successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Author not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Author is referenced by books and cannot be deleted',
+  })
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

@@ -10,6 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
   LoansService,
   LoanWithRelations,
   PaginatedLoansResponse,
@@ -26,6 +35,8 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
  * LoansController - Handles HTTP requests for loan management
  * Member only - all endpoints require MEMBER role and authentication
  */
+@ApiTags('Loans')
+@ApiBearerAuth('JWT-auth')
 @Controller('loans')
 @UseGuards(RolesGuard)
 export class LoansController {
@@ -52,6 +63,48 @@ export class LoansController {
    * @throws 403 if not admin
    * @throws 400 for validation errors
    */
+  @ApiOperation({
+    summary: 'List all loans (Admin)',
+    description:
+      'Retrieves all loans in the system with filtering and pagination. Admin only.',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: [
+      'REQUESTED',
+      'APPROVED',
+      'ACTIVE',
+      'RETURNED',
+      'CANCELLED',
+      'OVERDUE',
+    ],
+  })
+  @ApiQuery({ name: 'memberId', required: false, type: String })
+  @ApiQuery({ name: 'bookId', required: false, type: String })
+  @ApiQuery({
+    name: 'dueBefore',
+    required: false,
+    type: String,
+    format: 'date',
+  })
+  @ApiQuery({ name: 'dueAfter', required: false, type: String, format: 'date' })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['dueDate', 'borrowedAt', 'createdAt', 'status'],
+  })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loans retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
   @Get()
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ADMIN)
@@ -90,6 +143,44 @@ export class LoansController {
    * @throws 404 if book not found
    * @throws 409 if no available copies
    */
+  @ApiOperation({
+    summary: 'Create a loan (borrow a book)',
+    description:
+      'Creates a new loan for the authenticated member. Member only.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['bookId'],
+      properties: {
+        bookId: { type: 'string', format: 'uuid', description: 'Book UUID' },
+        copyId: {
+          type: 'string',
+          format: 'uuid',
+          nullable: true,
+          description:
+            'Specific copy UUID (optional, system auto-selects if not provided)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Loan created successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input or member ineligible',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Member suspended or max loans exceeded',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Book not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'No available copies',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(Role.MEMBER)
@@ -136,6 +227,48 @@ export class LoansController {
    * @throws 404 if loan not found
    * @throws 409 if loan status is not REQUESTED or copy unavailable
    */
+  @ApiOperation({
+    summary: 'Approve or reject a loan',
+    description:
+      'Admin approves or rejects a pending loan request. Admin only.',
+  })
+  @ApiParam({
+    name: 'loanId',
+    type: String,
+    format: 'uuid',
+    description: 'Loan UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['isApproved'],
+      properties: {
+        isApproved: {
+          type: 'boolean',
+          description: 'true to approve, false to reject',
+        },
+        copyId: {
+          type: 'string',
+          format: 'uuid',
+          description: 'Copy UUID (required if approving)',
+        },
+        rejectionReason: {
+          type: 'string',
+          nullable: true,
+          description: 'Reason for rejection (optional if rejecting)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loan approved/rejected successfully',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Loan not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Loan not in REQUESTED status or copy unavailable',
+  })
   @Post(':loanId/approve-reject')
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ADMIN)
@@ -177,6 +310,30 @@ export class LoansController {
    * @throws 404 if loan not found
    * @throws 409 if renewal is not allowed
    */
+  @ApiOperation({
+    summary: 'Renew a loan',
+    description:
+      'Extends the due date of an active loan. Member (loan owner) or Admin.',
+  })
+  @ApiParam({
+    name: 'loanId',
+    type: String,
+    format: 'uuid',
+    description: 'Loan UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loan renewed successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized or suspended member',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Loan not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Renewal not allowed (max renewals, overdue, etc.)',
+  })
   @Post(':loanId/renew')
   @HttpCode(HttpStatus.OK)
   async renewLoan(
@@ -213,6 +370,27 @@ export class LoansController {
    * @throws 404 if loan not found
    * @throws 409 if loan status doesn't allow cancellation
    */
+  @ApiOperation({
+    summary: 'Cancel a loan',
+    description:
+      'Cancels a pending or approved loan. Member (loan owner) or Admin.',
+  })
+  @ApiParam({
+    name: 'loanId',
+    type: String,
+    format: 'uuid',
+    description: 'Loan UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loan cancelled successfully',
+  })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Not authorized' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Loan not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Loan cannot be cancelled (already active or returned)',
+  })
   @Post(':loanId/cancel')
   @HttpCode(HttpStatus.OK)
   async cancelLoan(
@@ -249,6 +427,30 @@ export class LoansController {
    * @throws 404 if loan not found
    * @throws 409 if loan is not in APPROVED status or member is suspended
    */
+  @ApiOperation({
+    summary: 'Checkout a loan',
+    description:
+      'Marks an approved loan as active when member picks up the book. Admin only.',
+  })
+  @ApiParam({
+    name: 'loanId',
+    type: String,
+    format: 'uuid',
+    description: 'Loan UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loan checked out successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Loan not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Loan not in APPROVED status or member suspended',
+  })
   @Post(':loanId/checkout')
   @HttpCode(HttpStatus.OK)
   @Roles(Role.ADMIN)
@@ -290,6 +492,27 @@ export class LoansController {
    * @throws 404 if loan not found
    * @throws 409 if loan already returned or status doesn't allow return
    */
+  @ApiOperation({
+    summary: 'Return a loan',
+    description:
+      'Marks a loan as returned and calculates any overdue penalties. Member (loan owner) or Admin.',
+  })
+  @ApiParam({
+    name: 'loanId',
+    type: String,
+    format: 'uuid',
+    description: 'Loan UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Loan returned successfully (includes penalty if applicable)',
+  })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Not authorized' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Loan not found' })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Loan already returned or invalid status',
+  })
   @Post(':loanId/return')
   @HttpCode(HttpStatus.OK)
   async returnLoan(

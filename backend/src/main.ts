@@ -37,14 +37,57 @@ async function bootstrap(): Promise<void> {
   // Set global prefix
   app.setGlobalPrefix('api');
 
+  // Configure Swagger/OpenAPI Documentation
   const openApiConfig = new DocumentBuilder()
-    .setTitle('Library Management APIs')
-    .setDescription('The Libray Management APIs')
-    .setVersion('1.0')
+    .setTitle('Library Management System API')
+    .setDescription(
+      'RESTful API for a comprehensive Library Management System. This API provides endpoints for managing books, authors, categories, book copies, members, loans, and system settings.',
+    )
+    .setVersion('1.0.0')
+    .setContact(
+      'Library Management Team',
+      'https://github.com/library-management',
+      'support@library-management.com',
+    )
+    .addServer('http://localhost:3000', 'Development Server')
+    .addServer('https://api.library-management.com', 'Production Server')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Auth', 'Authentication and authorization endpoints')
+    .addTag('Books', 'Book catalog management')
+    .addTag('Authors', 'Author management')
+    .addTag('Categories', 'Category management')
+    .addTag('Book Copies', 'Physical book copy management')
+    .addTag('Members', 'Library member management')
+    .addTag('Loans', 'Loan management (Admin)')
+    .addTag('My Loans', 'Personal loan management (Member)')
+    .addTag('Settings', 'System settings management')
+    .addTag('Audit Logs', 'Audit log viewing')
+    .addTag('Health', 'Health check endpoints')
     .build();
   const openApiDocument = SwaggerModule.createDocument(app, openApiConfig);
 
-  // SwaggerModule.setup('api', app, openApiDocument); // Swagger UI
+  // Swagger UI at /api/docs
+  SwaggerModule.setup('api/docs', app, openApiDocument, {
+    customSiteTitle: 'Library Management API Docs',
+    customfavIcon: 'https://nestjs.com/img/logo-small.svg',
+    customCss: '.swagger-ui .topbar { display: none }',
+    swaggerOptions: {
+      persistAuthorization: true,
+      docExpansion: 'none',
+      filter: true,
+      showRequestDuration: true,
+    },
+  });
 
   // Scalar API Reference
   // https://github.com/scalar/scalar/issues/6895#issuecomment-3323558038

@@ -1,0 +1,3517 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/members/register": {
+      "post": {
+        "description": "Creates a new user account and member profile. Returns the created user, member profile, and JWT access/refresh tokens for immediate authentication.",
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Registration data including email, password, and profile information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password",
+                  "firstName",
+                  "lastName"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Valid email address for the user account",
+                    "example": "john.doe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128,
+                    "description": "Password must be 8-128 characters with at least one uppercase, lowercase, digit, and special character",
+                    "example": "SecurePass123!"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Member first name",
+                    "example": "John"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Member last name",
+                    "example": "Doe"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Optional phone number",
+                    "example": "+1234567890"
+                  },
+                  "address": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Optional residential address",
+                    "example": "123 Main St, City, State 12345"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "123e4567-e89b-12d3-a456-426614174000"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email",
+                          "example": "john.doe@example.com"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "ADMIN",
+                            "MEMBER"
+                          ],
+                          "example": "MEMBER"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "memberProfile": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "membershipNumber": {
+                          "type": "string",
+                          "example": "LIB-2024-0001"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "example": "John"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "example": "Doe"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "+1234567890"
+                        },
+                        "address": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "membershipStatus": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "SUSPENDED",
+                            "EXPIRED"
+                          ],
+                          "example": "ACTIVE"
+                        },
+                        "membershipStartDate": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "membershipEndDate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "description": "JWT access token (15 minutes expiry)"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "JWT refresh token (7 days expiry)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data or email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Email already exists"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "email"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Email already exists"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Register a new member",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/members/login": {
+      "post": {
+        "description": "Authenticates a user with email and password. Returns JWT access and refresh tokens. Rate limited to 10 requests per minute to prevent brute force attacks.",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Login credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User email address",
+                    "example": "john.doe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "User password",
+                    "example": "SecurePass123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "ADMIN",
+                            "MEMBER"
+                          ]
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "memberProfile": {
+                      "type": "object",
+                      "nullable": true,
+                      "description": "Member profile (only for MEMBER role)"
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "description": "JWT access token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "JWT refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or account suspended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid email or password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many login attempts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 429
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/members/refresh": {
+      "post": {
+        "description": "Uses a valid refresh token to generate new access and refresh tokens. The old refresh token is revoked after successful refresh.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Refresh token to generate new tokens",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "description": "New JWT access token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "New JWT refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Refresh access and refresh tokens",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/members/logout": {
+      "post": {
+        "description": "Logs out the user by revoking their refresh token. The access token will remain valid until it expires (15 minutes).",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Refresh token to revoke",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logout successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Logout user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/authors": {
+      "get": {
+        "description": "Retrieves a paginated list of authors with search and sorting.",
+        "operationId": "AuthorsController_findAll",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort field",
+            "schema": {
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search query for author name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authors retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          }
+        },
+        "summary": "List all authors",
+        "tags": [
+          "Authors"
+        ]
+      },
+      "post": {
+        "description": "Creates a new author. Admin only.",
+        "operationId": "AuthorsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "example": "F. Scott Fitzgerald"
+                  },
+                  "biography": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "American novelist and short story writer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Author created successfully"
+          },
+          "400": {
+            "description": "Invalid input data or author already exists"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new author",
+        "tags": [
+          "Authors"
+        ]
+      }
+    },
+    "/api/authors/{id}": {
+      "patch": {
+        "description": "Updates an existing author. Admin only.",
+        "operationId": "AuthorsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Author UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "biography": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Author updated successfully"
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Author not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update an author",
+        "tags": [
+          "Authors"
+        ]
+      },
+      "delete": {
+        "description": "Deletes an author if not referenced by any books. Admin only.",
+        "operationId": "AuthorsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Author UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Author deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Author not found"
+          },
+          "409": {
+            "description": "Author is referenced by books and cannot be deleted"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete an author",
+        "tags": [
+          "Authors"
+        ]
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "description": "Retrieves a paginated list of categories with search and sorting.",
+        "operationId": "CategoriesController_findAll",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort field",
+            "schema": {
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search query for category name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          }
+        },
+        "summary": "List all categories",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "post": {
+        "description": "Creates a new category. Admin only.",
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "example": "Fiction"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Fictional literature including novels and short stories"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully"
+          },
+          "400": {
+            "description": "Invalid input data or category already exists"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/categories/{id}": {
+      "patch": {
+        "description": "Updates an existing category. Admin only.",
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated successfully"
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update a category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a category if not referenced by any books. Admin only.",
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Category not found"
+          },
+          "409": {
+            "description": "Category is referenced by books and cannot be deleted"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete a category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/books": {
+      "get": {
+        "description": "Retrieves a paginated list of books with support for search, filtering, and sorting. Public endpoint accessible without authentication.",
+        "operationId": "BooksController_findAll",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order (default: asc)",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort field (default: relevance if searching, createdAt otherwise)",
+            "schema": {
+              "enum": [
+                "title",
+                "createdAt",
+                "relevance"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "availability",
+            "required": false,
+            "in": "query",
+            "description": "Filter by availability status",
+            "schema": {
+              "enum": [
+                "AVAILABLE",
+                "BORROWED",
+                "RESERVED",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by author UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search query for title and author name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "books": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "The Great Gatsby"
+                          },
+                          "subtitle": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "isbn": {
+                            "type": "string",
+                            "example": "978-0743273565"
+                          },
+                          "publicationYear": {
+                            "type": "number",
+                            "nullable": true,
+                            "example": 1925
+                          },
+                          "language": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "English"
+                          },
+                          "coverImageUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ACTIVE",
+                              "ARCHIVED"
+                            ],
+                            "example": "ACTIVE"
+                          },
+                          "authors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          },
+                          "categories": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          },
+                          "availableCopies": {
+                            "type": "number",
+                            "example": 3
+                          },
+                          "totalCopies": {
+                            "type": "number",
+                            "example": 5
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "pageSize": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "totalItems": {
+                          "type": "number",
+                          "example": 100
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "example": 10
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          }
+        },
+        "summary": "List all books",
+        "tags": [
+          "Books"
+        ]
+      },
+      "post": {
+        "description": "Creates a new book in the catalog. Admin only. Validates ISBN format and uniqueness.",
+        "operationId": "BooksController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Book data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "isbn",
+                  "authorIds",
+                  "categoryIds"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500,
+                    "example": "The Great Gatsby"
+                  },
+                  "subtitle": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "isbn": {
+                    "type": "string",
+                    "example": "978-0743273565",
+                    "description": "ISBN-10 or ISBN-13"
+                  },
+                  "publicationYear": {
+                    "type": "number",
+                    "minimum": 1000,
+                    "nullable": true,
+                    "example": 1925
+                  },
+                  "language": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "nullable": true,
+                    "example": "English"
+                  },
+                  "coverImageUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "nullable": true
+                  },
+                  "authorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1
+                  },
+                  "categoryIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book created successfully"
+          },
+          "400": {
+            "description": "Invalid input data or ISBN already exists"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a new book",
+        "tags": [
+          "Books"
+        ]
+      }
+    },
+    "/api/books/{id}": {
+      "get": {
+        "description": "Retrieves detailed information about a specific book including authors, categories, and copy availability.",
+        "operationId": "BooksController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Book UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "book": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "subtitle": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "isbn": {
+                          "type": "string"
+                        },
+                        "publicationYear": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "language": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "coverImageUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ACTIVE",
+                            "ARCHIVED"
+                          ]
+                        },
+                        "authors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "availableCopies": {
+                          "type": "number"
+                        },
+                        "totalCopies": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found or archived"
+          }
+        },
+        "summary": "Get a book by ID",
+        "tags": [
+          "Books"
+        ]
+      },
+      "patch": {
+        "description": "Updates an existing book. Admin only. All fields are optional.",
+        "operationId": "BooksController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Book UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Book data to update (all fields optional)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "subtitle": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "isbn": {
+                    "type": "string",
+                    "description": "ISBN-10 or ISBN-13"
+                  },
+                  "publicationYear": {
+                    "type": "number",
+                    "minimum": 1000,
+                    "nullable": true
+                  },
+                  "language": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "nullable": true
+                  },
+                  "coverImageUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "nullable": true
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "ACTIVE",
+                      "ARCHIVED"
+                    ]
+                  },
+                  "authorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "categoryIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Book updated successfully"
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update a book",
+        "tags": [
+          "Books"
+        ]
+      },
+      "delete": {
+        "description": "Permanently deletes a book if it has no loan history. If loans exist, the book should be archived instead. Admin only.",
+        "operationId": "BooksController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Book UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Book deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "409": {
+            "description": "Book has loan history and cannot be deleted. Archive it instead."
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete a book",
+        "tags": [
+          "Books"
+        ]
+      }
+    },
+    "/api/books/{id}/copies": {
+      "get": {
+        "description": "Retrieves all physical copies for a specific book. Admin only.",
+        "operationId": "BookCopiesController_findCopiesForBook",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Book UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by copy status",
+            "schema": {
+              "enum": [
+                "AVAILABLE",
+                "ON_LOAN",
+                "LOST",
+                "DAMAGED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10, max: 100)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Copies retrieved successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List copies for a book",
+        "tags": [
+          "Book Copies"
+        ]
+      },
+      "post": {
+        "description": "Adds multiple physical copies to a book. Admin only.",
+        "operationId": "BookCopiesController_addCopiesToBook",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Book UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "count"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "example": 5,
+                    "description": "Number of copies to add"
+                  },
+                  "locationCode": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "nullable": true,
+                    "example": "SHELF-A1",
+                    "description": "Physical location code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Copies added successfully"
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Book not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Add copies to a book",
+        "tags": [
+          "Book Copies"
+        ]
+      }
+    },
+    "/api/copies/{copyId}": {
+      "patch": {
+        "description": "Updates a physical copy. Cannot set status to AVAILABLE if copy has an open loan. Admin only.",
+        "operationId": "BookCopiesController_updateCopy",
+        "parameters": [
+          {
+            "name": "copyId",
+            "required": true,
+            "in": "path",
+            "description": "Copy UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "AVAILABLE",
+                      "ON_LOAN",
+                      "LOST",
+                      "DAMAGED"
+                    ],
+                    "description": "Copy status"
+                  },
+                  "locationCode": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "nullable": true,
+                    "description": "Physical location code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Copy updated successfully"
+          },
+          "400": {
+            "description": "Invalid input data or business rule violation"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Copy not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update a book copy",
+        "tags": [
+          "Book Copies"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a physical copy if it has no loan history. Admin only.",
+        "operationId": "BookCopiesController_deleteCopy",
+        "parameters": [
+          {
+            "name": "copyId",
+            "required": true,
+            "in": "path",
+            "description": "Copy UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Copy deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Copy not found"
+          },
+          "409": {
+            "description": "Copy has loan history and cannot be deleted"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Delete a book copy",
+        "tags": [
+          "Book Copies"
+        ]
+      }
+    },
+    "/api/members": {
+      "get": {
+        "description": "Retrieves a paginated list of members with loan statistics. Admin only.",
+        "operationId": "MembersController_findAll",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "firstName",
+                "lastName",
+                "email",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "ACTIVE",
+                "SUSPENDED",
+                "EXPIRED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search by name or email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Members retrieved successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List all members",
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/members/{id}": {
+      "get": {
+        "description": "Retrieves detailed information about a specific member. Admin only.",
+        "operationId": "MembersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Member profile UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member retrieved successfully"
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get member details",
+        "tags": [
+          "Members"
+        ]
+      },
+      "patch": {
+        "description": "Updates member profile information. Admin only.",
+        "operationId": "MembersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Member profile UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "address": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "notes": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Member updated successfully"
+          },
+          "404": {
+            "description": "Member not found"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update member profile",
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/members/{id}/activate": {
+      "post": {
+        "description": "Changes member status from PENDING to ACTIVE. Admin only.",
+        "operationId": "MembersController_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Member profile UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member activated successfully"
+          },
+          "404": {
+            "description": "Member not found"
+          },
+          "409": {
+            "description": "Member already active"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Activate a member",
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/members/{id}/suspend": {
+      "post": {
+        "description": "Changes member status from ACTIVE to SUSPENDED. Admin only.",
+        "operationId": "MembersController_suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Member profile UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Reason for suspension"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Member suspended successfully"
+          },
+          "404": {
+            "description": "Member not found"
+          },
+          "409": {
+            "description": "Member already suspended"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Suspend a member",
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "description": "Retrieves current system configuration including borrowing policy, notification settings, and operational parameters. Admin only.",
+        "operationId": "SettingsController_getSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Settings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "approvalsRequired": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "loanDays": {
+                      "type": "number",
+                      "example": 14
+                    },
+                    "renewalDays": {
+                      "type": "number",
+                      "example": 7
+                    },
+                    "renewalMinDaysBeforeDue": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "maxRenewals": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "overdueFeePerDay": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "overdueFeeCapPerLoan": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "currency": {
+                      "type": "string",
+                      "enum": [
+                        "USD",
+                        "EUR",
+                        "GBP",
+                        "IDR"
+                      ],
+                      "example": "USD"
+                    },
+                    "maxConcurrentLoans": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "notificationsEnabled": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "dueSoonDays": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "dueDateNotificationsEnabled": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "fromEmail": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "noreply@library.com"
+                    },
+                    "smtpProvider": {
+                      "type": "string",
+                      "enum": [
+                        "GMAIL",
+                        "SENDGRID",
+                        "MAILGUN",
+                        "CUSTOM"
+                      ],
+                      "example": "GMAIL"
+                    },
+                    "sendHourUTC": {
+                      "type": "number",
+                      "example": 9
+                    },
+                    "timeZone": {
+                      "type": "string",
+                      "example": "UTC"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get system settings",
+        "tags": [
+          "Settings"
+        ]
+      },
+      "patch": {
+        "description": "Updates system configuration. All fields are optional. Changes are logged and take effect based on the setting type. Admin only.",
+        "operationId": "SettingsController_updateSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Settings data to update (all fields optional)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "approvalsRequired": {
+                    "type": "boolean",
+                    "description": "Whether loans require admin approval",
+                    "example": false
+                  },
+                  "loanDays": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 90,
+                    "description": "Default loan period in days",
+                    "example": 14
+                  },
+                  "renewalDays": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 90,
+                    "description": "Extension period for renewals in days",
+                    "example": 7
+                  },
+                  "renewalMinDaysBeforeDue": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Minimum days before due date to request renewal",
+                    "example": 3
+                  },
+                  "maxRenewals": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10,
+                    "description": "Maximum number of renewals per loan",
+                    "example": 2
+                  },
+                  "overdueFeePerDay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Overdue penalty per day",
+                    "example": 1
+                  },
+                  "overdueFeeCapPerLoan": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Maximum overdue penalty per loan",
+                    "example": 50
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": [
+                      "USD",
+                      "EUR",
+                      "GBP",
+                      "IDR"
+                    ],
+                    "description": "Currency for fees",
+                    "example": "USD"
+                  },
+                  "maxConcurrentLoans": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Maximum number of concurrent active loans per member",
+                    "example": 5
+                  },
+                  "notificationsEnabled": {
+                    "type": "boolean",
+                    "description": "Whether email notifications are enabled",
+                    "example": true
+                  },
+                  "dueSoonDays": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 14,
+                    "description": "Days before due date to send reminder notification",
+                    "example": 3
+                  },
+                  "dueDateNotificationsEnabled": {
+                    "type": "boolean",
+                    "description": "Whether due date reminder notifications are enabled",
+                    "example": true
+                  },
+                  "fromEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 255,
+                    "description": "Email address to send notifications from",
+                    "example": "noreply@library.com"
+                  },
+                  "smtpProvider": {
+                    "type": "string",
+                    "enum": [
+                      "GMAIL",
+                      "SENDGRID",
+                      "MAILGUN",
+                      "CUSTOM"
+                    ],
+                    "description": "SMTP email provider",
+                    "example": "GMAIL"
+                  },
+                  "sendHourUTC": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 23,
+                    "description": "Hour in UTC to send scheduled notifications",
+                    "example": 9
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "description": "Time zone for scheduling",
+                    "example": "UTC"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "approvalsRequired": {
+                      "type": "boolean"
+                    },
+                    "loanDays": {
+                      "type": "number"
+                    },
+                    "renewalDays": {
+                      "type": "number"
+                    },
+                    "renewalMinDaysBeforeDue": {
+                      "type": "number"
+                    },
+                    "maxRenewals": {
+                      "type": "number"
+                    },
+                    "overdueFeePerDay": {
+                      "type": "number"
+                    },
+                    "overdueFeeCapPerLoan": {
+                      "type": "number"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "enum": [
+                        "USD",
+                        "EUR",
+                        "GBP",
+                        "IDR"
+                      ]
+                    },
+                    "maxConcurrentLoans": {
+                      "type": "number"
+                    },
+                    "notificationsEnabled": {
+                      "type": "boolean"
+                    },
+                    "dueSoonDays": {
+                      "type": "number"
+                    },
+                    "dueDateNotificationsEnabled": {
+                      "type": "boolean"
+                    },
+                    "fromEmail": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "smtpProvider": {
+                      "type": "string",
+                      "enum": [
+                        "GMAIL",
+                        "SENDGRID",
+                        "MAILGUN",
+                        "CUSTOM"
+                      ]
+                    },
+                    "sendHourUTC": {
+                      "type": "number"
+                    },
+                    "timeZone": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update system settings",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
+    "/api/loans": {
+      "get": {
+        "description": "Retrieves all loans in the system with filtering and pagination. Admin only.",
+        "operationId": "LoansController_findAllLoans",
+        "parameters": [
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "dueDate",
+                "borrowedAt",
+                "createdAt",
+                "status"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueAfter",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueBefore",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "bookId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "REQUESTED",
+                "APPROVED",
+                "ACTIVE",
+                "RETURNED",
+                "CANCELLED",
+                "OVERDUE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loans retrieved successfully"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List all loans (Admin)",
+        "tags": [
+          "Loans"
+        ]
+      },
+      "post": {
+        "description": "Creates a new loan for the authenticated member. Member only.",
+        "operationId": "LoansController_createLoan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "bookId"
+                ],
+                "properties": {
+                  "bookId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Book UUID"
+                  },
+                  "copyId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true,
+                    "description": "Specific copy UUID (optional, system auto-selects if not provided)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Loan created successfully"
+          },
+          "400": {
+            "description": "Invalid input or member ineligible"
+          },
+          "403": {
+            "description": "Member suspended or max loans exceeded"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "409": {
+            "description": "No available copies"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create a loan (borrow a book)",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/loans/{loanId}/approve-reject": {
+      "post": {
+        "description": "Admin approves or rejects a pending loan request. Admin only.",
+        "operationId": "LoansController_approveLoan",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "description": "Loan UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "isApproved"
+                ],
+                "properties": {
+                  "isApproved": {
+                    "type": "boolean",
+                    "description": "true to approve, false to reject"
+                  },
+                  "copyId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Copy UUID (required if approving)"
+                  },
+                  "rejectionReason": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Reason for rejection (optional if rejecting)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Loan approved/rejected successfully"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "409": {
+            "description": "Loan not in REQUESTED status or copy unavailable"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Approve or reject a loan",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/loans/{loanId}/renew": {
+      "post": {
+        "description": "Extends the due date of an active loan. Member (loan owner) or Admin.",
+        "operationId": "LoansController_renewLoan",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "description": "Loan UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan renewed successfully"
+          },
+          "403": {
+            "description": "Not authorized or suspended member"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "409": {
+            "description": "Renewal not allowed (max renewals, overdue, etc.)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Renew a loan",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/loans/{loanId}/cancel": {
+      "post": {
+        "description": "Cancels a pending or approved loan. Member (loan owner) or Admin.",
+        "operationId": "LoansController_cancelLoan",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "description": "Loan UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan cancelled successfully"
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "409": {
+            "description": "Loan cannot be cancelled (already active or returned)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Cancel a loan",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/loans/{loanId}/checkout": {
+      "post": {
+        "description": "Marks an approved loan as active when member picks up the book. Admin only.",
+        "operationId": "LoansController_checkoutLoan",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "description": "Loan UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan checked out successfully"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "409": {
+            "description": "Loan not in APPROVED status or member suspended"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Checkout a loan",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/loans/{loanId}/return": {
+      "post": {
+        "description": "Marks a loan as returned and calculates any overdue penalties. Member (loan owner) or Admin.",
+        "operationId": "LoansController_returnLoan",
+        "parameters": [
+          {
+            "name": "loanId",
+            "required": true,
+            "in": "path",
+            "description": "Loan UUID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan returned successfully (includes penalty if applicable)"
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "409": {
+            "description": "Loan already returned or invalid status"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Return a loan",
+        "tags": [
+          "Loans"
+        ]
+      }
+    },
+    "/api/my/loans": {
+      "get": {
+        "description": "Retrieves the authenticated member's loans with computed fields (canRenew, isOverdue, daysUntilDue). Supports filtering by status and sorting. Member only.",
+        "operationId": "MyLoansController_findMyLoans",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 20, max: 100)",
+            "schema": {
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction (default: asc)",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by (default: dueDate)",
+            "schema": {
+              "enum": [
+                "dueDate",
+                "borrowedAt",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by loan status",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED",
+                "BORROWED",
+                "RETURNED",
+                "OVERDUE",
+                "CANCELLED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member's loans retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "loans": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "memberId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "bookCopyId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "APPROVED",
+                              "REJECTED",
+                              "BORROWED",
+                              "RETURNED",
+                              "OVERDUE",
+                              "CANCELLED"
+                            ]
+                          },
+                          "requestedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "approvedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "borrowedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "dueDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "returnedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "renewalCount": {
+                            "type": "number",
+                            "example": 0
+                          },
+                          "overdueFee": {
+                            "type": "number",
+                            "example": 0
+                          },
+                          "rejectionReason": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "bookCopy": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "copyNumber": {
+                                "type": "string"
+                              },
+                              "book": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "subtitle": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "isbn": {
+                                    "type": "string"
+                                  },
+                                  "coverImageUrl": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "authors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "canRenew": {
+                            "type": "boolean",
+                            "description": "Whether loan can be renewed"
+                          },
+                          "isOverdue": {
+                            "type": "boolean",
+                            "description": "Whether loan is overdue"
+                          },
+                          "daysUntilDue": {
+                            "type": "number",
+                            "description": "Days until due (negative if overdue)",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "pageSize": {
+                          "type": "number",
+                          "example": 20
+                        },
+                        "totalItems": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (MEMBER only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get current member's loans",
+        "tags": [
+          "My Loans"
+        ]
+      }
+    },
+    "/api/audit-logs": {
+      "get": {
+        "description": "Retrieves system audit trail with filtering by user, action, entity, and date range. Returns paginated results with audit log details. Admin only.",
+        "operationId": "AuditLogsController_findAll",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 50, max: 100)",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction (default: desc)",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Field to sort by (default: createdAt)",
+            "schema": {
+              "enum": [
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs created before this date (ISO 8601 format)",
+            "schema": {
+              "format": "date-time",
+              "example": "2024-12-31T23:59:59Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs created after this date (ISO 8601 format)",
+            "schema": {
+              "format": "date-time",
+              "example": "2024-01-01T00:00:00Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entity ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityType",
+            "required": false,
+            "in": "query",
+            "description": "Filter by entity type (e.g., \"Book\", \"Loan\", \"Member\")",
+            "schema": {
+              "example": "Book",
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action (e.g., \"book.created\", \"loan.approved\")",
+            "schema": {
+              "example": "book.created",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit logs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "action": {
+                            "type": "string",
+                            "example": "book.created"
+                          },
+                          "entityType": {
+                            "type": "string",
+                            "example": "Book"
+                          },
+                          "entityId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "changes": {
+                            "type": "object",
+                            "nullable": true,
+                            "description": "JSON object containing the changes made"
+                          },
+                          "ipAddress": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "192.168.1.1"
+                          },
+                          "userAgent": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email"
+                              },
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "ADMIN",
+                                  "MEMBER"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "pageSize": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "totalItems": {
+                          "type": "number",
+                          "example": 250
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "example": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Not authorized (ADMIN only)"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List audit logs",
+        "tags": [
+          "Audit Logs"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "description": "Checks the health of system components including database and optional SMTP connectivity. Used for monitoring and deployment orchestration.",
+        "operationId": "HealthController_checkHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Health check completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "degraded",
+                        "down"
+                      ],
+                      "example": "ok",
+                      "description": "Overall system health status"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-01-15T10:30:00.000Z",
+                      "description": "ISO 8601 timestamp of the health check"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 3600,
+                      "description": "System uptime in seconds"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "properties": {
+                        "database": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "degraded",
+                                "down"
+                              ],
+                              "example": "ok"
+                            },
+                            "latency": {
+                              "type": "number",
+                              "example": 15,
+                              "description": "Response latency in milliseconds"
+                            },
+                            "error": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "Error message if status is down"
+                            }
+                          }
+                        },
+                        "smtp": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "SMTP check (only if configured)",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "ok",
+                                "degraded",
+                                "down"
+                              ],
+                              "example": "ok"
+                            },
+                            "latency": {
+                              "type": "number",
+                              "example": 50,
+                              "description": "Response latency in milliseconds"
+                            },
+                            "error": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "Error message if status is down"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Health check endpoint",
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Library Management System API",
+    "description": "RESTful API for a comprehensive Library Management System. This API provides endpoints for managing books, authors, categories, book copies, members, loans, and system settings.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Library Management Team",
+      "url": "https://github.com/library-management",
+      "email": "support@library-management.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and authorization endpoints"
+    },
+    {
+      "name": "Books",
+      "description": "Book catalog management"
+    },
+    {
+      "name": "Authors",
+      "description": "Author management"
+    },
+    {
+      "name": "Categories",
+      "description": "Category management"
+    },
+    {
+      "name": "Book Copies",
+      "description": "Physical book copy management"
+    },
+    {
+      "name": "Members",
+      "description": "Library member management"
+    },
+    {
+      "name": "Loans",
+      "description": "Loan management (Admin)"
+    },
+    {
+      "name": "My Loans",
+      "description": "Personal loan management (Member)"
+    },
+    {
+      "name": "Settings",
+      "description": "System settings management"
+    },
+    {
+      "name": "Audit Logs",
+      "description": "Audit log viewing"
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.library-management.com",
+      "description": "Production Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {}
+  }
+}

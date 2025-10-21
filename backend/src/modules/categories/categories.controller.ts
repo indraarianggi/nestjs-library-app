@@ -12,6 +12,15 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CategoriesService, PaginatedCategories } from './categories.service';
 import type { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import {
@@ -30,6 +39,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
  * CategoriesController - Handles HTTP requests for category management
  * Implements CRUD operations with proper authorization
  */
+@ApiTags('Categories')
 @Controller('categories')
 @UseGuards(RolesGuard)
 export class CategoriesController {
@@ -43,6 +53,49 @@ export class CategoriesController {
    * @param query Query parameters for filtering, sorting, and pagination
    * @returns Paginated list of categories
    */
+  @ApiOperation({
+    summary: 'List all categories',
+    description:
+      'Retrieves a paginated list of categories with search and sorting.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Search query for category name',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'createdAt'],
+    description: 'Sort field',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Categories retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid query parameters',
+  })
   @Public()
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -75,6 +128,46 @@ export class CategoriesController {
    * @param user Current authenticated user (from JWT)
    * @returns Created category
    */
+  @ApiOperation({
+    summary: 'Create a new category',
+    description: 'Creates a new category. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 100,
+          example: 'Fiction',
+        },
+        description: {
+          type: 'string',
+          nullable: true,
+          example: 'Fictional literature including novels and short stories',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Category created successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or category already exists',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(Role.ADMIN)
@@ -101,6 +194,46 @@ export class CategoriesController {
    * @param user Current authenticated user (from JWT)
    * @returns Updated category
    */
+  @ApiOperation({
+    summary: 'Update a category',
+    description: 'Updates an existing category. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Category UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', minLength: 1, maxLength: 100 },
+        description: { type: 'string', nullable: true },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Category updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found',
+  })
   @Roles(Role.ADMIN)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
@@ -128,6 +261,38 @@ export class CategoriesController {
    * @param user Current authenticated user (from JWT)
    * @returns No content (204)
    */
+  @ApiOperation({
+    summary: 'Delete a category',
+    description:
+      'Deletes a category if not referenced by any books. Admin only.',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Category UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Category deleted successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Category not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Category is referenced by books and cannot be deleted',
+  })
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

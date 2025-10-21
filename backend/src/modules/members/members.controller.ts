@@ -12,6 +12,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import {
   MembersService,
   PaginatedMembers,
   MemberDetail,
@@ -33,6 +42,8 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
  * All endpoints are admin-only and require authentication
  * Implements list, detail, update, activate, and suspend operations
  */
+@ApiTags('Members')
+@ApiBearerAuth('JWT-auth')
 @Controller('members')
 @UseGuards(RolesGuard)
 @Roles(Role.ADMIN)
@@ -59,6 +70,42 @@ export class MembersController {
    * @param queryParams Query parameters for filtering, sorting, and pagination
    * @returns Paginated list of members with statistics
    */
+  @ApiOperation({
+    summary: 'List all members',
+    description:
+      'Retrieves a paginated list of members with loan statistics. Admin only.',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Search by name or email',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PENDING', 'ACTIVE', 'SUSPENDED', 'EXPIRED'],
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['firstName', 'lastName', 'email', 'createdAt'],
+  })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Members retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Not authenticated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not authorized (ADMIN only)',
+  })
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(
@@ -97,6 +144,25 @@ export class MembersController {
    * @returns Member detail with statistics
    * @throws 404 if member not found
    */
+  @ApiOperation({
+    summary: 'Get member details',
+    description:
+      'Retrieves detailed information about a specific member. Admin only.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Member profile UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Member retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Member not found',
+  })
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string): Promise<MemberDetail> {
@@ -125,6 +191,36 @@ export class MembersController {
    * @throws 404 if member not found
    * @throws 400 for validation errors
    */
+  @ApiOperation({
+    summary: 'Update member profile',
+    description: 'Updates member profile information. Admin only.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Member profile UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        firstName: { type: 'string', maxLength: 100 },
+        lastName: { type: 'string', maxLength: 100 },
+        phone: { type: 'string', nullable: true },
+        address: { type: 'string', nullable: true },
+        notes: { type: 'string', nullable: true },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Member updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Member not found',
+  })
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   async update(
@@ -165,6 +261,28 @@ export class MembersController {
    * @throws 404 if member not found
    * @throws 409 if member already active
    */
+  @ApiOperation({
+    summary: 'Activate a member',
+    description: 'Changes member status from PENDING to ACTIVE. Admin only.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Member profile UUID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Member activated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Member not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Member already active',
+  })
   @Post(':id/activate')
   @HttpCode(HttpStatus.OK)
   async activate(
@@ -205,6 +323,40 @@ export class MembersController {
    * @throws 404 if member not found
    * @throws 409 if member already suspended
    */
+  @ApiOperation({
+    summary: 'Suspend a member',
+    description: 'Changes member status from ACTIVE to SUSPENDED. Admin only.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Member profile UUID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: {
+          type: 'string',
+          nullable: true,
+          description: 'Reason for suspension',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Member suspended successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Member not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Member already suspended',
+  })
   @Post(':id/suspend')
   @HttpCode(HttpStatus.OK)
   async suspend(
