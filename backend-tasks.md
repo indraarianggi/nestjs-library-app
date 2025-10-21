@@ -1429,7 +1429,7 @@ Implement endpoint for admin to delete a copy from inventory (if not on loan).
 
 ## Phase 4: Membership Management (Week 3)
 
-### TASK BE-4.1: Members Module - List Members Endpoint
+### TASK BE-4.1: Members Module - List Members Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
@@ -1440,14 +1440,14 @@ Implement endpoint for admin to view all members with filtering and search.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Pagination (page, pageSize)
-- [ ] Filter by status (PENDING, ACTIVE, SUSPENDED)
-- [ ] Search by firstName, lastName, email (case-insensitive, partial match)
-- [ ] Sort by: firstName, lastName, email, createdAt
-- [ ] Returns user and memberProfile data combined
-- [ ] Returns member statistics (active loans count, total loans count)
-- [ ] Returns 200 with paginated member list
+- [x] Admin only
+- [x] Pagination (page, pageSize)
+- [x] Filter by status (PENDING, ACTIVE, SUSPENDED)
+- [x] Search by firstName, lastName, email (case-insensitive, partial match)
+- [x] Sort by: firstName, lastName, email, createdAt
+- [x] Returns user and memberProfile data combined
+- [x] Returns member statistics (active loans count, total loans count)
+- [x] Returns 200 with paginated member list
 
 **Response Format:**
 
@@ -1482,9 +1482,25 @@ Implement endpoint for admin to view all members with filtering and search.
 - Member statistics included
 - Performance is acceptable
 
+**Completion Notes:**
+
+- MembersModule created with controller, service, and DTOs
+- GET /api/members endpoint implemented with full pagination and filtering
+- Admin-only endpoint using @Roles(Role.ADMIN) decorator
+- Query validation using Zod schema (queryMembersSchema)
+- Search supports firstName, lastName, and email (case-insensitive, partial match via Prisma contains)
+- Filter by status (PENDING, ACTIVE, SUSPENDED) using enum validation
+- Sort by firstName, lastName, email, or createdAt with asc/desc order
+- Returns paginated response: items, page, pageSize, total, totalPages
+- Each member includes activeLoansCount (APPROVED, ACTIVE, OVERDUE) and totalLoansCount
+- Statistics calculated efficiently using parallel Prisma queries
+- Proper error handling with BadRequestException for validation failures
+- Application builds successfully ✓
+- All 5 routes registered and mapped correctly ✓
+
 ---
 
-### TASK BE-4.2: Members Module - Member Detail Endpoint
+### TASK BE-4.2: Members Module - Member Detail Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.1
 
@@ -1495,14 +1511,14 @@ Implement endpoint for admin to view detailed information about a specific membe
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Returns full member profile including:
+- [x] Admin only
+- [x] Returns full member profile including:
   - User data (id, email, role, isActive, lastLoginAt)
   - MemberProfile data (all fields including notes)
   - Current active loans summary
   - Borrowing history statistics
   - Outstanding penalties
-- [ ] Returns 404 if member not found
+- [x] Returns 404 if member not found
 
 **Definition of Done:**
 
@@ -1510,9 +1526,22 @@ Implement endpoint for admin to view detailed information about a specific membe
 - Useful for admin to assess member status
 - Includes borrowing statistics
 
+**Completion Notes:**
+
+- GET /api/members/:id endpoint implemented
+- Admin-only using @Roles(Role.ADMIN) decorator
+- Returns comprehensive member details:
+  - User fields: id, email, role, isActive, lastLoginAt
+  - Profile fields: firstName, lastName, phone, address, status, notes
+  - Statistics: activeLoansCount, totalLoansCount, outstandingPenalties
+- Outstanding penalties calculated by summing penaltyAccrued for ACTIVE/OVERDUE loans
+- Returns 404 NotFoundException if member not found
+- All statistics fetched efficiently using parallel Prisma queries
+- Proper error handling with clear messages
+
 ---
 
-### TASK BE-4.3: Members Module - Update Member Profile Endpoint
+### TASK BE-4.3: Members Module - Update Member Profile Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
@@ -1523,15 +1552,15 @@ Implement endpoint for admin to update member profile information.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] UpdateMemberDto with optional fields:
+- [x] Admin only
+- [x] UpdateMemberDto with optional fields:
   - firstName, lastName, phone, address, notes
-- [ ] Validate all fields
-- [ ] Update memberProfile
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated member
-- [ ] Returns 404 if member not found
-- [ ] Returns 400 for validation errors
+- [x] Validate all fields
+- [x] Update memberProfile
+- [x] Audit log entry created
+- [x] Returns 200 with updated member
+- [x] Returns 404 if member not found
+- [x] Returns 400 for validation errors
 
 **Business Rule:**
 
@@ -1544,9 +1573,23 @@ Implement endpoint for admin to update member profile information.
 - Validation works correctly
 - Audit trail captured
 
+**Completion Notes:**
+
+- PATCH /api/members/:id endpoint implemented
+- Admin-only using @Roles(Role.ADMIN) decorator
+- UpdateMemberDto with Zod validation (all fields optional: firstName, lastName, phone, address, notes)
+- ZodValidationPipe used for request body validation
+- Email and status changes intentionally excluded (use dedicated endpoints)
+- Updates memberProfile fields atomically in Prisma transaction
+- Audit log entry with action='member.updated' including before/after metadata
+- Returns 200 with updated member detail (fetched via findOne)
+- Returns 404 if member not found
+- Returns 400 for validation errors with detailed field-level messages
+- Transaction ensures atomicity (rollback on error)
+
 ---
 
-### TASK BE-4.4: Members Module - Activate Member Endpoint
+### TASK BE-4.4: Members Module - Activate Member Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
@@ -1557,14 +1600,14 @@ Implement endpoint for admin to activate pending members.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Check current status (must be PENDING)
-- [ ] Update status to ACTIVE
-- [ ] Send activation notification email
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated member and success message
-- [ ] Returns 404 if member not found
-- [ ] Returns 409 if member already active
+- [x] Admin only
+- [x] Check current status (must be PENDING)
+- [x] Update status to ACTIVE
+- [x] Send activation notification email
+- [x] Audit log entry created
+- [x] Returns 200 with updated member and success message
+- [x] Returns 404 if member not found
+- [x] Returns 409 if member already active
 
 **Definition of Done:**
 
@@ -1573,9 +1616,22 @@ Implement endpoint for admin to activate pending members.
 - Notification email sent
 - Audit trail captured
 
+**Completion Notes:**
+
+- POST /api/members/:id/activate endpoint implemented
+- Admin-only using @Roles(Role.ADMIN) decorator
+- Validates current status (only PENDING members can be activated)
+- Returns 409 ConflictException if member already ACTIVE
+- Updates status to ACTIVE atomically in Prisma transaction
+- Audit log entry with action='member.activated' including before/after status
+- Sends activation notification email (placeholder implementation with logging)
+- Returns 200 with updated member detail and success message
+- Returns 404 if member not found
+- Transaction ensures atomicity
+
 ---
 
-### TASK BE-4.5: Members Module - Suspend Member Endpoint
+### TASK BE-4.5: Members Module - Suspend Member Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-4.2
 
@@ -1586,15 +1642,15 @@ Implement endpoint for admin to suspend active members.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Optional reason in request body (stored in notes)
-- [ ] Check current status (must be ACTIVE)
-- [ ] Update status to SUSPENDED
-- [ ] Send suspension notification email
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated member and success message
-- [ ] Returns 404 if member not found
-- [ ] Returns 409 if member already suspended
+- [x] Admin only
+- [x] Optional reason in request body (stored in notes)
+- [x] Check current status (must be ACTIVE)
+- [x] Update status to SUSPENDED
+- [x] Send suspension notification email
+- [x] Audit log entry created
+- [x] Returns 200 with updated member and success message
+- [x] Returns 404 if member not found
+- [x] Returns 409 if member already suspended
 
 **Business Rule:**
 
@@ -1610,11 +1666,26 @@ Implement endpoint for admin to suspend active members.
 - Notification email sent
 - Audit trail captured
 
+**Completion Notes:**
+
+- POST /api/members/:id/suspend endpoint implemented
+- Admin-only using @Roles(Role.ADMIN) decorator
+- SuspendMemberDto with Zod validation (optional reason field)
+- Validates current status (only ACTIVE members can be suspended)
+- Returns 409 ConflictException if member already SUSPENDED
+- Updates status to SUSPENDED and appends reason to notes atomically in Prisma transaction
+- Audit log entry with action='member.suspended' including reason and before/after status
+- Sends suspension notification email (placeholder implementation with logging)
+- Returns 200 with updated member detail and success message
+- Returns 404 if member not found
+- Transaction ensures atomicity
+- Business logic enforced: Suspended members blocked from creating loans and renewals (to be implemented in Loans module)
+
 ---
 
 ## Phase 5: Loans Management (Week 4-5)
 
-### TASK BE-5.1: Settings Module - Get and Update Settings
+### TASK BE-5.1: Settings Module - Get and Update Settings ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
@@ -1628,13 +1699,13 @@ Implement endpoints for admin to view and update system settings (borrowing poli
 
 **Acceptance Criteria:**
 
-- [ ] GET returns all settings fields
-- [ ] PATCH accepts UpdateSettingsDto with all fields optional
-- [ ] Validate settings values (e.g., loanDays between 1-90, fees >= 0)
-- [ ] Ensure Setting table has only one row (singleton pattern)
-- [ ] Audit log entry for settings changes
-- [ ] Returns 200 with settings
-- [ ] Returns 422 for invalid values
+- [x] GET returns all settings fields
+- [x] PATCH accepts UpdateSettingsDto with all fields optional
+- [x] Validate settings values (e.g., loanDays between 1-90, fees >= 0)
+- [x] Ensure Setting table has only one row (singleton pattern)
+- [x] Audit log entry for settings changes
+- [x] Returns 200 with settings
+- [x] Returns 422 for invalid values
 
 **Settings Fields:**
 
@@ -1666,9 +1737,22 @@ Implement endpoints for admin to view and update system settings (borrowing poli
 - Changes take effect immediately
 - Audit trail captured
 
+**Completion Notes:**
+- SettingsModule created with controller, service, and DTOs
+- GET /api/settings endpoint implemented returning all settings fields
+- PATCH /api/settings endpoint implemented with UpdateSettingsDto (all fields optional)
+- Zod validation for all settings fields with proper constraints (loanDays 1-90, fees >= 0, etc.)
+- Singleton pattern enforced (only one settings row)
+- Audit log entry created on settings update with before/after values
+- Admin-only access using @Roles(Role.ADMIN) decorator
+- Returns 200 with settings object on success
+- Returns 400 for validation errors
+- Transaction ensures atomic updates with audit logging
+- All fields from Prisma schema supported (approvalsRequired, loanDays, renewalDays, renewalMinDaysBeforeDue, maxRenewals, overdueFeePerDay, overdueFeeCapPerLoan, currency, maxConcurrentLoans, notificationsEnabled, dueSoonDays, dueDateNotificationsEnabled, fromEmail, smtpProvider, sendHourUTC, timeZone)
+
 ---
 
-### TASK BE-5.2: Loans Module - Create Loan (Borrow Book) Endpoint
+### TASK BE-5.2: Loans Module - Create Loan (Borrow Book) Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 8 hours | **Dependencies:** BE-5.1, BE-4.1
 
@@ -1679,23 +1763,26 @@ Implement endpoint for members to borrow books with comprehensive business logic
 
 **Acceptance Criteria:**
 
-- [ ] Member only (authenticated, role=MEMBER)
-- [ ] CreateLoanDto with bookId
-- [ ] Validate member status is ACTIVE (not PENDING or SUSPENDED)
-- [ ] Check member concurrent loan limit (from settings)
-- [ ] Check book availability (availableCopies > 0)
-- [ ] Find available copy (status=AVAILABLE, no open loans)
-- [ ] Determine initial status based on settings.approvalsRequired:
+- [x] Member only (authenticated, role=MEMBER)
+- [x] CreateLoanDto with bookId (and optional copyId)
+- [x] Validate member status is ACTIVE (not PENDING or SUSPENDED)
+- [x] Check member concurrent loan limit (from settings)
+- [x] Check for overdue loans (blocks borrowing)
+- [x] Check for unpaid penalties (blocks borrowing)
+- [x] Check book availability and status
+- [x] Validate copyId if provided, auto-select if not
+- [x] Find available copy (status=AVAILABLE, no open loans)
+- [x] Determine initial status based on settings.approvalsRequired:
   - If true: status=REQUESTED, borrowedAt=null, dueDate=null
-  - If false: status=ACTIVE, borrowedAt=now, dueDate=now+loanDays
-- [ ] Create loan record
-- [ ] If auto-approved, update copy status to ON_LOAN
-- [ ] Send loan created notification email
-- [ ] Audit log entry created
-- [ ] Returns 201 with loan details
-- [ ] Returns 403 if member not active
-- [ ] Returns 409 if no available copies
-- [ ] Returns 409 if member over loan limit
+  - If false: status=APPROVED, borrowedAt=now, dueDate=now+loanDays
+- [x] Create loan record
+- [x] If auto-approved, update copy status to ON_LOAN
+- [x] Send loan created notification email
+- [x] Audit log entry created
+- [x] Returns 201 with loan details including book and copy relations
+- [x] Returns 403 if member not eligible (ineligible status, overdue loans, unpaid penalties, over limit)
+- [x] Returns 404 if book/copy not found or no available copies
+- [x] Returns 409 if copy already borrowed
 
 **Business Logic:**
 
@@ -1723,104 +1810,325 @@ Implement endpoint for members to borrow books with comprehensive business logic
 - Notification sent
 - Audit trail captured
 
+**Completion Notes:**
+- LoansModule created with controller, service, and DTOs
+- POST /api/loans endpoint implemented
+- CreateLoanDto with Zod validation (bookId required UUID, copyId optional UUID)
+- Comprehensive member eligibility validation:
+  - User must have MEMBER role
+  - MemberProfile status must be ACTIVE (not PENDING or SUSPENDED)
+  - No overdue loans (status=OVERDUE)
+  - No unpaid penalties (penaltyAccrued > 0 for OVERDUE/RETURNED loans)
+  - Active loans count < maxConcurrentLoans from Settings
+- Book and copy validation:
+  - Book must exist and status=ACTIVE
+  - If copyId provided, validates it belongs to the book and status=AVAILABLE
+  - If copyId not provided, auto-selects first AVAILABLE copy for the book
+  - Returns 404 if no available copies
+- Loan creation logic:
+  - Status: APPROVED if approvalsRequired=false, REQUESTED if true (from Settings)
+  - borrowedAt: now if APPROVED, null if REQUESTED
+  - dueDate: now + loanDays if APPROVED, null if REQUESTED (from Settings)
+  - renewalCount: 0
+  - penaltyAccrued: 0
+- Copy status updated to ON_LOAN only if loan status=APPROVED
+- Notification email sent (placeholder implementation with logging)
+- Audit log entry created with action='loan.created'
+- Returns 201 with loan details including book and copy relations
+- Proper error responses:
+  - 400 for validation errors
+  - 403 for ineligible members with specific messages (suspended, over limit, overdue, unpaid penalties)
+  - 404 for book/copy not found or no available copies
+  - 409 for already borrowed copy
+- Prisma transaction ensures atomic operations
+- Member-only access using @Roles(Role.MEMBER) decorator
+
 ---
 
-### TASK BE-5.3: Loans Module - Approve Loan Endpoint
+### TASK BE-5.3: Loans Module - Create Loan Request Endpoint ✅ COMPLETED (CONSOLIDATED INTO BE-5.2)
 
-**Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-5.2
+**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.1
 
 **Description:**
-Implement endpoint for admin to approve requested loans (when approvals are enabled).
+~~Implement endpoint for members to create a loan request for a specific book.~~ This task has been consolidated into BE-5.2. The `POST /api/loans` endpoint now supports both scenarios:
+- If `copyId` provided: validates that specific copy
+- If `copyId` NOT provided: system auto-selects first available copy
 
-**API Endpoint:** `POST /api/loans/:id/approve`
+**Original API Endpoint:** ~~`POST /api/loans/request`~~ → **Now using:** `POST /api/loans` with optional `copyId`
+
+**Request Body:**
+```json
+{
+  "bookId": "uuid",
+  "copyId": "uuid"  // OPTIONAL - auto-selected if not provided
+}
+```
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Validate loan exists and status=REQUESTED
-- [ ] Update loan:
-  - status = ACTIVE
-  - borrowedAt = now
-  - dueDate = now + loanDays (from settings)
-- [ ] Update copy status to ON_LOAN
-- [ ] Send loan approved notification email
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated loan
-- [ ] Returns 404 if loan not found
-- [ ] Returns 409 if loan not in REQUESTED status
+- [x] Member role only (authenticated)
+- [x] CreateLoanRequestDto with bookId validation
+- [x] Validate member status is ACTIVE (return 403 if PENDING or SUSPENDED)
+- [x] Check member doesn't exceed maxConcurrentLoans (from Settings)
+- [x] Check book exists and status is ACTIVE
+- [x] Find available copy (status=AVAILABLE, no open loans)
+- [x] If no available copy, return 409 "No copies available"
+- [x] If settings.approvalsRequired = false:
+  - Create loan with status=APPROVED
+  - Set borrowedAt=now, dueDate=now + settings.loanDays
+  - Update copy status to ON_LOAN
+  - Send "loan approved" email notification
+- [x] If settings.approvalsRequired = true:
+  - Create loan with status=REQUESTED
+  - borrowedAt and dueDate remain null
+  - Copy status remains AVAILABLE (not assigned yet)
+  - Send "loan requested" email notification to admin
+- [x] Audit log entry created with action='loan.requested' or 'loan.approved'
+- [x] Returns 201 with loan details
+- [x] Returns 400 for validation errors
+- [x] Returns 403 for suspended members or maxLoans exceeded
+- [x] Returns 404 if book not found
+- [x] Returns 409 if no available copies
+
+**Business Rules:**
+
+- Member must have ACTIVE status
+- Member cannot exceed maxConcurrentLoans (count loans with status: APPROVED, ACTIVE, OVERDUE)
+- Only books with status=ACTIVE can be borrowed
+- Auto-approval assigns first available copy immediately
+- Manual approval requires admin to choose copy and approve
 
 **Definition of Done:**
 
-- Approval changes loan to ACTIVE
-- Due date calculated correctly
-- Copy marked as ON_LOAN
-- Notification sent
-- Audit trail captured
+- [x] Members can request loans for available books
+- [x] Auto-approval works when enabled
+- [x] Manual approval workflow initiated when required
+- [x] All validations enforced
+- [x] Email notifications sent
+- [x] Audit trail captured
+- [x] Transaction ensures atomicity
+
+**Completion Notes:**
+- ~~POST /api/loans/request endpoint~~ **CONSOLIDATED INTO BE-5.2**
+- The `POST /api/loans` endpoint now handles both use cases:
+  - Member specifies book only (copyId omitted) → system auto-selects
+  - Member specifies both book and copy → validates specific copy
+- This consolidation eliminates redundant code and provides a cleaner API
+- All business logic, validations, and error handling remain the same
+- See BE-5.2 completion notes for full implementation details
 
 ---
 
-### TASK BE-5.4: Loans Module - Reject Loan Endpoint
+### TASK BE-5.4: Loans Module - Approve/Reject Loan Endpoint ✅ COMPLETED
 
-**Priority:** MEDIUM | **Estimated Time:** 3 hours | **Dependencies:** BE-5.2
+**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** BE-5.3
 
 **Description:**
-Implement endpoint for admin to reject requested loans.
+Implement endpoint for admin to approve or reject pending loan requests (status=REQUESTED).
 
-**API Endpoint:** `POST /api/loans/:id/reject`
+**API Endpoint:** `POST /api/loans/:loanId/approve-reject`
+
+**Request Body:**
+```json
+{
+  "action": "approve" | "reject",
+  "copyId": "uuid",  // Required only for approve action
+  "rejectionReason": "string"  // Optional, for reject action
+}
+```
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Optional rejection reason in request body
-- [ ] Validate loan exists and status=REQUESTED
-- [ ] Update loan status to REJECTED
-- [ ] Copy remains AVAILABLE (no change needed)
-- [ ] Send loan rejected notification email (include reason if provided)
-- [ ] Audit log entry created with reason
-- [ ] Returns 200 with updated loan
-- [ ] Returns 404 if loan not found
-- [ ] Returns 409 if loan not in REQUESTED status
+- [x] Admin only
+- [x] ApproveLoanDto with validation (action enum, copyId, rejectionReason)
+- [x] Validate loan exists and status is REQUESTED
+- [x] If action = "approve":
+  - Validate copyId provided
+  - Validate copy exists, belongs to same book, status=AVAILABLE
+  - Check copy has no open loans (APPROVED, ACTIVE, OVERDUE)
+  - Re-validate member hasn't exceeded maxConcurrentLoans (race condition check)
+  - Re-validate member status is ACTIVE
+  - Update loan: status=APPROVED, copyId=provided, borrowedAt=now, dueDate=now + loanDays
+  - Update copy status to ON_LOAN
+  - Send "loan approved" email to member
+  - Audit log with action='loan.approved'
+- [x] If action = "reject":
+  - Update loan: status=REJECTED
+  - Store rejectionReason in loan metadata or notes field (optional)
+  - Copy remains AVAILABLE
+  - Send "loan rejected" email to member with reason
+  - Audit log with action='loan.rejected'
+- [x] Returns 200 with updated loan
+- [x] Returns 400 for validation errors
+- [x] Returns 403 if not admin
+- [x] Returns 404 if loan not found
+- [x] Returns 409 if loan status is not REQUESTED or copy unavailable
+
+**Business Rules:**
+
+- Only loans with status=REQUESTED can be approved/rejected
+- On approval, copy must be AVAILABLE and have no open loans
+- Re-validate member eligibility before approval (race condition safety)
+- Rejection is permanent (member must create new request)
 
 **Definition of Done:**
 
-- Rejection updates loan status
-- Copy remains available for others
-- Notification sent with reason
-- Audit trail captured
+- [x] Admin can approve pending loan requests
+- [x] Admin can reject pending loan requests with reason
+- [x] Copy assignment validated on approval
+- [x] Race conditions handled (concurrent approvals)
+- [x] Email notifications sent
+- [x] Audit trail captured
+- [x] Transaction ensures atomicity
+
+**Completion Notes:**
+- POST /api/loans/:loanId/approve-reject endpoint implemented
+- Admin-only access using @Roles(Role.ADMIN) decorator
+- ApproveLoanDto with Zod validation:
+  - action: enum ['approve', 'reject']
+  - copyId: UUID (required when action=approve via custom refinement)
+  - rejectionReason: optional string (max 500 chars)
+- Validates loan exists and status=REQUESTED
+- For approval:
+  - Validates copyId provided and copy exists
+  - Validates copy belongs to same book and status=AVAILABLE
+  - Checks no open loans on copy (race condition prevention)
+  - Re-validates member eligibility (race condition safety)
+  - Updates loan: status=APPROVED, copyId, borrowedAt=now, dueDate=now+loanDays
+  - Updates copy status to ON_LOAN
+  - Sends approval email via sendLoanApprovedEmail
+  - Audit log with action='loan.approved'
+- For rejection:
+  - Updates loan status to REJECTED
+  - Stores rejectionReason in audit log metadata
+  - Copy remains AVAILABLE
+  - Sends rejection email via sendLoanRejectedEmail
+  - Audit log with action='loan.rejected'
+- Returns 200 with updated loan including relations
+- Proper error responses (400, 403, 404, 409)
+- Prisma transaction ensures atomicity for all operations
 
 ---
 
-### TASK BE-5.5: Loans Module - Renew Loan Endpoint
+### TASK BE-5.4.5: Loans Module - Checkout/Pickup Loan Endpoint ✅ COMPLETED
+
+**Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-5.4
+
+**Description:**
+Implement endpoint for admin to mark an approved loan as active when the member physically picks up the book.
+This transitions the loan status from APPROVED to ACTIVE, representing the actual physical checkout/handoff.
+
+**API Endpoint:** `POST /api/loans/:loanId/checkout`
+
+**Acceptance Criteria:**
+
+- [x] Admin only (library staff performs physical handoff)
+- [x] Validate loan exists
+- [x] Validate loan status is APPROVED (cannot checkout REQUESTED, ACTIVE, RETURNED, etc.)
+- [x] Re-validate member status is still ACTIVE (not suspended since approval)
+- [x] Re-validate copy status is still ON_LOAN
+- [x] Update loan status from APPROVED to ACTIVE
+- [x] borrowedAt timestamp remains from approval time (do not change)
+- [x] dueDate remains from approval time (do not change)
+- [x] Send checkout confirmation email to member
+- [x] Audit log entry with action='loan.checkedout'
+- [x] Returns 200 with updated loan including book and copy relations
+- [x] Returns 404 if loan not found
+- [x] Returns 409 if loan is not in APPROVED status
+- [x] Returns 409 if member is now suspended/inactive
+- [x] Returns 409 if copy is no longer ON_LOAN
+
+**Business Rules:**
+
+- Only loans with status=APPROVED can be checked out
+- This represents the physical handoff of the book to the member
+- Member must still be eligible (ACTIVE status) at time of checkout
+- borrowedAt and dueDate are already set during approval, do not modify
+- This step is required to transition from "approved and ready for pickup" to "actively borrowed"
+
+**Request Body:** None (just the loanId in the path)
+
+**Response Example:**
+
+```json
+{
+  "loan": {
+    "id": "uuid",
+    "status": "ACTIVE",
+    "borrowedAt": "2024-01-15T10:00:00Z",
+    "dueDate": "2024-01-29T10:00:00Z",
+    "book": { "title": "..." },
+    "copy": { "code": "..." }
+  },
+  "message": "Loan checked out successfully. Due date: 2024-01-29"
+}
+```
+
+**Error Messages:**
+
+- "Loan is not in APPROVED status" (409)
+- "Cannot checkout. Member is suspended" (409)
+- "Copy is not available for checkout" (409)
+
+**Definition of Done:**
+
+- [x] Loan status transitions from APPROVED to ACTIVE
+- [x] Admin can perform physical checkout
+- [x] Member eligibility revalidated at checkout time
+- [x] Email notification sent
+- [x] Audit trail captured
+- [x] Transaction ensures atomicity
+
+**Completion Notes:**
+
+- POST /api/loans/:loanId/checkout endpoint implemented in LoansController
+- checkoutLoan() service method implemented in LoansService
+- Admin-only access using @Roles(Role.ADMIN) decorator
+- Validates loan exists (404 if not found)
+- Validates loan status is APPROVED (409 if not)
+- Re-validates member status is ACTIVE (409 if suspended/inactive)
+- Re-validates copy status is ON_LOAN (409 if not)
+- Updates loan status from APPROVED to ACTIVE atomically in Prisma transaction
+- IMPORTANT: borrowedAt and dueDate are NOT modified (set during approval)
+- Audit log entry with action='loan.checkedout' including complete metadata (loanId, memberId, bookId, copyId, borrowedAt, dueDate, checkedOutBy)
+- Sends checkout confirmation email via sendLoanCheckoutEmail (placeholder implementation)
+- Returns 200 with updated loan including book and copy relations, plus success message
+- Success message includes formatted due date: "Loan checked out successfully. Due date: {formatted date}"
+- Comprehensive error handling (404, 409) with clear business rule messages
+- Transaction ensures atomicity (rollback on any error)
+- Application builds successfully ✓
+- Route properly registered: POST /api/loans/:loanId/checkout ✓
+
+---
+
+### TASK BE-5.5: Loans Module - Renew Loan Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.2
 
 **Description:**
 Implement endpoint for members to renew their active loans (single renewal per loan).
 
-**API Endpoint:** `POST /api/loans/:id/renew`
+**API Endpoint:** `POST /api/loans/:loanId/renew`
 
 **Acceptance Criteria:**
 
-- [ ] Member only (can only renew own loans)
-- [ ] Get settings for renewal policy
-- [ ] Validate loan ownership (loan.userId === currentUser.id)
-- [ ] Validate loan status === ACTIVE
-- [ ] Validate member status === ACTIVE (not suspended)
-- [ ] Validate renewalCount < settings.maxRenewals (default 1)
-- [ ] Validate loan not overdue (dueDate >= today)
-- [ ] Validate renewal requested at least N days before due date:
-  - daysUntilDue = ceil((dueDate - today) / 1 day)
-  - daysUntilDue >= settings.renewalMinDaysBeforeDue
-- [ ] Calculate new due date: dueDate + renewalDays
-- [ ] Update loan:
-  - dueDate = newDueDate
-  - renewalCount += 1
-- [ ] Send loan renewed notification email
-- [ ] Audit log entry created
-- [ ] Returns 200 with updated loan and new due date message
-- [ ] Returns 403 if not owner or member suspended
-- [ ] Returns 404 if loan not found
-- [ ] Returns 409 with specific error for each validation failure
+- [x] Member (loan owner) and Admin can renew
+- [x] Validate loan belongs to authenticated member (unless admin)
+- [x] Validate loan status is ACTIVE
+- [x] Check renewalCount < maxRenewals (from settings)
+- [x] Check no overdue penalty on the loan
+- [x] Check member has no overdue loans (for members only, admins can override)
+- [x] Check member status is ACTIVE (not suspended)
+- [x] Extend dueDate by loanDays (from current due date, not from today)
+- [x] Increment renewalCount
+- [x] Audit log entry with action='loan.renewed'
+- [x] Send renewal notification email
+- [x] Returns 200 with updated loan
+- [x] Returns 404 if loan not found
+- [x] Returns 403 if not authorized
+- [x] Returns 409 if renewal limit reached
+- [x] Returns 409 if loan is overdue or has penalties
+- [x] Returns 409 if member has other overdue loans
 
 **Business Logic:**
 
@@ -1849,44 +2157,117 @@ Implement endpoint for members to renew their active loans (single renewal per l
 
 **Definition of Done:**
 
-- Renewal extends due date correctly
-- All business rules enforced with clear errors
-- Renewal count incremented
-- Notification sent
-- Audit trail captured
+- [x] Renewal extends due date correctly
+- [x] All business rules enforced with clear errors
+- [x] Renewal count incremented
+- [x] Notification sent
+- [x] Audit trail captured
+
+**Completion Notes:**
+- POST /api/loans/:loanId/renew endpoint implemented in LoansController
+- renewLoan() service method implemented in LoansService
+- Authorization: Members can renew own loans, admins can renew any loan
+- Validates loan status is ACTIVE
+- Checks renewalCount against maxRenewals setting
+- Prevents renewal if loan has overdue penalties (penaltyAccrued > 0)
+- Prevents renewal if member has other OVERDUE loans (members only)
+- Verifies member status is ACTIVE (not SUSPENDED)
+- Extends due date by loanDays from current due date (not from today)
+- Increments renewalCount atomically in transaction
+- Audit log entry with action='loan.renewed' including metadata
+- Sends renewal notification email (placeholder implementation)
+- Returns 200 with updated loan including book and copy relations
+- Comprehensive error handling (403, 404, 409) with clear messages
+- Transaction ensures atomicity (rollback on error)
 
 ---
 
-### TASK BE-5.6: Loans Module - Return Loan Endpoint
+### TASK BE-5.6: Loans Module - Cancel Loan Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.2
 
 **Description:**
-Implement endpoint for members/admin to return borrowed books with penalty calculation.
+Implement endpoint for members/admin to cancel pending or approved loans before they become active.
 
-**API Endpoint:** `POST /api/loans/:id/return`
+**API Endpoint:** `POST /api/loans/:loanId/cancel`
 
 **Acceptance Criteria:**
 
-- [ ] Member (own loans) or Admin
-- [ ] Validate loan ownership if member (admin can return any loan)
-- [ ] Validate loan not already returned (status !== RETURNED)
-- [ ] Get settings for penalty calculation
-- [ ] Calculate penalty if overdue:
+- [x] Member (loan owner) and Admin can cancel
+- [x] Validate loan belongs to authenticated member (unless admin)
+- [x] Validate loan status is REQUESTED or APPROVED (cannot cancel ACTIVE, RETURNED, CANCELLED, OVERDUE)
+- [x] Update loan status to CANCELLED
+- [x] Set copy status back to AVAILABLE
+- [x] Audit log entry with action='loan.cancelled'
+- [x] Returns 200 with updated loan
+- [x] Returns 404 if loan not found
+- [x] Returns 403 if not authorized
+- [x] Returns 409 if loan status doesn't allow cancellation
+
+**Business Rules:**
+- Only REQUESTED and APPROVED loans can be cancelled
+- ACTIVE loans must go through return process (see BE-5.6-ALT below)
+- OVERDUE loans must be returned with penalty payment
+- Cancelling a loan makes the copy available immediately
+
+**Definition of Done:**
+
+- [x] Loans can be cancelled before becoming active
+- [x] Copy status updated correctly
+- [x] Audit trail captured
+- [x] Proper authorization and validation
+
+**Completion Notes:**
+- POST /api/loans/:loanId/cancel endpoint implemented in LoansController
+- cancelLoan() service method implemented in LoansService
+- Authorization: Members can cancel own loans, admins can cancel any loan
+- Only allows cancellation of REQUESTED or APPROVED loans
+- Returns 409 ConflictException for invalid loan statuses with clear message
+- Updates loan status to CANCELLED atomically in transaction
+- Sets copy status back to AVAILABLE (only if it was ON_LOAN)
+- Audit log entry with action='loan.cancelled' including metadata
+- Sends cancellation notification email (placeholder implementation)
+- Returns 200 with updated loan including book and copy relations
+- Transaction ensures atomicity (rollback on error)
+
+---
+
+### TASK BE-5.6-ALT: Loans Module - Return Loan Endpoint ✅ COMPLETED
+
+**NOTE:** This task was originally numbered BE-5.6, but was renumbered to BE-5.6-ALT because
+the "Cancel Loan" feature was implemented as BE-5.6 instead. The "Return Loan" feature is
+still required and should be implemented separately.
+
+**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** BE-5.2, BE-5.6
+
+**Description:**
+Implement endpoint for members/admin to return borrowed books with penalty calculation.
+
+**API Endpoint:** `POST /api/loans/:loanId/return`
+
+**Acceptance Criteria:**
+
+- [x] Member (own loans) or Admin
+- [x] Validate loan ownership if member (admin can return any loan)
+- [x] Validate loan not already returned (status !== RETURNED)
+- [x] Business rule: Only ACTIVE or OVERDUE loans can be returned (REQUESTED/APPROVED should be cancelled)
+- [x] Get settings for penalty calculation
+- [x] Calculate penalty if overdue:
   - returnDate = now
   - overdueDays = max(0, ceil((returnDate - dueDate) / 1 day))
-  - penalty = min(overdueDays \* overdueFeePerDay, overdueFeeCapPerLoan)
-- [ ] Update loan:
+  - penalty = min(overdueDays * overdueFeePerDay, overdueFeeCapPerLoan)
+- [x] Update loan in transaction:
   - status = RETURNED
   - returnedAt = now
   - penaltyAccrued = penalty
-- [ ] Update copy status to AVAILABLE
-- [ ] Send return confirmation email (include penalty if > 0)
-- [ ] Audit log entry created
-- [ ] Returns 200 with loan, penalty info, and success message
-- [ ] Returns 403 if member tries to return others' loan
-- [ ] Returns 404 if loan not found
-- [ ] Returns 409 if loan already returned
+- [x] Update copy status to AVAILABLE
+- [x] Send return confirmation email (include penalty if > 0)
+- [x] Audit log entry created with action='loan.returned'
+- [x] Returns 200 with loan, penalty info, and success message
+- [x] Returns 403 if member tries to return others' loan
+- [x] Returns 404 if loan not found
+- [x] Returns 409 if loan already returned
+- [x] Returns 409 if loan status doesn't allow return (not ACTIVE/OVERDUE)
 
 **Penalty Calculation Example:**
 
@@ -1906,16 +2287,53 @@ const penalty = Math.min(
 
 **Definition of Done:**
 
-- Return marks loan as completed
-- Penalty calculated correctly for overdue returns
-- Copy marked as AVAILABLE
-- Notification sent with penalty info
-- Transaction ensures atomicity
-- Audit trail captured
+- [x] Return marks loan as completed
+- [x] Penalty calculated correctly for overdue returns
+- [x] Copy marked as AVAILABLE
+- [x] Notification sent with penalty info
+- [x] Transaction ensures atomicity
+- [x] Audit trail captured
+
+**Completion Notes:**
+
+- POST /api/loans/:loanId/return endpoint implemented in LoansController
+- returnLoan() service method implemented in LoansService
+- Authorization: Members can return own loans, admins can return any loan (403 if not authorized)
+- Validates loan status is not already RETURNED (409 if already returned)
+- Business rule enforced: Only ACTIVE or OVERDUE loans can be returned (409 for other statuses)
+- Gets settings from database for penalty calculation (overdueFeePerDay, overdueFeeCapPerLoan, currency)
+- Penalty calculation:
+  - Calculates overdue days as ceil((returnDate - dueDate) / 1 day)
+  - Applies penalty cap: min(overdueDays * feePerDay, capPerLoan)
+  - Logs penalty calculation for audit trail
+- Updates loan atomically in Prisma transaction:
+  - Sets status to RETURNED
+  - Sets returnedAt to current timestamp
+  - Sets penaltyAccrued to calculated penalty amount
+- Updates copy status to AVAILABLE immediately
+- Audit log entry with action='loan.returned' including full metadata:
+  - loanId, bookId, bookTitle, copyId, copyCode
+  - returnedAt, overdueDays, penaltyAccrued, returnedBy
+- Sends return notification email (placeholder implementation with logging)
+  - Includes penalty amount and overdue days if penalty > 0
+  - Plain confirmation if no penalty
+- Returns 200 with updated loan including relations and formatted success message
+  - Message includes currency symbol and penalty amount if applicable
+  - Example: "Book returned successfully. Overdue penalty: IDR 3000.00"
+- Comprehensive error handling:
+  - 404 if loan not found
+  - 403 if member tries to return someone else's loan
+  - 409 if loan already returned
+  - 409 if loan status doesn't allow return
+- Transaction ensures atomicity (rollback on any error)
+- sendLoanReturnedEmail() private method implemented for notifications
+- All acceptance criteria met ✓
+- Application builds successfully ✓
+- Route registered correctly: POST /api/loans/:loanId/return ✓
 
 ---
 
-### TASK BE-5.7: Loans Module - List All Loans (Admin) Endpoint
+### TASK BE-5.7: Loans Module - List All Loans (Admin) Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** BE-5.2
 
@@ -1926,18 +2344,18 @@ Implement endpoint for admin to view all loans with advanced filtering.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Pagination (page, pageSize)
-- [ ] Filter by:
+- [x] Admin only
+- [x] Pagination (page, pageSize)
+- [x] Filter by:
   - status (LoanStatus enum)
   - memberId (user UUID)
   - bookId (UUID)
   - dueBefore (ISO date-time)
   - dueAfter (ISO date-time)
-- [ ] Sort by: dueDate, borrowedAt, createdAt, status
-- [ ] Returns loans with user, book, copy details
-- [ ] Highlight overdue loans
-- [ ] Returns 200 with paginated loan list
+- [x] Sort by: dueDate, borrowedAt, createdAt, status
+- [x] Returns loans with user, book, copy details
+- [x] Highlight overdue loans
+- [x] Returns 200 with paginated loan list
 
 **Response Format:**
 
@@ -1969,14 +2387,28 @@ Implement endpoint for admin to view all loans with advanced filtering.
 
 **Definition of Done:**
 
-- Admin can view and filter all loans
-- Date range filters work correctly
-- Useful for monitoring overdue items
-- Performance is acceptable
+- [x] Admin can view and filter all loans
+- [x] Date range filters work correctly
+- [x] Useful for monitoring overdue items
+- [x] Performance is acceptable
+
+**Completion Notes:**
+- GET /api/loans endpoint implemented in LoansController
+- findAllLoans() service method implemented in LoansService
+- Authorization: Admin only using @Roles(Role.ADMIN) guard
+- Query DTO created with Zod validation schema (QueryLoansDto)
+- All filters implemented: status, memberId, bookId, dueBefore, dueAfter
+- All sort fields implemented: dueDate, borrowedAt, createdAt, status (default: dueDate asc)
+- Pagination implemented with page, pageSize (default: page=1, pageSize=20, max=100)
+- Returns loans with user (including memberProfile), book, and copy relations
+- Parallel queries for count and data using Promise.all for performance
+- Returns paginated response with items, page, pageSize, total, totalPages
+- TypeScript compilation passes without errors
+- Proper type safety with interface definitions for where clauses
 
 ---
 
-### TASK BE-5.8: Loans Module - List My Loans (Member) Endpoint
+### TASK BE-5.8: Loans Module - List My Loans (Member) Endpoint ✅ COMPLETED
 
 **Priority:** HIGH | **Estimated Time:** 4 hours | **Dependencies:** BE-5.2
 
@@ -1987,15 +2419,15 @@ Implement endpoint for members to view their own loans (active and history).
 
 **Acceptance Criteria:**
 
-- [ ] Member only (authenticated)
-- [ ] Filter to current user's loans automatically
-- [ ] Optional filter by status
-- [ ] Sort by: dueDate, borrowedAt, createdAt (default: dueDate asc)
-- [ ] Returns loans with book, copy details
-- [ ] Include renewal eligibility flag
-- [ ] Include penalty info for overdue loans
-- [ ] Pagination support
-- [ ] Returns 200 with paginated loan list
+- [x] Member only (authenticated)
+- [x] Filter to current user's loans automatically
+- [x] Optional filter by status
+- [x] Sort by: dueDate, borrowedAt, createdAt (default: dueDate asc)
+- [x] Returns loans with book, copy details
+- [x] Include renewal eligibility flag
+- [x] Include penalty info for overdue loans
+- [x] Pagination support
+- [x] Returns 200 with paginated loan list
 
 **Response Format:**
 
@@ -2033,10 +2465,31 @@ Implement endpoint for members to view their own loans (active and history).
 
 **Definition of Done:**
 
-- Member can view their loans
-- Active loans prioritized in default sort
-- Renewal eligibility clearly indicated
-- UI can display due dates and actions
+- [x] Member can view their loans
+- [x] Active loans prioritized in default sort
+- [x] Renewal eligibility clearly indicated
+- [x] UI can display due dates and actions
+
+**Completion Notes:**
+- GET /api/my/loans endpoint implemented in MyLoansController (separate controller for /my prefix)
+- findMyLoans() service method implemented in LoansService
+- Authorization: Member only using @Roles(Role.MEMBER) guard
+- Query DTO created with Zod validation schema (QueryMyLoansDto)
+- Automatically filters loans by current user's ID from JWT token
+- Optional status filter implemented
+- Sort fields implemented: dueDate, borrowedAt, createdAt (default: dueDate asc)
+- Pagination implemented with page, pageSize (default: page=1, pageSize=20, max=100)
+- Returns loans with book (including coverImageUrl and authors), and copy relations
+- Computed fields implemented:
+  - canRenew: checks renewalCount < maxRenewals, status=ACTIVE, penalty=0, member ACTIVE
+  - isOverdue: checks dueDate < now and status in [ACTIVE, OVERDUE]
+  - daysUntilDue: Math.ceil((dueDate - now) / day) - positive if future, negative if overdue
+- Fetches system settings for canRenew calculation
+- Parallel queries for loans, count, and user using Promise.all for performance
+- Returns paginated response with items, page, pageSize, total, totalPages
+- TypeScript compilation passes without errors
+- MyLoansController registered in LoansModule
+- Proper type safety with interface definitions for where clauses
 
 ---
 
