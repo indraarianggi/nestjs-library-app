@@ -29,17 +29,16 @@ export const queryBooksSchema = z.object({
     .enum(['true', 'false'])
     .transform((val) => val === 'true')
     .optional()
-    .describe('Filter by availability (true = has available copies, false = no available copies)'),
+    .describe(
+      'Filter by availability (true = has available copies, false = no available copies)',
+    ),
 
   sortBy: z
     .enum(['title', 'createdAt', 'relevance'])
     .default('relevance')
     .describe('Field to sort by'),
 
-  sortOrder: z
-    .enum(['asc', 'desc'])
-    .default('desc')
-    .describe('Sort direction'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc').describe('Sort direction'),
 
   page: z.coerce
     .number()
