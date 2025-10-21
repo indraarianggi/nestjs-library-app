@@ -13,6 +13,8 @@ import { BookCopiesModule } from './modules/book-copies/book-copies.module';
 import { MembersModule } from './modules/members/members.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { LoansModule } from './modules/loans/loans.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { HealthModule } from './modules/health/health.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -38,6 +40,8 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     MembersModule,
     SettingsModule,
     LoansModule,
+    AuditLogsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

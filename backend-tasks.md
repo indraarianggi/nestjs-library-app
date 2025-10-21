@@ -358,6 +358,7 @@ Integrate Passport.js with JWT strategy for stateless token-based authentication
 - [x] CORS configured to allow credentials from frontend origin
 
 **Environment Variables Required:**
+
 ```
 JWT_ACCESS_SECRET=your-access-secret-key-min-256-bits
 JWT_REFRESH_SECRET=your-refresh-secret-key-min-256-bits
@@ -368,17 +369,18 @@ JWT_REFRESH_EXPIRES_IN=7d
 **Technical Details:**
 
 **LocalStrategy** - Validates email/password:
+
 ```typescript
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
+export class LocalStrategy extends PassportStrategy(Strategy, "local") {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'email' });
+    super({ usernameField: "email" });
   }
 
   async validate(email: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
     return user;
   }
@@ -386,14 +388,15 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
 ```
 
 **JwtStrategy** - Validates access tokens:
+
 ```typescript
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET'),
+      secretOrKey: configService.get<string>("JWT_ACCESS_SECRET"),
     });
   }
 
@@ -404,6 +407,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 ```
 
 **RefreshToken Schema** (already in ERD):
+
 - id, userId, token (hashed), expiresAt, isRevoked
 - Enables token revocation on logout
 
@@ -454,6 +458,7 @@ Implement user registration endpoint with validation, automatic member profile c
 **API Endpoint:** `POST /api/members/register`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -487,10 +492,21 @@ Implement user registration endpoint with validation, automatic member profile c
 - [x] Returns 400 for validation errors
 
 **Response:**
+
 ```json
 {
-  "user": { "id": "uuid", "email": "user@example.com", "role": "MEMBER", "isActive": true },
-  "memberProfile": { "id": "uuid", "firstName": "John", "lastName": "Doe", "status": "ACTIVE" },
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "MEMBER",
+    "isActive": true
+  },
+  "memberProfile": {
+    "id": "uuid",
+    "firstName": "John",
+    "lastName": "Doe",
+    "status": "ACTIVE"
+  },
   "tokens": {
     "accessToken": "eyJhbG...",
     "refreshToken": "eyJhbG..."
@@ -534,6 +550,7 @@ Implement user login endpoint with credential validation using Passport LocalStr
 **API Endpoint:** `POST /api/members/login`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -560,6 +577,7 @@ Implement user login endpoint with credential validation using Passport LocalStr
 - [x] Rate limiting: 10 requests per minute per IP
 
 **Response:**
+
 ```json
 {
   "accessToken": "eyJhbG...",
@@ -609,6 +627,7 @@ Implement logout endpoint to revoke refresh token using JWT authentication.
 **API Endpoint:** `POST /api/members/logout`
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "eyJhbG..."
@@ -633,7 +652,7 @@ Implement logout endpoint to revoke refresh token using JWT authentication.
 // AuthService.logout()
 async logout(userId: string, refreshToken: string): Promise<void> {
   const hashedToken = await bcrypt.hash(refreshToken, 10);
-  
+
   await this.prisma.refreshToken.updateMany({
     where: {
       userId,
@@ -642,7 +661,7 @@ async logout(userId: string, refreshToken: string): Promise<void> {
     },
     data: { isRevoked: true },
   });
-  
+
   // Create audit log
   await this.auditLogService.create({
     userId,
@@ -756,6 +775,7 @@ async publicEndpoint() {
 ```
 
 **App Module Setup:**
+
 ```typescript
 // app.module.ts
 {
@@ -802,6 +822,7 @@ Implement endpoint to exchange refresh token for new access and refresh tokens.
 **API Endpoint:** `POST /api/members/refresh`
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "eyJhbG..."
@@ -824,6 +845,7 @@ Implement endpoint to exchange refresh token for new access and refresh tokens.
 - [x] Returns 401 if refresh token invalid, expired, or revoked
 
 **Response:**
+
 ```json
 {
   "accessToken": "eyJhbG...",
@@ -832,6 +854,7 @@ Implement endpoint to exchange refresh token for new access and refresh tokens.
 ```
 
 **Security:**
+
 - Refresh token rotation prevents token reuse
 - Old tokens immediately revoked
 - Refresh token reuse detection (optional future enhancement)
@@ -1738,6 +1761,7 @@ Implement endpoints for admin to view and update system settings (borrowing poli
 - Audit trail captured
 
 **Completion Notes:**
+
 - SettingsModule created with controller, service, and DTOs
 - GET /api/settings endpoint implemented returning all settings fields
 - PATCH /api/settings endpoint implemented with UpdateSettingsDto (all fields optional)
@@ -1811,6 +1835,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 - Audit trail captured
 
 **Completion Notes:**
+
 - LoansModule created with controller, service, and DTOs
 - POST /api/loans endpoint implemented
 - CreateLoanDto with Zod validation (bookId required UUID, copyId optional UUID)
@@ -1851,16 +1876,18 @@ Implement endpoint for members to borrow books with comprehensive business logic
 
 **Description:**
 ~~Implement endpoint for members to create a loan request for a specific book.~~ This task has been consolidated into BE-5.2. The `POST /api/loans` endpoint now supports both scenarios:
+
 - If `copyId` provided: validates that specific copy
 - If `copyId` NOT provided: system auto-selects first available copy
 
 **Original API Endpoint:** ~~`POST /api/loans/request`~~ → **Now using:** `POST /api/loans` with optional `copyId`
 
 **Request Body:**
+
 ```json
 {
   "bookId": "uuid",
-  "copyId": "uuid"  // OPTIONAL - auto-selected if not provided
+  "copyId": "uuid" // OPTIONAL - auto-selected if not provided
 }
 ```
 
@@ -1909,6 +1936,7 @@ Implement endpoint for members to borrow books with comprehensive business logic
 - [x] Transaction ensures atomicity
 
 **Completion Notes:**
+
 - ~~POST /api/loans/request endpoint~~ **CONSOLIDATED INTO BE-5.2**
 - The `POST /api/loans` endpoint now handles both use cases:
   - Member specifies book only (copyId omitted) → system auto-selects
@@ -1929,6 +1957,7 @@ Implement endpoint for admin to approve or reject pending loan requests (status=
 **API Endpoint:** `POST /api/loans/:loanId/approve-reject`
 
 **Request Body:**
+
 ```json
 {
   "action": "approve" | "reject",
@@ -1982,6 +2011,7 @@ Implement endpoint for admin to approve or reject pending loan requests (status=
 - [x] Transaction ensures atomicity
 
 **Completion Notes:**
+
 - POST /api/loans/:loanId/approve-reject endpoint implemented
 - Admin-only access using @Roles(Role.ADMIN) decorator
 - ApproveLoanDto with Zod validation:
@@ -2164,6 +2194,7 @@ Implement endpoint for members to renew their active loans (single renewal per l
 - [x] Audit trail captured
 
 **Completion Notes:**
+
 - POST /api/loans/:loanId/renew endpoint implemented in LoansController
 - renewLoan() service method implemented in LoansService
 - Authorization: Members can renew own loans, admins can renew any loan
@@ -2205,6 +2236,7 @@ Implement endpoint for members/admin to cancel pending or approved loans before 
 - [x] Returns 409 if loan status doesn't allow cancellation
 
 **Business Rules:**
+
 - Only REQUESTED and APPROVED loans can be cancelled
 - ACTIVE loans must go through return process (see BE-5.6-ALT below)
 - OVERDUE loans must be returned with penalty payment
@@ -2218,6 +2250,7 @@ Implement endpoint for members/admin to cancel pending or approved loans before 
 - [x] Proper authorization and validation
 
 **Completion Notes:**
+
 - POST /api/loans/:loanId/cancel endpoint implemented in LoansController
 - cancelLoan() service method implemented in LoansService
 - Authorization: Members can cancel own loans, admins can cancel any loan
@@ -2255,7 +2288,7 @@ Implement endpoint for members/admin to return borrowed books with penalty calcu
 - [x] Calculate penalty if overdue:
   - returnDate = now
   - overdueDays = max(0, ceil((returnDate - dueDate) / 1 day))
-  - penalty = min(overdueDays * overdueFeePerDay, overdueFeeCapPerLoan)
+  - penalty = min(overdueDays \* overdueFeePerDay, overdueFeeCapPerLoan)
 - [x] Update loan in transaction:
   - status = RETURNED
   - returnedAt = now
@@ -2304,7 +2337,7 @@ const penalty = Math.min(
 - Gets settings from database for penalty calculation (overdueFeePerDay, overdueFeeCapPerLoan, currency)
 - Penalty calculation:
   - Calculates overdue days as ceil((returnDate - dueDate) / 1 day)
-  - Applies penalty cap: min(overdueDays * feePerDay, capPerLoan)
+  - Applies penalty cap: min(overdueDays \* feePerDay, capPerLoan)
   - Logs penalty calculation for audit trail
 - Updates loan atomically in Prisma transaction:
   - Sets status to RETURNED
@@ -2393,6 +2426,7 @@ Implement endpoint for admin to view all loans with advanced filtering.
 - [x] Performance is acceptable
 
 **Completion Notes:**
+
 - GET /api/loans endpoint implemented in LoansController
 - findAllLoans() service method implemented in LoansService
 - Authorization: Admin only using @Roles(Role.ADMIN) guard
@@ -2471,6 +2505,7 @@ Implement endpoint for members to view their own loans (active and history).
 - [x] UI can display due dates and actions
 
 **Completion Notes:**
+
 - GET /api/my/loans endpoint implemented in MyLoansController (separate controller for /my prefix)
 - findMyLoans() service method implemented in LoansService
 - Authorization: Member only using @Roles(Role.MEMBER) guard
@@ -2762,7 +2797,7 @@ async updateOverdueLoans() {
 
 ## Phase 7: Audit Logging & Error Handling (Week 6)
 
-### TASK BE-7.1: Audit Logs Module - Create Audit Log Endpoint
+### TASK BE-7.1: Audit Logs Module - Create Audit Log Endpoint ✅ COMPLETED
 
 **Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** BE-2.5
 
@@ -2773,19 +2808,19 @@ Implement endpoint for admin to view system audit logs with filtering.
 
 **Acceptance Criteria:**
 
-- [ ] Admin only
-- [ ] Pagination (page, pageSize)
-- [ ] Filter by:
+- [x] Admin only
+- [x] Pagination (page, pageSize)
+- [x] Filter by:
   - userId (UUID)
   - action (string, e.g., 'book.created')
   - entityType (string, e.g., 'book')
   - entityId (UUID)
   - dateFrom (ISO date-time)
   - dateTo (ISO date-time)
-- [ ] Sort by createdAt (default: desc)
-- [ ] Returns logs with user details (email, name)
-- [ ] Metadata displayed as JSON
-- [ ] Returns 200 with paginated log list
+- [x] Sort by createdAt (default: desc)
+- [x] Returns logs with user details (email, name)
+- [x] Metadata displayed as JSON
+- [x] Returns 200 with paginated log list
 
 **Response Format:**
 
@@ -2816,6 +2851,20 @@ Implement endpoint for admin to view system audit logs with filtering.
 - Filters work correctly
 - Useful for compliance and debugging
 - Performance is acceptable (indexed queries)
+
+**Completion Notes:**
+
+- AuditLogsModule created with controller, service, and DTOs
+- GET /api/audit-logs endpoint implemented with admin-only access
+- Zod validation schema for query parameters with all required filters
+- Pagination support with configurable page and pageSize (max 100)
+- Filtering by userId, action, entityType, entityId, dateFrom, dateTo
+- Sorting by createdAt (default: desc)
+- Returns audit logs with user email information
+- Metadata displayed as JSON object
+- Tested with admin and member roles (authorization working correctly)
+- Response format matches specification
+- All acceptance criteria met ✓
 
 ---
 
@@ -2897,7 +2946,7 @@ Implement interceptor to log all HTTP requests and responses for debugging and m
 
 ---
 
-### TASK BE-7.4: Health Check Endpoint
+### TASK BE-7.4: Health Check Endpoint ✅ COMPLETED
 
 **Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** BE-1.6
 
@@ -2908,12 +2957,12 @@ Implement health check endpoint for monitoring and deployment orchestration.
 
 **Acceptance Criteria:**
 
-- [ ] Public endpoint (no authentication)
-- [ ] Check database connectivity
+- [x] Public endpoint (no authentication)
+- [x] Check database connectivity
 - [ ] Check SMTP connectivity (optional)
-- [ ] Return status: 'ok' | 'degraded' | 'down'
-- [ ] Return component statuses
-- [ ] Returns 200 if healthy, 503 if down
+- [x] Return status: 'ok' | 'degraded' | 'down'
+- [x] Return component statuses
+- [x] Returns 200 if healthy, 503 if down
 
 **Response Format:**
 
@@ -2934,6 +2983,22 @@ Implement health check endpoint for monitoring and deployment orchestration.
 - Health endpoint returns accurate status
 - Can be used by load balancers
 - Database check uses simple query
+
+**Completion Notes:**
+
+- HealthModule created with controller and service
+- GET /api/health endpoint implemented as public (no authentication required)
+- Database connectivity check using simple SQL query (`SELECT 1`)
+- Returns proper health status: 'ok', 'degraded', or 'down'
+- Includes system uptime in seconds since server start
+- Database check includes latency measurement in milliseconds
+- Response format matches specification exactly
+- Tested without authentication (public endpoint working)
+- Overall status determined by component health:
+  - 'down' if database is down
+  - 'degraded' if any non-critical component has issues
+  - 'ok' if all components are healthy
+- All acceptance criteria met ✓
 
 ---
 
