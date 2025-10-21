@@ -4,10 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
+
+  // Enable global logging interceptor for request/response logging
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   // Enable global validation pipe
   app.useGlobalPipes(
