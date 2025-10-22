@@ -17,7 +17,8 @@ import { Throttle } from '@nestjs/throttler';
 import {
   AuthService,
   type RegistrationResult,
-  type TokenPair,
+  type LoginResult,
+  type RefreshResult,
   type UserWithProfile,
 } from './auth.service';
 import type { RegisterDto } from './dto/register.dto';
@@ -149,13 +150,18 @@ export class AuthController {
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
-        accessToken: {
-          type: 'string',
-          description: 'JWT access token (15 minutes expiry)',
-        },
-        refreshToken: {
-          type: 'string',
-          description: 'JWT refresh token (7 days expiry)',
+        tokens: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              description: 'JWT access token (1 hour expiry)',
+            },
+            refreshToken: {
+              type: 'string',
+              description: 'JWT refresh token (7 days expiry)',
+            },
+          },
         },
       },
     },
@@ -245,8 +251,19 @@ export class AuthController {
           nullable: true,
           description: 'Member profile (only for MEMBER role)',
         },
-        accessToken: { type: 'string', description: 'JWT access token' },
-        refreshToken: { type: 'string', description: 'JWT refresh token' },
+        tokens: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              description: 'JWT access token (1 hour expiry)',
+            },
+            refreshToken: {
+              type: 'string',
+              description: 'JWT refresh token (7 days expiry)',
+            },
+          },
+        },
       },
     },
   })
@@ -277,7 +294,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
-  async login(@CurrentUser() user: UserWithProfile): Promise<TokenPair> {
+  async login(@CurrentUser() user: UserWithProfile): Promise<LoginResult> {
     // User is already validated by LocalAuthGuard
     return this.authService.login(user);
   }
@@ -334,7 +351,9 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@CurrentUser() user: ValidatedRefreshUser): Promise<TokenPair> {
+  async refresh(
+    @CurrentUser() user: ValidatedRefreshUser,
+  ): Promise<RefreshResult> {
     return this.authService.refreshTokens(user.userId, user.refreshToken);
   }
 
@@ -348,7 +367,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Logout user',
     description:
-      'Logs out the user by revoking their refresh token. The access token will remain valid until it expires (15 minutes).',
+      'Logs out the user by revoking their refresh token. The access token will remain valid until it expires (1 hour).',
   })
   @ApiBearerAuth('JWT-auth')
   @ApiBody({

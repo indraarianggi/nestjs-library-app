@@ -144,7 +144,7 @@ export class AuthorsController {
           maxLength: 200,
           example: 'F. Scott Fitzgerald',
         },
-        biography: {
+        bio: {
           type: 'string',
           nullable: true,
           example: 'American novelist and short story writer',
@@ -209,7 +209,7 @@ export class AuthorsController {
       type: 'object',
       properties: {
         name: { type: 'string', minLength: 1, maxLength: 200 },
-        biography: { type: 'string', nullable: true },
+        bio: { type: 'string', nullable: true },
       },
     },
   })

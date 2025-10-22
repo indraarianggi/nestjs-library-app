@@ -88,6 +88,16 @@ export interface LoginResult {
   message: string;
 }
 
+/**
+ * Refresh token result
+ */
+export interface RefreshResult {
+  user: UserResponse;
+  memberProfile?: MemberProfileResponse;
+  accessToken: string;
+  refreshToken: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -142,9 +152,9 @@ export class AuthService {
   /**
    * Generate access and refresh token pair
    * @param user User object
-   * @returns Token pair
+   * @returns Login result with user, memberProfile, and tokens
    */
-  async login(user: UserWithProfile): Promise<TokenPair> {
+  async login(user: UserWithProfile): Promise<LoginResult> {
     const accessPayload: JwtAccessPayload = {
       sub: user.id,
       email: user.email,
@@ -190,9 +200,37 @@ export class AuthService {
       },
     });
 
+    // Prepare user response (without sensitive data)
+    const userResponse: UserResponse = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
+    };
+
+    // Prepare member profile response (if exists)
+    const memberProfileResponse: MemberProfileResponse | undefined =
+      user.memberProfile
+        ? {
+            id: user.memberProfile.id,
+            userId: user.memberProfile.userId,
+            firstName: user.memberProfile.firstName,
+            lastName: user.memberProfile.lastName,
+            phone: user.memberProfile.phone,
+            address: user.memberProfile.address,
+            status: user.memberProfile.status,
+          }
+        : undefined;
+
     return {
-      accessToken,
-      refreshToken,
+      user: userResponse,
+      memberProfile: memberProfileResponse,
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
+      message: 'Login successful',
     };
   }
 
@@ -306,27 +344,13 @@ export class AuthService {
       ...createdUser,
       memberProfile: createdMemberProfile,
     };
-    const tokens = await this.login(userWithProfile);
+    const loginResult = await this.login(userWithProfile);
 
     // 6. Return registration result
     return {
-      user: {
-        id: createdUser.id,
-        email: createdUser.email,
-        role: createdUser.role,
-        isActive: createdUser.isActive,
-        lastLoginAt: createdUser.lastLoginAt,
-      },
-      memberProfile: {
-        id: createdMemberProfile.id,
-        userId: createdMemberProfile.userId,
-        firstName: createdMemberProfile.firstName,
-        lastName: createdMemberProfile.lastName,
-        phone: createdMemberProfile.phone,
-        address: createdMemberProfile.address,
-        status: createdMemberProfile.status,
-      },
-      tokens,
+      user: loginResult.user,
+      memberProfile: loginResult.memberProfile!,
+      tokens: loginResult.tokens,
       message: 'Registration successful',
     };
   }
@@ -335,15 +359,18 @@ export class AuthService {
    * Refresh access and refresh tokens
    * @param userId User ID from validated refresh token
    * @param refreshToken Current refresh token
-   * @returns New token pair
+   * @returns New token pair with user and memberProfile data
    */
   async refreshTokens(
     userId: string,
     refreshToken: string,
-  ): Promise<TokenPair> {
-    // Get user
+  ): Promise<RefreshResult> {
+    // Get user with member profile
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        memberProfile: true,
+      },
     });
 
     if (!user || !user.isActive) {
@@ -379,7 +406,32 @@ export class AuthService {
     // Store new refresh token
     await this.storeRefreshToken(user.id, newRefreshToken);
 
+    // Prepare user response (without sensitive data)
+    const userResponse: UserResponse = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
+    };
+
+    // Prepare member profile response (if exists)
+    const memberProfileResponse: MemberProfileResponse | undefined =
+      user.memberProfile
+        ? {
+            id: user.memberProfile.id,
+            userId: user.memberProfile.userId,
+            firstName: user.memberProfile.firstName,
+            lastName: user.memberProfile.lastName,
+            phone: user.memberProfile.phone,
+            address: user.memberProfile.address,
+            status: user.memberProfile.status,
+          }
+        : undefined;
+
     return {
+      user: userResponse,
+      memberProfile: memberProfileResponse,
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };

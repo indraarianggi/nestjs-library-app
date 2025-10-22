@@ -38,7 +38,7 @@ export const login = async (
   );
 
   // Store tokens
-  tokenStorage.setTokens(data.accessToken, data.refreshToken);
+  tokenStorage.setTokens(data.tokens.accessToken, data.tokens.refreshToken);
 
   return data;
 };

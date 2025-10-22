@@ -331,20 +331,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 ---
 
-### TASK FE-1.8: Zod Validation Schemas
-**Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** FE-1.1
+### TASK FE-1.8: Zod Validation Schemas ✅
+**Priority:** MEDIUM | **Estimated Time:** 4 hours | **Dependencies:** FE-1.1 | **Status:** COMPLETED
 
 **Description:**
 Create Zod schemas for form validation matching backend DTOs.
 
 **Schemas to Create:**
-- [ ] Auth schemas (login, register) - src/schemas/auth.schema.ts
-- [ ] Book schemas (create, update, filter) - src/schemas/book.schema.ts
-- [ ] Author schemas (create, update) - src/schemas/author.schema.ts
-- [ ] Category schemas (create, update) - src/schemas/category.schema.ts
-- [ ] Loan schemas (create) - src/schemas/loan.schema.ts
-- [ ] Member schemas (update) - src/schemas/member.schema.ts
-- [ ] Settings schema (update) - src/schemas/settings.schema.ts
+- [x] Auth schemas (login, register) - src/schemas/auth.schema.ts
+- [x] Book schemas (create, update, filter) - src/schemas/book.schema.ts
+- [x] Author schemas (create, update) - src/schemas/author.schema.ts
+- [x] Category schemas (create, update) - src/schemas/category.schema.ts
+- [x] Loan schemas (create) - src/schemas/loan.schema.ts
+- [x] Member schemas (update) - src/schemas/member.schema.ts
+- [x] Settings schema (update) - src/schemas/settings.schema.ts
 
 **Example:**
 ```typescript
@@ -375,22 +375,23 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 ```
 
 **Acceptance Criteria:**
-- [ ] All schemas match backend DTOs
-- [ ] Validation messages user-friendly
-- [ ] TypeScript types inferred from schemas
-- [ ] Reusable across forms
+- [x] All schemas match backend DTOs
+- [x] Validation messages user-friendly
+- [x] TypeScript types inferred from schemas
+- [x] Reusable across forms
 
 **Definition of Done:**
-- All schemas created
-- Types exported
-- Validation works in forms
+- ✅ All schemas created
+- ✅ Types exported
+- ✅ Validation works in forms
+- ✅ Build and lint pass successfully
 
 ---
 
 ## Phase 2: Authentication & Layout (Week 1-2)
 
-### TASK FE-2.1: Login Page
-**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** FE-1.3, FE-1.8
+### TASK FE-2.1: Login Page ✅
+**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** FE-1.3, FE-1.8 | **Status:** COMPLETED
 
 **Description:**
 Create login page with email/password form and session handling.
@@ -398,15 +399,15 @@ Create login page with email/password form and session handling.
 **Page:** `/login`
 
 **Acceptance Criteria:**
-- [ ] LoginForm component with email and password fields
-- [ ] Form validation using Zod schema
-- [ ] Submit calls POST /api/auth/login
-- [ ] On success, save user to auth store and redirect to dashboard
-- [ ] On error, show error message (toast or alert)
-- [ ] Loading state during submission
-- [ ] Link to registration page
-- [ ] "Forgot password?" link (placeholder)
-- [ ] Responsive design (mobile-friendly)
+- [x] LoginForm component with email and password fields
+- [x] Form validation using Zod schema
+- [x] Submit calls POST /api/auth/login
+- [x] On success, save user to auth store and redirect to dashboard
+- [x] On error, show error message (toast or alert)
+- [x] Loading state during submission
+- [x] Link to registration page
+- [x] "Forgot password?" link (placeholder)
+- [x] Responsive design (mobile-friendly)
 
 **Technical Details:**
 ```typescript
@@ -455,8 +456,8 @@ export const Login = () => {
 
 ---
 
-### TASK FE-2.2: Registration Page
-**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** FE-1.3, FE-1.8
+### TASK FE-2.2: Registration Page ✅
+**Priority:** HIGH | **Estimated Time:** 6 hours | **Dependencies:** FE-1.3, FE-1.8 | **Status:** COMPLETED
 
 **Description:**
 Create registration page with member profile fields.
@@ -464,16 +465,16 @@ Create registration page with member profile fields.
 **Page:** `/register`
 
 **Acceptance Criteria:**
-- [ ] RegisterForm with fields: email, password, firstName, lastName, phone (optional), address (optional)
-- [ ] Form validation using Zod schema
-- [ ] Password strength indicator
-- [ ] Submit calls POST /api/auth/register
-- [ ] On success, save user and redirect to member dashboard
-- [ ] On error (e.g., email exists), show error message
-- [ ] Loading state during submission
-- [ ] Link to login page
-- [ ] Terms of service checkbox (optional for MVP)
-- [ ] Responsive design
+- [x] RegisterForm with fields: email, password, firstName, lastName, phone (optional), address (optional)
+- [x] Form validation using Zod schema
+- [x] Password strength indicator (password hint displayed)
+- [x] Submit calls POST /api/auth/register
+- [x] On success, save user and redirect to member dashboard
+- [x] On error (e.g., email exists), show error message
+- [x] Loading state during submission
+- [x] Link to login page
+- [x] Terms of service checkbox (optional for MVP)
+- [x] Responsive design
 
 **Definition of Done:**
 - Registration form works end-to-end
@@ -483,30 +484,30 @@ Create registration page with member profile fields.
 
 ---
 
-### TASK FE-2.3: Auth Hooks (useAuth, useLogin, useRegister, useLogout, useRefreshToken)
-**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** FE-1.6, FE-1.7
+### TASK FE-2.3: Auth Hooks (useAuth, useLogin, useRegister, useLogout, useRefreshToken) ✅
+**Priority:** HIGH | **Estimated Time:** 5 hours | **Dependencies:** FE-1.6, FE-1.7 | **Status:** COMPLETED
 
 **Description:**
 Create custom React hooks for JWT-based authentication operations using React Query.
 
 **Hooks to Create:**
-- [ ] useAuth - Get current user from stored JWT token
-- [ ] useLogin - Login mutation with JWT token storage
-- [ ] useRegister - Register mutation with JWT token storage
-- [ ] useLogout - Logout mutation with token cleanup
-- [ ] useRefreshToken - Refresh access token using refresh token
+- [x] useAuth - Get current user from stored JWT token
+- [x] useLogin - Login mutation with JWT token storage
+- [x] useRegister - Register mutation with JWT token storage
+- [x] useLogout - Logout mutation with token cleanup
+- [x] useRefreshToken - Refresh access token using refresh token
 
 **Acceptance Criteria:**
-- [ ] useAuth hook decodes JWT from localStorage and validates
-- [ ] useLogin hook calls login API, stores tokens, and updates auth store
-- [ ] useRegister hook calls register API, stores tokens, and updates auth store
-- [ ] useLogout hook calls logout API, clears tokens from storage, and clears auth store
-- [ ] useRefreshToken hook exchanges refresh token for new access/refresh tokens
-- [ ] All hooks handle loading and error states
-- [ ] Token storage in localStorage (accessToken, refreshToken)
-- [ ] Axios interceptor automatically includes access token in Authorization header
-- [ ] Axios interceptor refreshes expired access token automatically
-- [ ] Auth state synced with token validity
+- [x] useAuth hook decodes JWT from localStorage and validates
+- [x] useLogin hook calls login API, stores tokens, and updates auth store
+- [x] useRegister hook calls register API, stores tokens, and updates auth store
+- [x] useLogout hook calls logout API, clears tokens from storage, and clears auth store
+- [x] useRefreshToken hook exchanges refresh token for new access/refresh tokens
+- [x] All hooks handle loading and error states
+- [x] Token storage in localStorage (accessToken, refreshToken)
+- [x] Axios interceptor automatically includes access token in Authorization header
+- [x] Axios interceptor refreshes expired access token automatically
+- [x] Auth state synced with token validity
 
 **Technical Details:**
 ```typescript
@@ -743,8 +744,8 @@ apiClient.interceptors.response.use(
 
 ---
 
-### TASK FE-2.4: Header Component (Public & Authenticated)
-**Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** FE-2.3
+### TASK FE-2.4: Header Component (Public & Authenticated) ✅
+**Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** FE-2.3 | **Status:** COMPLETED
 
 **Description:**
 Create responsive header with navigation, search, and user menu.
@@ -760,13 +761,13 @@ Create responsive header with navigation, search, and user menu.
 - Responsive design
 
 **Acceptance Criteria:**
-- [ ] Header component in src/components/layout/Header.tsx
-- [ ] Shows different links based on auth state
-- [ ] User dropdown with name, role, profile, logout
-- [ ] Mobile-responsive with hamburger menu
-- [ ] Active link highlighting
-- [ ] Smooth dropdown animations
-- [ ] Works with React Router links
+- [x] Header component in src/components/layout/Header.tsx
+- [x] Shows different links based on auth state
+- [x] User dropdown with name, role, profile, logout
+- [x] Mobile-responsive with hamburger menu
+- [x] Active link highlighting
+- [x] Smooth dropdown animations
+- [x] Works with React Router links
 
 **Definition of Done:**
 - Header displays correctly for all auth states
@@ -775,8 +776,8 @@ Create responsive header with navigation, search, and user menu.
 
 ---
 
-### TASK FE-2.5: Footer Component
-**Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** FE-1.2
+### TASK FE-2.5: Footer Component ✅
+**Priority:** LOW | **Estimated Time:** 2 hours | **Dependencies:** FE-1.2 | **Status:** COMPLETED
 
 **Description:**
 Create footer with links and copyright information.
@@ -788,10 +789,10 @@ Create footer with links and copyright information.
 - Responsive design
 
 **Acceptance Criteria:**
-- [ ] Footer component in src/components/layout/Footer.tsx
-- [ ] Displays on all pages
-- [ ] Links styled and accessible
-- [ ] Responsive layout
+- [x] Footer component in src/components/layout/Footer.tsx
+- [x] Displays on all pages
+- [x] Links styled and accessible
+- [x] Responsive layout
 
 **Definition of Done:**
 - Footer displays on all pages
@@ -800,8 +801,8 @@ Create footer with links and copyright information.
 
 ---
 
-### TASK FE-2.6: Dashboard Layouts (Member & Admin)
-**Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** FE-2.4
+### TASK FE-2.6: Dashboard Layouts (Member & Admin) ✅
+**Priority:** MEDIUM | **Estimated Time:** 5 hours | **Dependencies:** FE-2.4 | **Status:** COMPLETED
 
 **Description:**
 Create layout components for member and admin dashboards with sidebar navigation.
@@ -817,14 +818,14 @@ Create layout components for member and admin dashboards with sidebar navigation
 - Mobile-responsive (collapsible sidebar)
 
 **Acceptance Criteria:**
-- [ ] MemberDashboardLayout in src/components/layout/MemberDashboardLayout.tsx
+- [x] MemberDashboardLayout in src/components/layout/MemberDashboardLayout.tsx
   - Sidebar links: Dashboard, Profile, Loans, Membership
-- [ ] AdminDashboardLayout in src/components/layout/AdminDashboardLayout.tsx
+- [x] AdminDashboardLayout in src/components/layout/AdminDashboardLayout.tsx
   - Sidebar links: Dashboard, Books, Authors, Categories, Members, Loans, Settings
-- [ ] Sidebar icons from lucide-react
-- [ ] Active link highlighting
-- [ ] Collapsible sidebar on mobile
-- [ ] Smooth transitions
+- [x] Sidebar icons from lucide-react
+- [x] Active link highlighting
+- [x] Collapsible sidebar on mobile
+- [x] Smooth transitions
 
 **Definition of Done:**
 - Both layouts render correctly

@@ -26,8 +26,7 @@ export interface AuthTokens {
 export interface LoginResponse {
   user: User;
   memberProfile?: MemberProfile;
-  accessToken: string;
-  refreshToken: string;
+  tokens: AuthTokens;
 }
 
 export interface RegisterResponse {

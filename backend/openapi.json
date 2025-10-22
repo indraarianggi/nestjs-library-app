@@ -181,13 +181,18 @@
                         }
                       }
                     },
-                    "accessToken": {
-                      "type": "string",
-                      "description": "JWT access token (15 minutes expiry)"
-                    },
-                    "refreshToken": {
-                      "type": "string",
-                      "description": "JWT refresh token (7 days expiry)"
+                    "tokens": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT access token (1 hour expiry)"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "JWT refresh token (7 days expiry)"
+                        }
+                      }
                     }
                   }
                 }
@@ -307,13 +312,18 @@
                       "nullable": true,
                       "description": "Member profile (only for MEMBER role)"
                     },
-                    "accessToken": {
-                      "type": "string",
-                      "description": "JWT access token"
-                    },
-                    "refreshToken": {
-                      "type": "string",
-                      "description": "JWT refresh token"
+                    "tokens": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT access token (1 hour expiry)"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "JWT refresh token (7 days expiry)"
+                        }
+                      }
                     }
                   }
                 }
@@ -444,7 +454,7 @@
     },
     "/api/members/logout": {
       "post": {
-        "description": "Logs out the user by revoking their refresh token. The access token will remain valid until it expires (15 minutes).",
+        "description": "Logs out the user by revoking their refresh token. The access token will remain valid until it expires (1 hour).",
         "operationId": "AuthController_logout",
         "parameters": [],
         "requestBody": {
@@ -605,7 +615,7 @@
                     "maxLength": 200,
                     "example": "F. Scott Fitzgerald"
                   },
-                  "biography": {
+                  "bio": {
                     "type": "string",
                     "nullable": true,
                     "example": "American novelist and short story writer"
@@ -668,7 +678,7 @@
                     "minLength": 1,
                     "maxLength": 200
                   },
-                  "biography": {
+                  "bio": {
                     "type": "string",
                     "nullable": true
                   }
