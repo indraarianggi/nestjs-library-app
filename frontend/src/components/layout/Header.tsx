@@ -1,14 +1,6 @@
-import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import {
-  Menu,
-  User,
-  LogOut,
-  Home,
-  Book,
-  ClipboardList,
-  LayoutDashboard,
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, User, LogOut, Home, Book, ClipboardList, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Header Component
- * 
+ *
  * Responsive header with auth-aware navigation.
  * Shows different links based on authentication state and user role.
  */
@@ -35,7 +27,13 @@ export const Header = () => {
   const { user, memberProfile, isAuthenticated } = useAuth();
   const { logout, isLoading: isLoggingOut } = useLogout();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Auto-close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -111,7 +109,7 @@ export const Header = () => {
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground',
                   )
                 }
               >
@@ -185,13 +183,26 @@ export const Header = () => {
           {/* Mobile Menu Toggle */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Toggle navigation menu"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <nav className="flex flex-col gap-4 mt-8">
+            <SheetContent
+              side="right"
+              className="w-[300px] sm:w-[400px]"
+              aria-label="Mobile navigation"
+            >
+              <nav
+                className="flex flex-col gap-4 mt-8"
+                role="navigation"
+                aria-label="Mobile navigation menu"
+              >
                 {/* Mobile Navigation Links */}
                 {navLinks.map((link) => {
                   const Icon = link.icon;
@@ -203,9 +214,7 @@ export const Header = () => {
                       className={({ isActive }) =>
                         cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent',
-                          isActive
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground'
+                          isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
                         )
                       }
                     >
