@@ -21,10 +21,10 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          npm ci
+          pnpm install --frozen-lockfile
           # Optional: inject frontend env vars if needed
           echo "${{ secrets.FRONTEND_ENV }}" > .env
-          npm run build
+          pnpm run build
 
       - name: Deploy build to VPS
         uses: appleboy/scp-action@v0.1.7
