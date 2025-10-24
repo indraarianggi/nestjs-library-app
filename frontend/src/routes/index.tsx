@@ -36,134 +36,139 @@ import { MemberDetail } from '@/pages/admin/MemberDetail';
 import { AdminLoans } from '@/pages/admin/Loans';
 import { AdminSettings } from '@/pages/admin/Settings';
 
-export const router = createBrowserRouter([
-  // Public routes with RootLayout
-  {
-    path: '/',
-    element: <RootLayout />,
-    children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: 'login',
-        element: <Login />,
-      },
-      {
-        path: 'register',
-        element: <Register />,
-      },
-      {
-        path: 'books',
-        element: <BooksListPage />,
-      },
-      {
-        path: 'books/:id',
-        element: <BookDetailPage />,
-      },
-      {
-        path: 'about',
-        element: <About />,
-      },
-      {
-        path: 'contact',
-        element: <Contact />,
-      },
-      {
-        path: 'privacy',
-        element: <Privacy />,
-      },
-      {
-        path: 'terms',
-        element: <Terms />,
-      },
-    ],
-  },
+export const router = createBrowserRouter(
+  [
+    // Public routes with RootLayout
+    {
+      path: '/',
+      element: <RootLayout />,
+      children: [
+        {
+          index: true,
+          element: <Home />,
+        },
+        {
+          path: 'login',
+          element: <Login />,
+        },
+        {
+          path: 'register',
+          element: <Register />,
+        },
+        {
+          path: 'books',
+          element: <BooksListPage />,
+        },
+        {
+          path: 'books/:id',
+          element: <BookDetailPage />,
+        },
+        {
+          path: 'about',
+          element: <About />,
+        },
+        {
+          path: 'contact',
+          element: <Contact />,
+        },
+        {
+          path: 'privacy',
+          element: <Privacy />,
+        },
+        {
+          path: 'terms',
+          element: <Terms />,
+        },
+      ],
+    },
 
-  // Member routes (Protected) with MemberDashboardLayout
-  {
-    path: '/member',
-    element: (
-      <ProtectedRoute>
-        <MemberDashboardLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        index: true,
-        element: <MemberDashboard />,
-      },
-      {
-        path: 'profile',
-        element: <MemberProfile />,
-      },
-      {
-        path: 'loans',
-        element: <MemberLoans />,
-      },
-      {
-        path: 'membership',
-        element: <MemberMembership />,
-      },
-    ],
-  },
+    // Member routes (Protected) with MemberDashboardLayout
+    {
+      path: '/member',
+      element: (
+        <ProtectedRoute>
+          <MemberDashboardLayout />
+        </ProtectedRoute>
+      ),
+      children: [
+        {
+          index: true,
+          element: <MemberDashboard />,
+        },
+        {
+          path: 'profile',
+          element: <MemberProfile />,
+        },
+        {
+          path: 'loans',
+          element: <MemberLoans />,
+        },
+        {
+          path: 'membership',
+          element: <MemberMembership />,
+        },
+      ],
+    },
 
-  // Admin routes (Protected) with AdminDashboardLayout
-  {
-    path: '/admin',
-    element: (
-      <AdminRoute>
-        <AdminDashboardLayout />
-      </AdminRoute>
-    ),
-    children: [
-      {
-        index: true,
-        element: <AdminDashboard />,
-      },
-      {
-        path: 'books',
-        element: <AdminBooks />,
-      },
-      {
-        path: 'books/new',
-        element: <BookForm />,
-      },
-      {
-        path: 'books/:id/edit',
-        element: <BookForm />,
-      },
-      {
-        path: 'authors',
-        element: <AdminAuthors />,
-      },
-      {
-        path: 'categories',
-        element: <AdminCategories />,
-      },
-      {
-        path: 'members',
-        element: <AdminMembers />,
-      },
-      {
-        path: 'members/:id',
-        element: <MemberDetail />,
-      },
-      {
-        path: 'loans',
-        element: <AdminLoans />,
-      },
-      {
-        path: 'settings',
-        element: <AdminSettings />,
-      },
-    ],
-  },
+    // Admin routes (Protected) with AdminDashboardLayout
+    {
+      path: '/admin',
+      element: (
+        <AdminRoute>
+          <AdminDashboardLayout />
+        </AdminRoute>
+      ),
+      children: [
+        {
+          index: true,
+          element: <AdminDashboard />,
+        },
+        {
+          path: 'books',
+          element: <AdminBooks />,
+        },
+        {
+          path: 'books/new',
+          element: <BookForm />,
+        },
+        {
+          path: 'books/:id/edit',
+          element: <BookForm />,
+        },
+        {
+          path: 'authors',
+          element: <AdminAuthors />,
+        },
+        {
+          path: 'categories',
+          element: <AdminCategories />,
+        },
+        {
+          path: 'members',
+          element: <AdminMembers />,
+        },
+        {
+          path: 'members/:id',
+          element: <MemberDetail />,
+        },
+        {
+          path: 'loans',
+          element: <AdminLoans />,
+        },
+        {
+          path: 'settings',
+          element: <AdminSettings />,
+        },
+      ],
+    },
 
-  // 404 route
+    // 404 route
+    {
+      path: '*',
+      element: <NotFound />,
+    },
+  ],
   {
-    path: '*',
-    element: <NotFound />,
+    basename: import.meta.env.PROD ? '/library' : '/',
   },
-]);
+);

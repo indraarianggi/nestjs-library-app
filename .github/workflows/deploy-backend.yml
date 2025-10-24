@@ -27,6 +27,7 @@ jobs:
         run: |
           cd backend
           pnpm install --frozen-lockfile
+          pnpm prisma generate
           pnpm run build
 
       # --- NEW STEP: Upload dist + package.json ---
@@ -36,8 +37,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "backend/dist/,backend/package.json,backend/pnpm-lock.yml"
-          target: "${{ secrets.VPS_BACKEND_PATH }}/"
+          source: "backend/dist/,backend/package.json,backend/pnpm-lock.yml,backend/prisma/"
+          target: "${{ secrets.VPS_PATH }}/"
 
       # --- NEW STEP: Create .env from GitHub Secret ---
       - name: Upload backend .env file
@@ -47,8 +48,8 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "${{ secrets.BACKEND_ENV }}" > ${{ secrets.VPS_BACKEND_PATH }}/.env
-            chmod 600 ${{ secrets.VPS_BACKEND_PATH }}/.env
+            echo "${{ secrets.BACKEND_ENV }}" > ${{ secrets.VPS_PATH }}/.env
+            chmod 600 ${{ secrets.VPS_PATH }}/.env
 
       # --- Restart PM2 process ---
       - name: Install dependencies & restart PM2
@@ -58,7 +59,8 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ${{ secrets.VPS_BACKEND_PATH }}
+            cd ${{ secrets.VPS_PATH }}
             pnpm install --prod --frozen-lockfile
+            npx prisma generate
             pm2 start dist/src/main.js --name fullstack-libray-backend --update-env || pm2 restart fullstack-libray-backend
             pm2 save
