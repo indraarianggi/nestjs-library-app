@@ -37,7 +37,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "backend/dist/,backend/package.json,backend/pnpm-lock.yml,backend/prisma/"
+          source: "backend/dist/,backend/package.json,backend/pnpm-lock.yaml,backend/prisma/"
           target: "${{ secrets.VPS_PATH }}/"
 
       # --- NEW STEP: Create .env from GitHub Secret ---

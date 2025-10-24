@@ -1,49 +1,279 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useBooksStats } from '@/features/books/hooks/useBooks';
+import { useFeaturedBooks } from '@/features/books/hooks/useFeaturedBooks';
+import { useCategoriesStats } from '@/features/categories/hooks/useCategories';
+import { BookOpen, Users, Grid3x3, ArrowRight, Library, Search, CheckCircle } from 'lucide-react';
 
+/**
+ * Home Page Component
+ *
+ * Landing page with hero section, stats, featured books, and CTAs.
+ * Implements requirements from FE-3.1: Home Page
+ */
 export const Home = () => {
   const { user } = useAuth();
 
+  // Fetch stats - total books
+  const { data: booksData, isLoading: booksLoading } = useBooksStats();
+
+  // Fetch stats - total categories
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesStats();
+
+  // Fetch featured books (first 6 available books)
+  const { data: featuredBooksData, isLoading: featuredLoading } = useFeaturedBooks(6);
+
+  const stats = {
+    books: booksData?.total ?? 0,
+    categories: categoriesData?.total ?? 0,
+    members: 1000, // Placeholder - members endpoint is admin only. TODO: create public endpoint to fetch number of members
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl font-bold mb-4">Library Management System</h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Manage your library efficiently. Browse our catalog, borrow books, and stay organized.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link to="/books">
-            <Button size="lg">Browse Catalog</Button>
-          </Link>
-          {!user && (
-            <Link to="/register">
-              <Button size="lg" variant="outline">
-                Get Started
-              </Button>
-            </Link>
-          )}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-primary/10 to-background py-20 md:py-32">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-2 text-sm backdrop-blur-sm">
+              <Library className="h-4 w-4 text-primary" />
+              <span className="font-medium">Welcome to Your Digital Library</span>
+            </div>
+            <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              Discover Your Next
+              <span className="text-primary"> Great Read</span>
+            </h1>
+            <p className="mb-10 text-lg text-muted-foreground md:text-xl max-w-2xl mx-auto">
+              Access thousands of books from our extensive collection. Browse, borrow, and manage
+              your reading journey all in one place. Join our community of readers today.
+            </p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <Link to="/books">
+                <Button size="lg" className="w-full sm:w-auto gap-2">
+                  <Search className="h-5 w-5" />
+                  Browse Catalog
+                </Button>
+              </Link>
+              {!user && (
+                <Link to="/register">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
+                    <Users className="h-5 w-5" />
+                    Register Now
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 blur-3xl opacity-20">
+            <div className="aspect-square w-[40rem] rounded-full bg-gradient-to-r from-primary to-primary/50" />
+          </div>
+        </div>
+      </section>
 
       {/* Stats Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="p-6 bg-card border rounded-lg text-center">
-            <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-            <p className="text-muted-foreground">Books Available</p>
-          </div>
-          <div className="p-6 bg-card border rounded-lg text-center">
-            <div className="text-3xl font-bold text-primary mb-2">5,000+</div>
-            <p className="text-muted-foreground">Active Members</p>
-          </div>
-          <div className="p-6 bg-card border rounded-lg text-center">
-            <div className="text-3xl font-bold text-primary mb-2">50+</div>
-            <p className="text-muted-foreground">Categories</p>
+      <section className="py-12 md:py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Total Books */}
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="p-6 text-center">
+                <div className="mb-2 flex justify-center">
+                  <div className="rounded-full bg-primary/10 p-3">
+                    <BookOpen className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                {booksLoading ? (
+                  <Skeleton className="h-10 w-24 mx-auto mb-2" />
+                ) : (
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    {stats.books.toLocaleString()}+
+                  </div>
+                )}
+                <p className="text-sm font-medium text-muted-foreground">Books Available</p>
+              </CardContent>
+            </Card>
+
+            {/* Total Categories */}
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="p-6 text-center">
+                <div className="mb-2 flex justify-center">
+                  <div className="rounded-full bg-primary/10 p-3">
+                    <Grid3x3 className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                {categoriesLoading ? (
+                  <Skeleton className="h-10 w-24 mx-auto mb-2" />
+                ) : (
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    {stats.categories.toLocaleString()}+
+                  </div>
+                )}
+                <p className="text-sm font-medium text-muted-foreground">Categories</p>
+              </CardContent>
+            </Card>
+
+            {/* Active Members */}
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="p-6 text-center">
+                <div className="mb-2 flex justify-center">
+                  <div className="rounded-full bg-primary/10 p-3">
+                    <Users className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-primary mb-2">
+                  {stats.members.toLocaleString()}+
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">Active Members</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Featured Books Section */}
+      <section className="py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-10 text-center">
+            <h2 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">Featured Books</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Explore our latest additions and popular titles from various genres
+            </p>
+          </div>
+
+          {featuredLoading ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <Skeleton className="h-48 w-full mb-4 rounded-lg" />
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2 mb-4" />
+                    <Skeleton className="h-4 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredBooksData?.items.map((book) => (
+                <Link
+                  key={book.id}
+                  to={`/books/${book.id}`}
+                  className="group"
+                  aria-label={`View details for ${book.title}`}
+                >
+                  <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
+                    <CardContent className="p-6">
+                      {/* Book Cover Placeholder */}
+                      <div className="mb-4 aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
+                        {book.coverImageUrl ? (
+                          <img
+                            src={book.coverImageUrl}
+                            alt={book.title}
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <BookOpen className="h-16 w-16 text-muted-foreground/50" />
+                        )}
+                      </div>
+
+                      {/* Book Info */}
+                      <h3 className="mb-2 font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                        {book.title}
+                      </h3>
+                      <p className="mb-3 text-sm text-muted-foreground line-clamp-1">
+                        {book.authors.map((a) => a.name).join(', ')}
+                      </p>
+
+                      {/* Categories */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {book.categories.slice(0, 2).map((category) => (
+                          <Badge key={category.id} variant="secondary" className="text-xs">
+                            {category.name}
+                          </Badge>
+                        ))}
+                        {book.categories.length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{book.categories.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Availability */}
+                      <div className="flex items-center gap-2 text-sm">
+                        {book.availableCopies > 0 ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-green-600 font-medium">
+                              {book.availableCopies} available
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">Not available</span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* View All Button */}
+          <div className="mt-10 text-center">
+            <Link to="/books">
+              <Button size="lg" variant="outline" className="gap-2">
+                View All Books
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Call-to-Action Section */}
+      <section className="py-12 md:py-20 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5">
+            <CardContent className="p-8 md:p-12">
+              <div className="mx-auto max-w-3xl text-center">
+                <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                  Ready to Start Your Reading Journey?
+                </h2>
+                <p className="mb-8 text-lg text-muted-foreground">
+                  {user
+                    ? 'Explore our extensive catalog and borrow your next favorite book today.'
+                    : 'Join thousands of readers and get instant access to our complete catalog. Registration is quick, free, and easy.'}
+                </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+                  <Link to="/books">
+                    <Button size="lg" className="w-full sm:w-auto gap-2">
+                      <Search className="h-5 w-5" />
+                      Explore Catalog
+                    </Button>
+                  </Link>
+                  {!user && (
+                    <Link to="/register">
+                      <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
+                        Get Started Free
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 };
