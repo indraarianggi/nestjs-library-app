@@ -48,8 +48,8 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "${{ secrets.BACKEND_ENV }}" > ${{ secrets.VPS_PATH }}/.env
-            chmod 600 ${{ secrets.VPS_PATH }}/.env
+            echo "${{ secrets.BACKEND_ENV }}" > ${{ secrets.VPS_PATH }}/backend/.env
+            chmod 600 ${{ secrets.VPS_PATH }}/backend/.env
 
       # --- Restart PM2 process ---
       - name: Install dependencies & restart PM2
@@ -59,7 +59,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ${{ secrets.VPS_PATH }}
+            cd ${{ secrets.VPS_PATH }}/backend
             pnpm install --prod --frozen-lockfile
             npx prisma generate
             pm2 start dist/src/main.js --name fullstack-libray-backend --update-env || pm2 restart fullstack-libray-backend
