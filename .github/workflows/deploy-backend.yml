@@ -1,0 +1,59 @@
+name: Deploy Backend
+
+on:
+  push:
+    tags:
+      - "be-v*.*.*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm ci
+          npm run build
+
+      # --- NEW STEP: Upload dist + package.json ---
+      - name: Copy backend build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "backend/dist/*,backend/package.json"
+          target: "${{ secrets.VPS_BACKEND_PATH }}/"
+
+      # --- NEW STEP: Create .env from GitHub Secret ---
+      - name: Upload backend .env file
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "${{ secrets.BACKEND_ENV }}" > ${{ secrets.VPS_BACKEND_PATH }}/.env
+            chmod 600 ${{ secrets.VPS_BACKEND_PATH }}/.env
+
+      # --- Restart PM2 process ---
+      - name: Install dependencies & restart PM2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ${{ secrets.VPS_BACKEND_PATH }}
+            npm ci --omit=dev
+            pm2 start dist/src/main.js --name fullstack-libray-backend --update-env || pm2 restart fullstack-libray-backend
+            pm2 save
