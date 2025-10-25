@@ -1325,66 +1325,58 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "book": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "subtitle": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "description": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "isbn": {
-                          "type": "string"
-                        },
-                        "publicationYear": {
-                          "type": "number",
-                          "nullable": true
-                        },
-                        "language": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "coverImageUrl": {
-                          "type": "string",
-                          "format": "uri",
-                          "nullable": true
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "ACTIVE",
-                            "ARCHIVED"
-                          ]
-                        },
-                        "authors": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "categories": {
-                          "type": "array",
-                          "items": {
-                            "type": "object"
-                          }
-                        },
-                        "availableCopies": {
-                          "type": "number"
-                        },
-                        "totalCopies": {
-                          "type": "number"
-                        }
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "subtitle": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "description": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "isbn": {
+                      "type": "string"
+                    },
+                    "publicationYear": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "language": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "coverImageUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["ACTIVE", "ARCHIVED"]
+                    },
+                    "authors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
                       }
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "availableCopies": {
+                      "type": "number"
+                    },
+                    "totalCopies": {
+                      "type": "number"
                     }
                   }
                 }

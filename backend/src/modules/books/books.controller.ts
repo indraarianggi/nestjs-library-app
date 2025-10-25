@@ -215,24 +215,19 @@ export class BooksController {
     schema: {
       type: 'object',
       properties: {
-        book: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-            title: { type: 'string' },
-            subtitle: { type: 'string', nullable: true },
-            description: { type: 'string', nullable: true },
-            isbn: { type: 'string' },
-            publicationYear: { type: 'number', nullable: true },
-            language: { type: 'string', nullable: true },
-            coverImageUrl: { type: 'string', format: 'uri', nullable: true },
-            status: { type: 'string', enum: ['ACTIVE', 'ARCHIVED'] },
-            authors: { type: 'array', items: { type: 'object' } },
-            categories: { type: 'array', items: { type: 'object' } },
-            availableCopies: { type: 'number' },
-            totalCopies: { type: 'number' },
-          },
-        },
+        id: { type: 'string', format: 'uuid' },
+        title: { type: 'string' },
+        subtitle: { type: 'string', nullable: true },
+        description: { type: 'string', nullable: true },
+        isbn: { type: 'string' },
+        publicationYear: { type: 'number', nullable: true },
+        language: { type: 'string', nullable: true },
+        coverImageUrl: { type: 'string', format: 'uri', nullable: true },
+        status: { type: 'string', enum: ['ACTIVE', 'ARCHIVED'] },
+        authors: { type: 'array', items: { type: 'object' } },
+        categories: { type: 'array', items: { type: 'object' } },
+        availableCopies: { type: 'number' },
+        totalCopies: { type: 'number' },
       },
     },
   })
@@ -243,9 +238,8 @@ export class BooksController {
   @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id') id: string): Promise<{ book: BookWithRelations }> {
-    const book = await this.booksService.findOne(id);
-    return { book };
+  async findOne(@Param('id') id: string): Promise<BookWithRelations> {
+    return await this.booksService.findOne(id);
   }
 
   /**
@@ -337,9 +331,8 @@ export class BooksController {
     @Body(new ZodValidationPipe(createBookSchema))
     createBookDto: CreateBookDto,
     @CurrentUser() user: { userId: string; role: Role },
-  ): Promise<{ book: BookWithRelations }> {
-    const book = await this.booksService.create(createBookDto, user.userId);
-    return { book };
+  ): Promise<BookWithRelations> {
+    return await this.booksService.create(createBookDto, user.userId);
   }
 
   /**
@@ -416,9 +409,8 @@ export class BooksController {
     @Body(new ZodValidationPipe(updateBookSchema))
     updateBookDto: UpdateBookDto,
     @CurrentUser() user: { userId: string; role: Role },
-  ): Promise<{ book: BookWithRelations }> {
-    const book = await this.booksService.update(id, updateBookDto, user.userId);
-    return { book };
+  ): Promise<BookWithRelations> {
+    return await this.booksService.update(id, updateBookDto, user.userId);
   }
 
   /**

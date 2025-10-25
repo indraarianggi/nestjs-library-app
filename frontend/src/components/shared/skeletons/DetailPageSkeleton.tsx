@@ -36,19 +36,19 @@ export const DetailPageSkeleton = ({
         <Skeleton className="h-4 w-24" />
       </div>
 
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-5 w-48" />
-        </CardHeader>
+      <Card className="pt-6">
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Image/Cover Column */}
-            {showImage && (
-              <div className="md:col-span-1">
-                <Skeleton className="w-full aspect-[2/3] rounded-lg" />
-              </div>
-            )}
+            <div className="md:col-span-1">
+              {showImage && <Skeleton className="w-full aspect-[2/3] rounded-lg" />}
+              {/* Actions */}
+              {showActions && (
+                <div className="flex gap-3 pt-6">
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              )}
+            </div>
 
             {/* Details Column */}
             <div className={showImage ? 'md:col-span-2' : 'md:col-span-3'}>
@@ -77,14 +77,6 @@ export const DetailPageSkeleton = ({
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-4/5" />
                 </div>
-
-                {/* Actions */}
-                {showActions && (
-                  <div className="flex gap-3 pt-6">
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-10 w-28" />
-                  </div>
-                )}
               </div>
             </div>
           </div>

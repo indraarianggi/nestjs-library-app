@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useBooksStats } from '@/features/books/hooks/useBooks';
 import { useFeaturedBooks } from '@/features/books/hooks/useFeaturedBooks';
 import { useCategoriesStats } from '@/features/categories/hooks/useCategories';
-import { BookOpen, Users, Grid3x3, ArrowRight, Library, Search, CheckCircle } from 'lucide-react';
+import { BookOpen, Users, Grid3x3, ArrowRight, Library, Search } from 'lucide-react';
+import { BookCard } from '@/components/books/BookCard';
+import { BookCardSkeleton } from '@/components/shared/skeletons';
 
 /**
  * Home Page Component
@@ -150,79 +151,13 @@ export const Home = () => {
           {featuredLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <Skeleton className="h-48 w-full mb-4 rounded-lg" />
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2 mb-4" />
-                    <Skeleton className="h-4 w-full" />
-                  </CardContent>
-                </Card>
+                <BookCardSkeleton key={i} />
               ))}
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {featuredBooksData?.items.map((book) => (
-                <Link
-                  key={book.id}
-                  to={`/books/${book.id}`}
-                  className="group"
-                  aria-label={`View details for ${book.title}`}
-                >
-                  <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                    <CardContent className="p-6">
-                      {/* Book Cover Placeholder */}
-                      <div className="mb-4 aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
-                        {book.coverImageUrl ? (
-                          <img
-                            src={book.coverImageUrl}
-                            alt={book.title}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <BookOpen className="h-16 w-16 text-muted-foreground/50" />
-                        )}
-                      </div>
-
-                      {/* Book Info */}
-                      <h3 className="mb-2 font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                        {book.title}
-                      </h3>
-                      <p className="mb-3 text-sm text-muted-foreground line-clamp-1">
-                        {book.authors.map((a) => a.name).join(', ')}
-                      </p>
-
-                      {/* Categories */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {book.categories.slice(0, 2).map((category) => (
-                          <Badge key={category.id} variant="secondary" className="text-xs">
-                            {category.name}
-                          </Badge>
-                        ))}
-                        {book.categories.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{book.categories.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Availability */}
-                      <div className="flex items-center gap-2 text-sm">
-                        {book.availableCopies > 0 ? (
-                          <>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-green-600 font-medium">
-                              {book.availableCopies} available
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">Not available</span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <BookCard key={book.id} book={book} showBtn={false} />
               ))}
             </div>
           )}

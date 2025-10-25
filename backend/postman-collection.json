@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "71177710-b048-4aca-8b09-8ee7ae554726",
+    "_postman_id": "bba0a007-d96b-43e1-974d-25c3cf8a0237",
     "name": "Library Management System API",
     "description": "RESTful API for a comprehensive Library Management System. This API provides endpoints for managing books, authors, categories, book copies, members, loans, and system settings.\n\nContact Support:\n Name: Library Management Team\n Email: support@library-management.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
@@ -97,7 +97,7 @@
                         }
                       ],
                       "cookie": [],
-                      "body": "{\n  \"user\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"email\": \"john.doe@example.com\",\n    \"role\": \"MEMBER\",\n    \"isActive\": true,\n    \"createdAt\": \"1970-11-09T02:59:10.818Z\",\n    \"updatedAt\": \"1971-03-04T14:01:16.502Z\"\n  },\n  \"memberProfile\": {\n    \"id\": \"bbe83c24-ca71-390d-8ea9-71b13cedbfe9\",\n    \"userId\": \"973385c1-2edc-db0d-57ae-00edd25ce430\",\n    \"membershipNumber\": \"LIB-2024-0001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"phone\": \"+1234567890\",\n    \"address\": \"string\",\n    \"membershipStatus\": \"ACTIVE\",\n    \"membershipStartDate\": \"2013-07-29T12:44:44.627Z\",\n    \"membershipEndDate\": \"1948-10-06T10:54:02.923Z\",\n    \"createdAt\": \"1968-10-02T16:27:11.910Z\",\n    \"updatedAt\": \"1987-03-27T06:02:01.492Z\"\n  },\n  \"tokens\": {\n    \"accessToken\": \"string\",\n    \"refreshToken\": \"string\"\n  }\n}"
+                      "body": "{\n  \"user\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"email\": \"john.doe@example.com\",\n    \"role\": \"MEMBER\",\n    \"isActive\": true,\n    \"createdAt\": \"1999-10-03T17:09:54.102Z\",\n    \"updatedAt\": \"1977-01-18T00:52:57.229Z\"\n  },\n  \"memberProfile\": {\n    \"id\": \"b21d6999-e136-f740-507e-56f4f1382190\",\n    \"userId\": \"9349a476-06c9-1121-e266-f2a71e4f799f\",\n    \"membershipNumber\": \"LIB-2024-0001\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"phone\": \"+1234567890\",\n    \"address\": \"string\",\n    \"membershipStatus\": \"ACTIVE\",\n    \"membershipStartDate\": \"1964-02-05T16:46:38.372Z\",\n    \"membershipEndDate\": \"1969-09-20T09:29:13.120Z\",\n    \"createdAt\": \"1965-04-09T18:26:52.113Z\",\n    \"updatedAt\": \"2001-07-25T01:39:06.424Z\"\n  },\n  \"tokens\": {\n    \"accessToken\": \"string\",\n    \"refreshToken\": \"string\"\n  }\n}"
                     },
                     {
                       "name": "Invalid input data or email already exists",
@@ -225,7 +225,7 @@
                         }
                       ],
                       "cookie": [],
-                      "body": "{\n  \"user\": {\n    \"id\": \"e4afdc6b-a987-97ce-3180-49f0c9fcccc2\",\n    \"email\": \"6R7leojcUk@hskOeDtvhLwH.ixxp\",\n    \"role\": \"ADMIN\",\n    \"isActive\": false\n  },\n  \"memberProfile\": {},\n  \"tokens\": {\n    \"accessToken\": \"string\",\n    \"refreshToken\": \"string\"\n  }\n}"
+                      "body": "{\n  \"user\": {\n    \"id\": \"6d258391-9934-ac71-ffab-481d78a2827b\",\n    \"email\": \"qZ79HpvIucwjIhK@IzUQwOnmYzvjlq.suer\",\n    \"role\": \"MEMBER\",\n    \"isActive\": true\n  },\n  \"memberProfile\": {},\n  \"tokens\": {\n    \"accessToken\": \"string\",\n    \"refreshToken\": \"string\"\n  }\n}"
                     },
                     {
                       "name": "Invalid credentials or account suspended",
@@ -602,7 +602,7 @@
                           "variable": [
                             {
                               "key": "id",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Member profile UUID"
                             }
                           ]
@@ -737,7 +737,7 @@
                           "variable": [
                             {
                               "key": "id",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Member profile UUID"
                             }
                           ]
@@ -896,7 +896,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Member profile UUID"
                         }
                       ]
@@ -997,7 +997,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Member profile UUID"
                         }
                       ]
@@ -1107,13 +1107,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/api/members?sortOrder=asc&sortBy=lastName&status=EXPIRED&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                  "raw": "{{baseUrl}}/api/members?sortOrder=desc&sortBy=lastName&status=ACTIVE&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "members"],
                   "query": [
                     {
                       "key": "sortOrder",
-                      "value": "asc"
+                      "value": "desc"
                     },
                     {
                       "key": "sortBy",
@@ -1121,7 +1121,7 @@
                     },
                     {
                       "key": "status",
-                      "value": "EXPIRED"
+                      "value": "ACTIVE"
                     },
                     {
                       "key": "q",
@@ -1130,11 +1130,11 @@
                     },
                     {
                       "key": "pageSize",
-                      "value": "3811.2137350153507"
+                      "value": "531.2921284430216"
                     },
                     {
                       "key": "page",
-                      "value": "3811.2137350153507"
+                      "value": "531.2921284430216"
                     }
                   ]
                 },
@@ -1153,13 +1153,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/members?sortOrder=asc&sortBy=lastName&status=EXPIRED&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/members?sortOrder=desc&sortBy=lastName&status=ACTIVE&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "members"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc"
+                          "value": "desc"
                         },
                         {
                           "key": "sortBy",
@@ -1167,7 +1167,7 @@
                         },
                         {
                           "key": "status",
-                          "value": "EXPIRED"
+                          "value": "ACTIVE"
                         },
                         {
                           "key": "q",
@@ -1176,11 +1176,11 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         }
                       ]
                     }
@@ -1204,13 +1204,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/members?sortOrder=asc&sortBy=lastName&status=EXPIRED&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/members?sortOrder=desc&sortBy=lastName&status=ACTIVE&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "members"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc"
+                          "value": "desc"
                         },
                         {
                           "key": "sortBy",
@@ -1218,7 +1218,7 @@
                         },
                         {
                           "key": "status",
-                          "value": "EXPIRED"
+                          "value": "ACTIVE"
                         },
                         {
                           "key": "q",
@@ -1227,11 +1227,11 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         }
                       ]
                     }
@@ -1255,13 +1255,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/members?sortOrder=asc&sortBy=lastName&status=EXPIRED&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/members?sortOrder=desc&sortBy=lastName&status=ACTIVE&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "members"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc"
+                          "value": "desc"
                         },
                         {
                           "key": "sortBy",
@@ -1269,7 +1269,7 @@
                         },
                         {
                           "key": "status",
-                          "value": "EXPIRED"
+                          "value": "ACTIVE"
                         },
                         {
                           "key": "q",
@@ -1278,11 +1278,11 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         }
                       ]
                     }
@@ -1337,7 +1337,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Author UUID"
                         }
                       ]
@@ -1580,7 +1580,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Author UUID"
                         }
                       ]
@@ -1743,13 +1743,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/api/authors?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                  "raw": "{{baseUrl}}/api/authors?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "authors"],
                   "query": [
                     {
                       "key": "sortOrder",
-                      "value": "asc",
+                      "value": "desc",
                       "description": "Sort order"
                     },
                     {
@@ -1764,12 +1764,12 @@
                     },
                     {
                       "key": "pageSize",
-                      "value": "3811.2137350153507",
+                      "value": "531.2921284430216",
                       "description": "Items per page (default: 10, max: 100)"
                     },
                     {
                       "key": "page",
-                      "value": "3811.2137350153507",
+                      "value": "531.2921284430216",
                       "description": "Page number (default: 1)"
                     }
                   ]
@@ -1783,13 +1783,13 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{baseUrl}}/api/authors?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/authors?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "authors"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order"
                         },
                         {
@@ -1804,12 +1804,12 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Items per page (default: 10, max: 100)"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Page number (default: 1)"
                         }
                       ]
@@ -1828,13 +1828,13 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{baseUrl}}/api/authors?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/authors?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "authors"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order"
                         },
                         {
@@ -1849,12 +1849,12 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Items per page (default: 10, max: 100)"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Page number (default: 1)"
                         }
                       ]
@@ -2078,7 +2078,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Category UUID"
                         }
                       ]
@@ -2321,7 +2321,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Category UUID"
                         }
                       ]
@@ -2484,13 +2484,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/api/categories?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                  "raw": "{{baseUrl}}/api/categories?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "categories"],
                   "query": [
                     {
                       "key": "sortOrder",
-                      "value": "asc",
+                      "value": "desc",
                       "description": "Sort order"
                     },
                     {
@@ -2505,12 +2505,12 @@
                     },
                     {
                       "key": "pageSize",
-                      "value": "3811.2137350153507",
+                      "value": "531.2921284430216",
                       "description": "Items per page (default: 10, max: 100)"
                     },
                     {
                       "key": "page",
-                      "value": "3811.2137350153507",
+                      "value": "531.2921284430216",
                       "description": "Page number (default: 1)"
                     }
                   ]
@@ -2524,13 +2524,13 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{baseUrl}}/api/categories?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/categories?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "categories"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order"
                         },
                         {
@@ -2545,12 +2545,12 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Items per page (default: 10, max: 100)"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Page number (default: 1)"
                         }
                       ]
@@ -2569,13 +2569,13 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{baseUrl}}/api/categories?sortOrder=asc&sortBy=name&q=string&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/categories?sortOrder=desc&sortBy=name&q=string&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "categories"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order"
                         },
                         {
@@ -2590,12 +2590,12 @@
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Items per page (default: 10, max: 100)"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507",
+                          "value": "531.2921284430216",
                           "description": "Page number (default: 1)"
                         }
                       ]
@@ -2801,7 +2801,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                          "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=3811.2137350153507&page=3811.2137350153507",
+                          "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=531.2921284430216&page=531.2921284430216",
                           "host": ["{{baseUrl}}"],
                           "path": ["api", "books", ":id", "copies"],
                           "query": [
@@ -2812,19 +2812,19 @@
                             },
                             {
                               "key": "pageSize",
-                              "value": "3811.2137350153507",
+                              "value": "531.2921284430216",
                               "description": "Items per page (default: 10, max: 100)"
                             },
                             {
                               "key": "page",
-                              "value": "3811.2137350153507",
+                              "value": "531.2921284430216",
                               "description": "Page number (default: 1)"
                             }
                           ],
                           "variable": [
                             {
                               "key": "id",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Book UUID"
                             }
                           ]
@@ -2844,7 +2844,7 @@
                               }
                             ],
                             "url": {
-                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=3811.2137350153507&page=3811.2137350153507",
+                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=531.2921284430216&page=531.2921284430216",
                               "host": ["{{baseUrl}}"],
                               "path": ["api", "books", ":id", "copies"],
                               "query": [
@@ -2855,12 +2855,12 @@
                                 },
                                 {
                                   "key": "pageSize",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Items per page (default: 10, max: 100)"
                                 },
                                 {
                                   "key": "page",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Page number (default: 1)"
                                 }
                               ],
@@ -2890,7 +2890,7 @@
                               }
                             ],
                             "url": {
-                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=3811.2137350153507&page=3811.2137350153507",
+                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=531.2921284430216&page=531.2921284430216",
                               "host": ["{{baseUrl}}"],
                               "path": ["api", "books", ":id", "copies"],
                               "query": [
@@ -2901,12 +2901,12 @@
                                 },
                                 {
                                   "key": "pageSize",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Items per page (default: 10, max: 100)"
                                 },
                                 {
                                   "key": "page",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Page number (default: 1)"
                                 }
                               ],
@@ -2936,7 +2936,7 @@
                               }
                             ],
                             "url": {
-                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=3811.2137350153507&page=3811.2137350153507",
+                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=531.2921284430216&page=531.2921284430216",
                               "host": ["{{baseUrl}}"],
                               "path": ["api", "books", ":id", "copies"],
                               "query": [
@@ -2947,12 +2947,12 @@
                                 },
                                 {
                                   "key": "pageSize",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Items per page (default: 10, max: 100)"
                                 },
                                 {
                                   "key": "page",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Page number (default: 1)"
                                 }
                               ],
@@ -2982,7 +2982,7 @@
                               }
                             ],
                             "url": {
-                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=3811.2137350153507&page=3811.2137350153507",
+                              "raw": "{{baseUrl}}/api/books/:id/copies?status=ON_LOAN&pageSize=531.2921284430216&page=531.2921284430216",
                               "host": ["{{baseUrl}}"],
                               "path": ["api", "books", ":id", "copies"],
                               "query": [
@@ -2993,12 +2993,12 @@
                                 },
                                 {
                                   "key": "pageSize",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Items per page (default: 10, max: 100)"
                                 },
                                 {
                                   "key": "page",
-                                  "value": "3811.2137350153507",
+                                  "value": "531.2921284430216",
                                   "description": "Page number (default: 1)"
                                 }
                               ],
@@ -3051,7 +3051,7 @@
                           "variable": [
                             {
                               "key": "id",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Book UUID"
                             }
                           ]
@@ -3295,7 +3295,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Book UUID"
                         }
                       ]
@@ -3334,7 +3334,7 @@
                         }
                       ],
                       "cookie": [],
-                      "body": "{\n  \"book\": {\n    \"id\": \"ca81600a-a31b-0f09-b34f-be88c3044efc\",\n    \"title\": \"string\",\n    \"subtitle\": \"string\",\n    \"description\": \"string\",\n    \"isbn\": \"string\",\n    \"publicationYear\": 1981.139045743303,\n    \"language\": \"string\",\n    \"coverImageUrl\": \"https://oQorLkfMarScLtvHialzOEJKEbLLTGm.cctdOL0EyjKadjTA3NF-MSWX\",\n    \"status\": \"ARCHIVED\",\n    \"availableCopies\": 4403.942576001092,\n    \"totalCopies\": 756.5216142124109\n  }\n}"
+                      "body": "{\n  \"id\": \"4828c7e1-c09c-00f0-dfd0-bb5c7456a556\",\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 82.77283695636851,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://GCcDq.yrmvGVH2Z9o,GiR0sNIByQvmeh,om8bj-QIKsRzNDB0E9+RMSx+e8tzlIbE\",\n  \"status\": \"ARCHIVED\",\n  \"availableCopies\": 6994.749511855882,\n  \"totalCopies\": 4720.0684759704245\n}"
                     },
                     {
                       "name": "Book not found or archived",
@@ -3379,7 +3379,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                      "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -3394,7 +3394,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Book UUID"
                         }
                       ]
@@ -3419,7 +3419,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3462,7 +3462,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3505,7 +3505,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3548,7 +3548,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3591,7 +3591,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 4809.941473736469,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"https://UkIn.qesakQxHGe85bWWbRKvxJdjUzO6t1c,AbHB7PIfRYz-LSt3MnT-lZqMdrb3ZmFgBw,bh93\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"e21d3400-0ff7-3971-d3eb-6c5b9a3b6e50\",\n    \"a11049d6-405f-ac9c-b607-5e46418020fd\"\n  ],\n  \"categoryIds\": [\n    \"4b6b2c71-7120-4825-2226-336f28cce272\",\n    \"c2d30e31-d91d-ed80-3b1d-8a426fbdd613\"\n  ]\n}",
+                          "raw": "{\n  \"title\": \"string\",\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"isbn\": \"string\",\n  \"publicationYear\": 8345.975221589488,\n  \"language\": \"string\",\n  \"coverImageUrl\": \"http://CztmDhxClYyeIwrR.mcbUuR93WqRtq-HpA\",\n  \"status\": \"ACTIVE\",\n  \"authorIds\": [\n    \"91c90b22-4a10-ea36-c48f-5473e6f3844f\",\n    \"a4e65a2a-f6a7-cee9-7813-17629a07acab\"\n  ],\n  \"categoryIds\": [\n    \"e48de32d-4533-4c8b-ec3e-e2501aef30e3\",\n    \"a70244aa-d380-83f3-60ce-923365085f03\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -3637,7 +3637,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Book UUID"
                         }
                       ]
@@ -3805,18 +3805,18 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/books?sortOrder=asc&sortBy=relevance&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
+                  "raw": "{{baseUrl}}/api/books?sortOrder=desc&sortBy=createdAt&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "books"],
                   "query": [
                     {
                       "key": "sortOrder",
-                      "value": "asc",
+                      "value": "desc",
                       "description": "Sort order (default: asc)"
                     },
                     {
                       "key": "sortBy",
-                      "value": "relevance",
+                      "value": "createdAt",
                       "description": "Sort field (default: relevance if searching, createdAt otherwise)"
                     },
                     {
@@ -3865,18 +3865,18 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/books?sortOrder=asc&sortBy=relevance&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
+                      "raw": "{{baseUrl}}/api/books?sortOrder=desc&sortBy=createdAt&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "books"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order (default: asc)"
                         },
                         {
                           "key": "sortBy",
-                          "value": "relevance",
+                          "value": "createdAt",
                           "description": "Sort field (default: relevance if searching, createdAt otherwise)"
                         },
                         {
@@ -3922,7 +3922,7 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "{\n  \"books\": [\n    {\n      \"id\": \"ff69b3d9-b693-0f84-26ea-131b6f42f167\",\n      \"title\": \"The Great Gatsby\",\n      \"subtitle\": \"string\",\n      \"description\": \"string\",\n      \"isbn\": \"978-0743273565\",\n      \"publicationYear\": 1925,\n      \"language\": \"English\",\n      \"coverImageUrl\": \"http://V.iiQShKWY2J5CXaQ7hzND.8-pjLR2GfBarN+5ld2zBB+L8\",\n      \"status\": \"ACTIVE\",\n      \"availableCopies\": 3,\n      \"totalCopies\": 5\n    },\n    {\n      \"id\": \"04f1907b-203d-6772-7c1a-12a7a540b0fd\",\n      \"title\": \"The Great Gatsby\",\n      \"subtitle\": \"string\",\n      \"description\": \"string\",\n      \"isbn\": \"978-0743273565\",\n      \"publicationYear\": 1925,\n      \"language\": \"English\",\n      \"coverImageUrl\": \"http://x.bgfTooMk-p1AbGTjSieyF-SwVYwu8Fx\",\n      \"status\": \"ACTIVE\",\n      \"availableCopies\": 3,\n      \"totalCopies\": 5\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"totalItems\": 100,\n    \"totalPages\": 10\n  }\n}"
+                  "body": "{\n  \"books\": [\n    {\n      \"id\": \"bfc5507c-8d1c-3de5-fd57-ba07e717f0ab\",\n      \"title\": \"The Great Gatsby\",\n      \"subtitle\": \"string\",\n      \"description\": \"string\",\n      \"isbn\": \"978-0743273565\",\n      \"publicationYear\": 1925,\n      \"language\": \"English\",\n      \"coverImageUrl\": \"https://kTsbeSYQIDe.ubjPfAZpLECFiqkc390xewZLYahJt8C\",\n      \"status\": \"ACTIVE\",\n      \"availableCopies\": 3,\n      \"totalCopies\": 5\n    },\n    {\n      \"id\": \"30cc47d1-b4ee-173f-98a1-da65823b42c7\",\n      \"title\": \"The Great Gatsby\",\n      \"subtitle\": \"string\",\n      \"description\": \"string\",\n      \"isbn\": \"978-0743273565\",\n      \"publicationYear\": 1925,\n      \"language\": \"English\",\n      \"coverImageUrl\": \"https://LajxmXQkIIw.ocMaLeJXMv2HpeUx2,IxlwBFOsdz7y-wsc.nibWhdqs1asLHTtzh2PSVz\",\n      \"status\": \"ACTIVE\",\n      \"availableCopies\": 3,\n      \"totalCopies\": 5\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"totalItems\": 100,\n    \"totalPages\": 10\n  }\n}"
                 },
                 {
                   "name": "Invalid query parameters",
@@ -3930,18 +3930,18 @@
                     "method": "GET",
                     "header": [],
                     "url": {
-                      "raw": "{{baseUrl}}/api/books?sortOrder=asc&sortBy=relevance&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
+                      "raw": "{{baseUrl}}/api/books?sortOrder=desc&sortBy=createdAt&availability=ALL&categoryId=string&authorId=string&q=string&pageSize=10&page=1",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "books"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort order (default: asc)"
                         },
                         {
                           "key": "sortBy",
-                          "value": "relevance",
+                          "value": "createdAt",
                           "description": "Sort field (default: relevance if searching, createdAt otherwise)"
                         },
                         {
@@ -4004,7 +4004,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"cea39b87-25a5-d41c-87e1-98d6e49d2f49\"\n  ],\n  \"categoryIds\": [\n    \"c311168a-1918-9a22-bcf6-138c5effe49d\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://bLSORFjFXWmLHigolCxSsFro.uiOXGkgP4nha\"\n}",
+                  "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"acdadf40-94a1-98a3-c388-5deda465af7a\"\n  ],\n  \"categoryIds\": [\n    \"96c24b99-6349-5229-a1ab-848e654db260\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://KAZSSmLNZBHNDfnDf.ygkivfDCE,Q2\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -4033,7 +4033,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"cea39b87-25a5-d41c-87e1-98d6e49d2f49\"\n  ],\n  \"categoryIds\": [\n    \"c311168a-1918-9a22-bcf6-138c5effe49d\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://bLSORFjFXWmLHigolCxSsFro.uiOXGkgP4nha\"\n}",
+                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"acdadf40-94a1-98a3-c388-5deda465af7a\"\n  ],\n  \"categoryIds\": [\n    \"96c24b99-6349-5229-a1ab-848e654db260\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://KAZSSmLNZBHNDfnDf.ygkivfDCE,Q2\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -4067,7 +4067,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"cea39b87-25a5-d41c-87e1-98d6e49d2f49\"\n  ],\n  \"categoryIds\": [\n    \"c311168a-1918-9a22-bcf6-138c5effe49d\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://bLSORFjFXWmLHigolCxSsFro.uiOXGkgP4nha\"\n}",
+                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"acdadf40-94a1-98a3-c388-5deda465af7a\"\n  ],\n  \"categoryIds\": [\n    \"96c24b99-6349-5229-a1ab-848e654db260\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://KAZSSmLNZBHNDfnDf.ygkivfDCE,Q2\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -4101,7 +4101,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"cea39b87-25a5-d41c-87e1-98d6e49d2f49\"\n  ],\n  \"categoryIds\": [\n    \"c311168a-1918-9a22-bcf6-138c5effe49d\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://bLSORFjFXWmLHigolCxSsFro.uiOXGkgP4nha\"\n}",
+                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"acdadf40-94a1-98a3-c388-5deda465af7a\"\n  ],\n  \"categoryIds\": [\n    \"96c24b99-6349-5229-a1ab-848e654db260\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://KAZSSmLNZBHNDfnDf.ygkivfDCE,Q2\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -4135,7 +4135,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"cea39b87-25a5-d41c-87e1-98d6e49d2f49\"\n  ],\n  \"categoryIds\": [\n    \"c311168a-1918-9a22-bcf6-138c5effe49d\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://bLSORFjFXWmLHigolCxSsFro.uiOXGkgP4nha\"\n}",
+                      "raw": "{\n  \"title\": \"The Great Gatsby\",\n  \"isbn\": \"978-0743273565\",\n  \"authorIds\": [\n    \"acdadf40-94a1-98a3-c388-5deda465af7a\"\n  ],\n  \"categoryIds\": [\n    \"96c24b99-6349-5229-a1ab-848e654db260\"\n  ],\n  \"subtitle\": \"string\",\n  \"description\": \"string\",\n  \"publicationYear\": 1925,\n  \"language\": \"English\",\n  \"coverImageUrl\": \"https://KAZSSmLNZBHNDfnDf.ygkivfDCE,Q2\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -4195,7 +4195,7 @@
                       "variable": [
                         {
                           "key": "copyId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Copy UUID"
                         }
                       ]
@@ -4438,7 +4438,7 @@
                       "variable": [
                         {
                           "key": "copyId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Copy UUID"
                         }
                       ]
@@ -4647,7 +4647,7 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "{\n  \"id\": \"b48e6675-d8be-97aa-8425-5debf4f8d58d\",\n  \"approvalsRequired\": false,\n  \"loanDays\": 14,\n  \"renewalDays\": 7,\n  \"renewalMinDaysBeforeDue\": 3,\n  \"maxRenewals\": 2,\n  \"overdueFeePerDay\": 1,\n  \"overdueFeeCapPerLoan\": 50,\n  \"currency\": \"USD\",\n  \"maxConcurrentLoans\": 5,\n  \"notificationsEnabled\": true,\n  \"dueSoonDays\": 3,\n  \"dueDateNotificationsEnabled\": true,\n  \"fromEmail\": \"noreply@library.com\",\n  \"smtpProvider\": \"GMAIL\",\n  \"sendHourUTC\": 9,\n  \"timeZone\": \"UTC\",\n  \"createdAt\": \"2021-05-16T19:56:28.276Z\",\n  \"updatedAt\": \"2021-12-29T20:48:46.684Z\"\n}"
+                  "body": "{\n  \"id\": \"76cfd216-020d-4cef-e73e-664aa35090d8\",\n  \"approvalsRequired\": false,\n  \"loanDays\": 14,\n  \"renewalDays\": 7,\n  \"renewalMinDaysBeforeDue\": 3,\n  \"maxRenewals\": 2,\n  \"overdueFeePerDay\": 1,\n  \"overdueFeeCapPerLoan\": 50,\n  \"currency\": \"USD\",\n  \"maxConcurrentLoans\": 5,\n  \"notificationsEnabled\": true,\n  \"dueSoonDays\": 3,\n  \"dueDateNotificationsEnabled\": true,\n  \"fromEmail\": \"noreply@library.com\",\n  \"smtpProvider\": \"GMAIL\",\n  \"sendHourUTC\": 9,\n  \"timeZone\": \"UTC\",\n  \"createdAt\": \"2019-05-31T19:15:12.398Z\",\n  \"updatedAt\": \"2009-12-01T17:02:27.739Z\"\n}"
                 },
                 {
                   "name": "Not authenticated",
@@ -4766,7 +4766,7 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "{\n  \"id\": \"1ae8e390-74ec-2aab-58f6-c7241950809a\",\n  \"approvalsRequired\": true,\n  \"loanDays\": 5310.3435488296855,\n  \"renewalDays\": 2475.7277340208384,\n  \"renewalMinDaysBeforeDue\": 7650.05577302879,\n  \"maxRenewals\": 9490.861051010943,\n  \"overdueFeePerDay\": 3254.5234261262635,\n  \"overdueFeeCapPerLoan\": 4660.429183518681,\n  \"currency\": \"IDR\",\n  \"maxConcurrentLoans\": 3610.509531341197,\n  \"notificationsEnabled\": true,\n  \"dueSoonDays\": 5273.805057203677,\n  \"dueDateNotificationsEnabled\": true,\n  \"fromEmail\": \"IYZwvE5vyj@fWHIOHffKrgTsgKgGzUNDJxXufgO.re\",\n  \"smtpProvider\": \"MAILGUN\",\n  \"sendHourUTC\": 3140.422532739553,\n  \"timeZone\": \"string\",\n  \"createdAt\": \"1995-07-15T23:28:06.965Z\",\n  \"updatedAt\": \"1956-07-25T19:54:43.025Z\"\n}"
+                  "body": "{\n  \"id\": \"414a1a41-a533-18e7-c475-6ad95bf02179\",\n  \"approvalsRequired\": false,\n  \"loanDays\": 9888.416545272708,\n  \"renewalDays\": 4866.897483527735,\n  \"renewalMinDaysBeforeDue\": 6505.624346911989,\n  \"maxRenewals\": 2261.847783896764,\n  \"overdueFeePerDay\": 2743.0883669602226,\n  \"overdueFeeCapPerLoan\": 6737.804197400641,\n  \"currency\": \"EUR\",\n  \"maxConcurrentLoans\": 3274.8335583181156,\n  \"notificationsEnabled\": false,\n  \"dueSoonDays\": 6891.034871821149,\n  \"dueDateNotificationsEnabled\": false,\n  \"fromEmail\": \"1NzO@siIJpvjhttrXJvUTFWKPO.yrah\",\n  \"smtpProvider\": \"MAILGUN\",\n  \"sendHourUTC\": 2682.7515617491395,\n  \"timeZone\": \"string\",\n  \"createdAt\": \"1980-02-09T04:01:52.929Z\",\n  \"updatedAt\": \"1961-03-21T01:31:32.035Z\"\n}"
                 },
                 {
                   "name": "Invalid input data",
@@ -4901,7 +4901,7 @@
                         ],
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"ba274f94-0835-43f0-2195-7182b3e45c93\",\n  \"rejectionReason\": \"string\"\n}",
+                          "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"c0e2d2b7-76f4-d0a2-e9fa-e60331746b72\",\n  \"rejectionReason\": \"string\"\n}",
                           "options": {
                             "raw": {
                               "headerFamily": "json",
@@ -4916,7 +4916,7 @@
                           "variable": [
                             {
                               "key": "loanId",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Loan UUID"
                             }
                           ]
@@ -4941,7 +4941,7 @@
                             ],
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"ba274f94-0835-43f0-2195-7182b3e45c93\",\n  \"rejectionReason\": \"string\"\n}",
+                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"c0e2d2b7-76f4-d0a2-e9fa-e60331746b72\",\n  \"rejectionReason\": \"string\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -4989,7 +4989,7 @@
                             ],
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"ba274f94-0835-43f0-2195-7182b3e45c93\",\n  \"rejectionReason\": \"string\"\n}",
+                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"c0e2d2b7-76f4-d0a2-e9fa-e60331746b72\",\n  \"rejectionReason\": \"string\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -5037,7 +5037,7 @@
                             ],
                             "body": {
                               "mode": "raw",
-                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"ba274f94-0835-43f0-2195-7182b3e45c93\",\n  \"rejectionReason\": \"string\"\n}",
+                              "raw": "{\n  \"isApproved\": false,\n  \"copyId\": \"c0e2d2b7-76f4-d0a2-e9fa-e60331746b72\",\n  \"rejectionReason\": \"string\"\n}",
                               "options": {
                                 "raw": {
                                   "headerFamily": "json",
@@ -5093,7 +5093,7 @@
                           "variable": [
                             {
                               "key": "loanId",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Loan UUID"
                             }
                           ]
@@ -5242,7 +5242,7 @@
                           "variable": [
                             {
                               "key": "loanId",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Loan UUID"
                             }
                           ]
@@ -5391,7 +5391,7 @@
                           "variable": [
                             {
                               "key": "loanId",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Loan UUID"
                             }
                           ]
@@ -5540,7 +5540,7 @@
                           "variable": [
                             {
                               "key": "loanId",
-                              "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                              "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                               "description": "Loan UUID"
                             }
                           ]
@@ -5682,13 +5682,13 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/api/loans?sortOrder=asc&sortBy=status&dueAfter=2019-06-16&dueBefore=2019-06-16&bookId=string&memberId=string&status=CANCELLED&pageSize=3811.2137350153507&page=3811.2137350153507",
+                  "raw": "{{baseUrl}}/api/loans?sortOrder=desc&sortBy=status&dueAfter=1974-10-05&dueBefore=1974-10-05&bookId=string&memberId=string&status=ACTIVE&pageSize=531.2921284430216&page=531.2921284430216",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "loans"],
                   "query": [
                     {
                       "key": "sortOrder",
-                      "value": "asc"
+                      "value": "desc"
                     },
                     {
                       "key": "sortBy",
@@ -5696,11 +5696,11 @@
                     },
                     {
                       "key": "dueAfter",
-                      "value": "2019-06-16"
+                      "value": "1974-10-05"
                     },
                     {
                       "key": "dueBefore",
-                      "value": "2019-06-16"
+                      "value": "1974-10-05"
                     },
                     {
                       "key": "bookId",
@@ -5712,15 +5712,15 @@
                     },
                     {
                       "key": "status",
-                      "value": "CANCELLED"
+                      "value": "ACTIVE"
                     },
                     {
                       "key": "pageSize",
-                      "value": "3811.2137350153507"
+                      "value": "531.2921284430216"
                     },
                     {
                       "key": "page",
-                      "value": "3811.2137350153507"
+                      "value": "531.2921284430216"
                     }
                   ]
                 },
@@ -5739,13 +5739,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/loans?sortOrder=asc&sortBy=status&dueAfter=2019-06-16&dueBefore=2019-06-16&bookId=string&memberId=string&status=CANCELLED&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/loans?sortOrder=desc&sortBy=status&dueAfter=1974-10-05&dueBefore=1974-10-05&bookId=string&memberId=string&status=ACTIVE&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "loans"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc"
+                          "value": "desc"
                         },
                         {
                           "key": "sortBy",
@@ -5753,11 +5753,11 @@
                         },
                         {
                           "key": "dueAfter",
-                          "value": "2019-06-16"
+                          "value": "1974-10-05"
                         },
                         {
                           "key": "dueBefore",
-                          "value": "2019-06-16"
+                          "value": "1974-10-05"
                         },
                         {
                           "key": "bookId",
@@ -5769,15 +5769,15 @@
                         },
                         {
                           "key": "status",
-                          "value": "CANCELLED"
+                          "value": "ACTIVE"
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         }
                       ]
                     }
@@ -5801,13 +5801,13 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/loans?sortOrder=asc&sortBy=status&dueAfter=2019-06-16&dueBefore=2019-06-16&bookId=string&memberId=string&status=CANCELLED&pageSize=3811.2137350153507&page=3811.2137350153507",
+                      "raw": "{{baseUrl}}/api/loans?sortOrder=desc&sortBy=status&dueAfter=1974-10-05&dueBefore=1974-10-05&bookId=string&memberId=string&status=ACTIVE&pageSize=531.2921284430216&page=531.2921284430216",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "loans"],
                       "query": [
                         {
                           "key": "sortOrder",
-                          "value": "asc"
+                          "value": "desc"
                         },
                         {
                           "key": "sortBy",
@@ -5815,11 +5815,11 @@
                         },
                         {
                           "key": "dueAfter",
-                          "value": "2019-06-16"
+                          "value": "1974-10-05"
                         },
                         {
                           "key": "dueBefore",
-                          "value": "2019-06-16"
+                          "value": "1974-10-05"
                         },
                         {
                           "key": "bookId",
@@ -5831,15 +5831,15 @@
                         },
                         {
                           "key": "status",
-                          "value": "CANCELLED"
+                          "value": "ACTIVE"
                         },
                         {
                           "key": "pageSize",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         },
                         {
                           "key": "page",
-                          "value": "3811.2137350153507"
+                          "value": "531.2921284430216"
                         }
                       ]
                     }
@@ -5871,7 +5871,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                  "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -5900,7 +5900,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                      "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -5934,7 +5934,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                      "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -5968,7 +5968,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                      "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -6002,7 +6002,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                      "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -6036,7 +6036,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"bookId\": \"52f15b0d-d2ae-a5ac-786a-20004a76ee13\",\n  \"copyId\": \"fd29e8fa-91bd-12e3-de1c-e3d09f2c00dc\"\n}",
+                      "raw": "{\n  \"bookId\": \"199b915a-d18c-0b8e-55d0-a546b9c05f8c\",\n  \"copyId\": \"d41a4ffa-8dc2-dabe-25c0-9df0df02d59d\"\n}",
                       "options": {
                         "raw": {
                           "headerFamily": "json",
@@ -6080,7 +6080,7 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=asc&sortBy=createdAt&status=CANCELLED",
+                      "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=desc&sortBy=dueDate&status=CANCELLED",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "my", "loans"],
                       "query": [
@@ -6096,12 +6096,12 @@
                         },
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort direction (default: asc)"
                         },
                         {
                           "key": "sortBy",
-                          "value": "createdAt",
+                          "value": "dueDate",
                           "description": "Field to sort by (default: dueDate)"
                         },
                         {
@@ -6130,7 +6130,7 @@
                           }
                         ],
                         "url": {
-                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=asc&sortBy=createdAt&status=CANCELLED",
+                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=desc&sortBy=dueDate&status=CANCELLED",
                           "host": ["{{baseUrl}}"],
                           "path": ["api", "my", "loans"],
                           "query": [
@@ -6146,12 +6146,12 @@
                             },
                             {
                               "key": "sortOrder",
-                              "value": "asc",
+                              "value": "desc",
                               "description": "Sort direction (default: asc)"
                             },
                             {
                               "key": "sortBy",
-                              "value": "createdAt",
+                              "value": "dueDate",
                               "description": "Field to sort by (default: dueDate)"
                             },
                             {
@@ -6172,7 +6172,7 @@
                         }
                       ],
                       "cookie": [],
-                      "body": "{\n  \"loans\": [\n    {\n      \"id\": \"bfc399f1-cbee-3852-1857-05167f70835b\",\n      \"memberId\": \"b548dff1-7667-8d1a-3c79-2780f8de3273\",\n      \"bookCopyId\": \"f088f2d9-ba92-0b2f-4779-d7f4d06e7b7b\",\n      \"status\": \"APPROVED\",\n      \"requestedAt\": \"2002-01-31T07:42:04.454Z\",\n      \"approvedAt\": \"1975-04-22T03:00:38.411Z\",\n      \"borrowedAt\": \"2016-03-24T11:20:13.314Z\",\n      \"dueDate\": \"1978-08-03T23:58:16.224Z\",\n      \"returnedAt\": \"1964-10-11T13:19:31.620Z\",\n      \"renewalCount\": 0,\n      \"overdueFee\": 0,\n      \"rejectionReason\": \"string\",\n      \"bookCopy\": {\n        \"id\": \"fc26cdf8-895b-9f14-f844-a7260da1ddc9\",\n        \"copyNumber\": \"string\",\n        \"book\": {\n          \"id\": \"79d679e4-a130-b880-f0c3-ee35d48ad8e7\",\n          \"title\": \"string\",\n          \"subtitle\": \"string\",\n          \"isbn\": \"string\",\n          \"coverImageUrl\": \"string\"\n        }\n      },\n      \"canRenew\": false,\n      \"isOverdue\": false,\n      \"daysUntilDue\": 6952.286871456384\n    },\n    {\n      \"id\": \"ab3207ef-0800-de81-0d5a-ff0f788113d9\",\n      \"memberId\": \"71fd38de-4d3e-db8f-ff8b-c17fcbc7dfe7\",\n      \"bookCopyId\": \"01f730d0-ef96-cafd-4641-d7e4d63b3ea3\",\n      \"status\": \"OVERDUE\",\n      \"requestedAt\": \"1958-06-23T08:47:57.596Z\",\n      \"approvedAt\": \"2003-06-24T22:45:29.263Z\",\n      \"borrowedAt\": \"1949-11-10T07:31:37.966Z\",\n      \"dueDate\": \"1952-08-29T18:27:08.088Z\",\n      \"returnedAt\": \"1947-08-17T02:24:50.467Z\",\n      \"renewalCount\": 0,\n      \"overdueFee\": 0,\n      \"rejectionReason\": \"string\",\n      \"bookCopy\": {\n        \"id\": \"05df2dcc-ea60-5629-05be-e167d06c0886\",\n        \"copyNumber\": \"string\",\n        \"book\": {\n          \"id\": \"d44c2531-56da-6d55-db52-4e059252d6eb\",\n          \"title\": \"string\",\n          \"subtitle\": \"string\",\n          \"isbn\": \"string\",\n          \"coverImageUrl\": \"string\"\n        }\n      },\n      \"canRenew\": false,\n      \"isOverdue\": false,\n      \"daysUntilDue\": 3606.349355440395\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 20,\n    \"totalItems\": 5,\n    \"totalPages\": 1\n  }\n}"
+                      "body": "{\n  \"loans\": [\n    {\n      \"id\": \"f71d6d97-edd5-5c79-609a-736df22ce2f5\",\n      \"memberId\": \"d55b0a82-dbbb-5a35-af10-fa1e10c2c415\",\n      \"bookCopyId\": \"818011de-852e-6ec1-73f4-a11894c5201f\",\n      \"status\": \"OVERDUE\",\n      \"requestedAt\": \"1996-11-29T19:25:26.194Z\",\n      \"approvedAt\": \"2012-07-09T22:42:42.382Z\",\n      \"borrowedAt\": \"2005-09-16T18:13:36.842Z\",\n      \"dueDate\": \"2009-12-20T20:19:07.514Z\",\n      \"returnedAt\": \"2011-03-07T04:15:06.908Z\",\n      \"renewalCount\": 0,\n      \"overdueFee\": 0,\n      \"rejectionReason\": \"string\",\n      \"bookCopy\": {\n        \"id\": \"74fce57c-ef86-8044-03b5-674b49a92810\",\n        \"copyNumber\": \"string\",\n        \"book\": {\n          \"id\": \"9e0b5a71-527d-ec21-5e6a-f2125375ac7c\",\n          \"title\": \"string\",\n          \"subtitle\": \"string\",\n          \"isbn\": \"string\",\n          \"coverImageUrl\": \"string\"\n        }\n      },\n      \"canRenew\": true,\n      \"isOverdue\": true,\n      \"daysUntilDue\": 8236.067746581444\n    },\n    {\n      \"id\": \"5de895f8-8370-e5ab-f031-70359b45d713\",\n      \"memberId\": \"f8b9e36e-d699-f765-14eb-083f02c25fb9\",\n      \"bookCopyId\": \"d5f5f72f-084a-71d2-8c8a-f7c7c8072a39\",\n      \"status\": \"PENDING\",\n      \"requestedAt\": \"2006-08-19T21:39:03.841Z\",\n      \"approvedAt\": \"2020-03-22T23:45:45.414Z\",\n      \"borrowedAt\": \"1950-06-25T09:28:02.114Z\",\n      \"dueDate\": \"1946-06-05T08:48:33.383Z\",\n      \"returnedAt\": \"1954-08-16T00:29:09.104Z\",\n      \"renewalCount\": 0,\n      \"overdueFee\": 0,\n      \"rejectionReason\": \"string\",\n      \"bookCopy\": {\n        \"id\": \"4de1a295-6c5c-dec5-fa53-fcb68bac2783\",\n        \"copyNumber\": \"string\",\n        \"book\": {\n          \"id\": \"fa184880-befc-854d-4906-2e2bcb35fa43\",\n          \"title\": \"string\",\n          \"subtitle\": \"string\",\n          \"isbn\": \"string\",\n          \"coverImageUrl\": \"string\"\n        }\n      },\n      \"canRenew\": false,\n      \"isOverdue\": true,\n      \"daysUntilDue\": 9288.350597929382\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 20,\n    \"totalItems\": 5,\n    \"totalPages\": 1\n  }\n}"
                     },
                     {
                       "name": "Invalid query parameters",
@@ -6186,7 +6186,7 @@
                           }
                         ],
                         "url": {
-                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=asc&sortBy=createdAt&status=CANCELLED",
+                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=desc&sortBy=dueDate&status=CANCELLED",
                           "host": ["{{baseUrl}}"],
                           "path": ["api", "my", "loans"],
                           "query": [
@@ -6202,12 +6202,12 @@
                             },
                             {
                               "key": "sortOrder",
-                              "value": "asc",
+                              "value": "desc",
                               "description": "Sort direction (default: asc)"
                             },
                             {
                               "key": "sortBy",
-                              "value": "createdAt",
+                              "value": "dueDate",
                               "description": "Field to sort by (default: dueDate)"
                             },
                             {
@@ -6237,7 +6237,7 @@
                           }
                         ],
                         "url": {
-                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=asc&sortBy=createdAt&status=CANCELLED",
+                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=desc&sortBy=dueDate&status=CANCELLED",
                           "host": ["{{baseUrl}}"],
                           "path": ["api", "my", "loans"],
                           "query": [
@@ -6253,12 +6253,12 @@
                             },
                             {
                               "key": "sortOrder",
-                              "value": "asc",
+                              "value": "desc",
                               "description": "Sort direction (default: asc)"
                             },
                             {
                               "key": "sortBy",
-                              "value": "createdAt",
+                              "value": "dueDate",
                               "description": "Field to sort by (default: dueDate)"
                             },
                             {
@@ -6288,7 +6288,7 @@
                           }
                         ],
                         "url": {
-                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=asc&sortBy=createdAt&status=CANCELLED",
+                          "raw": "{{baseUrl}}/api/my/loans?pageSize=20&page=1&sortOrder=desc&sortBy=dueDate&status=CANCELLED",
                           "host": ["{{baseUrl}}"],
                           "path": ["api", "my", "loans"],
                           "query": [
@@ -6304,12 +6304,12 @@
                             },
                             {
                               "key": "sortOrder",
-                              "value": "asc",
+                              "value": "desc",
                               "description": "Sort direction (default: asc)"
                             },
                             {
                               "key": "sortBy",
-                              "value": "createdAt",
+                              "value": "dueDate",
                               "description": "Field to sort by (default: dueDate)"
                             },
                             {
@@ -6353,7 +6353,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=asc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=b39420ad-5ccd-ccce-b12e-8792b6d01945&entityType=Book&action=book.created&userId=b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                  "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=desc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad&entityType=Book&action=book.created&userId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                   "host": ["{{baseUrl}}"],
                   "path": ["api", "audit-logs"],
                   "query": [
@@ -6369,7 +6369,7 @@
                     },
                     {
                       "key": "sortOrder",
-                      "value": "asc",
+                      "value": "desc",
                       "description": "Sort direction (default: desc)"
                     },
                     {
@@ -6389,7 +6389,7 @@
                     },
                     {
                       "key": "entityId",
-                      "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "description": "Filter by entity ID"
                     },
                     {
@@ -6404,7 +6404,7 @@
                     },
                     {
                       "key": "userId",
-                      "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "description": "Filter by user ID"
                     }
                   ]
@@ -6428,7 +6428,7 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=asc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=b39420ad-5ccd-ccce-b12e-8792b6d01945&entityType=Book&action=book.created&userId=b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=desc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad&entityType=Book&action=book.created&userId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "audit-logs"],
                       "query": [
@@ -6444,7 +6444,7 @@
                         },
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort direction (default: desc)"
                         },
                         {
@@ -6464,7 +6464,7 @@
                         },
                         {
                           "key": "entityId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by entity ID"
                         },
                         {
@@ -6479,7 +6479,7 @@
                         },
                         {
                           "key": "userId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by user ID"
                         }
                       ]
@@ -6495,7 +6495,7 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "{\n  \"logs\": [\n    {\n      \"id\": \"3fde3da7-27ef-a10e-d3d2-006fd3fad4fe\",\n      \"userId\": \"a7bab748-b1c8-571d-2096-e142237f3f82\",\n      \"action\": \"book.created\",\n      \"entityType\": \"Book\",\n      \"entityId\": \"951956a3-6c91-f7a8-f51e-d9ffaa5d54b3\",\n      \"changes\": {},\n      \"ipAddress\": \"192.168.1.1\",\n      \"userAgent\": \"string\",\n      \"createdAt\": \"1965-10-13T21:59:18.004Z\",\n      \"user\": {\n        \"id\": \"93317b25-9591-db16-9590-8e63093a1602\",\n        \"email\": \"HUGFmyYj@uJdKlDMgYpEizNlE.gj\",\n        \"role\": \"ADMIN\"\n      }\n    },\n    {\n      \"id\": \"52baaf6e-5390-5ddb-ce51-b4ec4396f42d\",\n      \"userId\": \"2618b668-1400-ad47-2db3-d459e5078643\",\n      \"action\": \"book.created\",\n      \"entityType\": \"Book\",\n      \"entityId\": \"a559fc9b-589b-be4b-4e12-e0e90ea9ae95\",\n      \"changes\": {},\n      \"ipAddress\": \"192.168.1.1\",\n      \"userAgent\": \"string\",\n      \"createdAt\": \"1965-01-15T07:41:28.386Z\",\n      \"user\": {\n        \"id\": \"f15ccb30-d8e4-01f4-6580-5839d6caa4e6\",\n        \"email\": \"g4ebrWkZjZ@xPkmLkxnPKILO.gtvs\",\n        \"role\": \"ADMIN\"\n      }\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 50,\n    \"totalItems\": 250,\n    \"totalPages\": 5\n  }\n}"
+                  "body": "{\n  \"logs\": [\n    {\n      \"id\": \"02f9e234-d486-5399-4307-835e0be6b5f0\",\n      \"userId\": \"ad142e01-e5bd-9295-009c-544a16ca4407\",\n      \"action\": \"book.created\",\n      \"entityType\": \"Book\",\n      \"entityId\": \"1b2eaaff-f372-9ef1-a3e7-4bdf2fdb0050\",\n      \"changes\": {},\n      \"ipAddress\": \"192.168.1.1\",\n      \"userAgent\": \"string\",\n      \"createdAt\": \"2001-11-09T06:02:43.062Z\",\n      \"user\": {\n        \"id\": \"55785537-4dba-fe26-9fe9-45b1efa20ee9\",\n        \"email\": \"QiuWBZZeOn5k@UyvwHQvnm.lf\",\n        \"role\": \"MEMBER\"\n      }\n    },\n    {\n      \"id\": \"2fafc574-b561-c6f3-89a1-9cceb561281f\",\n      \"userId\": \"0613ce10-c7ce-4952-1e08-c4f10c95acac\",\n      \"action\": \"book.created\",\n      \"entityType\": \"Book\",\n      \"entityId\": \"5d4f7616-8282-d2f0-be92-f10529b2260d\",\n      \"changes\": {},\n      \"ipAddress\": \"192.168.1.1\",\n      \"userAgent\": \"string\",\n      \"createdAt\": \"1961-07-21T23:49:53.402Z\",\n      \"user\": {\n        \"id\": \"f7216cbe-326b-c903-721c-b676ee81753e\",\n        \"email\": \"6Nfw9fk@tyqKwlXDqfScF.spa\",\n        \"role\": \"ADMIN\"\n      }\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 50,\n    \"totalItems\": 250,\n    \"totalPages\": 5\n  }\n}"
                 },
                 {
                   "name": "Invalid query parameters",
@@ -6509,7 +6509,7 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=asc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=b39420ad-5ccd-ccce-b12e-8792b6d01945&entityType=Book&action=book.created&userId=b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=desc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad&entityType=Book&action=book.created&userId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "audit-logs"],
                       "query": [
@@ -6525,7 +6525,7 @@
                         },
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort direction (default: desc)"
                         },
                         {
@@ -6545,7 +6545,7 @@
                         },
                         {
                           "key": "entityId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by entity ID"
                         },
                         {
@@ -6560,7 +6560,7 @@
                         },
                         {
                           "key": "userId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by user ID"
                         }
                       ]
@@ -6585,7 +6585,7 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=asc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=b39420ad-5ccd-ccce-b12e-8792b6d01945&entityType=Book&action=book.created&userId=b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=desc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad&entityType=Book&action=book.created&userId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "audit-logs"],
                       "query": [
@@ -6601,7 +6601,7 @@
                         },
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort direction (default: desc)"
                         },
                         {
@@ -6621,7 +6621,7 @@
                         },
                         {
                           "key": "entityId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by entity ID"
                         },
                         {
@@ -6636,7 +6636,7 @@
                         },
                         {
                           "key": "userId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by user ID"
                         }
                       ]
@@ -6661,7 +6661,7 @@
                       }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=asc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=b39420ad-5ccd-ccce-b12e-8792b6d01945&entityType=Book&action=book.created&userId=b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                      "raw": "{{baseUrl}}/api/audit-logs?pageSize=50&page=1&sortOrder=desc&sortBy=createdAt&dateTo=2024-12-31T23:59:59Z&dateFrom=2024-01-01T00:00:00Z&entityId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad&entityType=Book&action=book.created&userId=cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                       "host": ["{{baseUrl}}"],
                       "path": ["api", "audit-logs"],
                       "query": [
@@ -6677,7 +6677,7 @@
                         },
                         {
                           "key": "sortOrder",
-                          "value": "asc",
+                          "value": "desc",
                           "description": "Sort direction (default: desc)"
                         },
                         {
@@ -6697,7 +6697,7 @@
                         },
                         {
                           "key": "entityId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by entity ID"
                         },
                         {
@@ -6712,7 +6712,7 @@
                         },
                         {
                           "key": "userId",
-                          "value": "b39420ad-5ccd-ccce-b12e-8792b6d01945",
+                          "value": "cf123281-0e53-5d23-1ec0-6fcf1eeba0ad",
                           "description": "Filter by user ID"
                         }
                       ]
